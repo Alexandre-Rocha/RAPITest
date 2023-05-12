@@ -112,6 +112,7 @@ export class UploadMyOwnTSL extends Component {
     }
 
     continueCallback() {
+        console.log("inside the uplaodTslComponent, continue callback");
         if (this.state.acceptDIC === null) {
             this.props.handlerTest(this.state.acceptTSL, null, this.state.acceptDLL)
         } else {
@@ -239,7 +240,10 @@ export class UploadMyOwnTSL extends Component {
                 <Row>
                     <Col>
                         <div style={{ paddingTop: "75px", textAlign: "center" }}>
-                            <AwesomeButton type="primary" disabled={this.state.acceptTSL === null} onPress={this.continueCallback}><img style={{ marginRight: "10px" }} width="30" height="30" src={continueIcon} alt="Logo" />Continue</AwesomeButton>
+                        <button type="button" disabled={this.state.acceptTSL === null} onClick={this.continueCallback}>
+  <img style={{ marginRight: "10px" }} width="30" height="30" src={continueIcon} alt="Logo" />
+  Continue
+</button>
                         </div>
                     </Col>
                     <Col>
@@ -247,7 +251,9 @@ export class UploadMyOwnTSL extends Component {
                     </Col>
                 </Row>
                 <div style={{ marginTop: '100px' }}>
-                    <AwesomeButton  type="primary" onPress={this.props.goBackToSelection}><img style={{ marginRight: "15px" }} width="50" height="50" src={backIcon} alt="Logo" />Go Back</AwesomeButton>
+                <button type="button" onClick={this.props.goBackToSelection}>
+  Go Back
+</button>
                 </div>
             </Container >
 

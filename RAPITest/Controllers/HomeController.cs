@@ -33,6 +33,7 @@ namespace RAPITest.Controllers
 		[HttpGet]
 		public IActionResult GetUserDetails()   //returns some statistics about the user
 		{
+			_logger.LogInformation("GetUserDetails endpoint");
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
 			AspNetUsers currentUser = _context.AspNetUsers.Find(userId);
 			if (currentUser == null) return NoContent();
@@ -41,7 +42,8 @@ namespace RAPITest.Controllers
 			List<Api> apis = _context.Api.Where(a => a.UserId == userId).ToList();
 			apis = apis.FindAll(api => !(Encoding.Default.GetString(api.Tsl).Equals("") && !api.RunGenerated));
 
-			foreach (Api api in apis)
+            _logger.LogInformation("Starting foreach...");
+            foreach (Api api in apis)
 			{
 				ApiInfo apiInfo = new ApiInfo();
 				apiInfo.ApiId = api.ApiId;
@@ -53,31 +55,35 @@ namespace RAPITest.Controllers
 				Report latestReport = _context.Report.Where(r => r.ApiId == api.ApiId).ToList().OrderByDescending(r => r.ReportDate).FirstOrDefault(); 
 				if(latestReport != null)
 				{
-					apiInfo.ReportDate = latestReport.ReportDate;
+                    _logger.LogInformation("latestReport not null");
+                    apiInfo.ReportDate = latestReport.ReportDate;
 
 					string text = Encoding.Default.GetString(latestReport.ReportFile);
 					if (text[0] == '{')
 					{
-						//valid report
-						ModelsLibrary.Models.Report re = JsonConvert.DeserializeObject<ModelsLibrary.Models.Report>(text);
+                        //valid report
+                        _logger.LogInformation("Valid report");
+                        ModelsLibrary.Models.Report re = JsonConvert.DeserializeObject<ModelsLibrary.Models.Report>(text);
 						apiInfo.Errors = re.Errors;
 						apiInfo.Warnings = re.Warnings;
 					}
 					else
 					{
-						apiInfo.Errors = -1;
+                        _logger.LogInformation("Invalid report");
+                        apiInfo.Errors = -1;
 					}
 				}
 				ret.LatestActions.Add(apiInfo);
 			}
-
-			List<LoginRecord> loginRecords = _context.LoginRecord.Where(l => l.UserId == userId).ToList();
+            _logger.LogInformation("After foreach");
+            List<LoginRecord> loginRecords = _context.LoginRecord.Where(l => l.UserId == userId).ToList();
 			DateTime lastlogin = loginRecords.Count == 1 ? loginRecords.First().LoginTime : loginRecords[loginRecords.Count - 2].LoginTime;
 
 			ret.SetupApiCount = apis.Count;
 			ret.LastLogin = lastlogin;
 
-			return Ok(ret);
+            _logger.LogInformation("Returning...");
+            return Ok(ret);
 		}
 	}
 }

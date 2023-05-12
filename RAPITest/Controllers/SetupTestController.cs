@@ -61,7 +61,14 @@ namespace DataAnnotation.Controllers
 		{
 			List<IFormFile> files = data.Files.ToList();
 
-			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+            Console.WriteLine("datalala");
+            foreach (var key in data.Keys)
+            {
+                Console.WriteLine($"{key}: {data[key]}");
+            }
+
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
 			using (_context)
 			{
 				Api newApi = _context.Api.OrderByDescending(x => x.ApiId).FirstOrDefault();
@@ -165,7 +172,14 @@ namespace DataAnnotation.Controllers
 		{
 			List<IFormFile> files = data.Files.ToList();
 
-			IFormFile apispec = files.Single();
+
+            Console.WriteLine("datale");
+            foreach (var key in data.Keys)
+            {
+                Console.WriteLine($"{key}: {data[key]}");
+            }
+
+            IFormFile apispec = files.Single();
 
 			APISpecificationInfo aPISpecificationInfo = GetAPISpecificationInfo.GetSpecInfo(apispec);
 
@@ -252,6 +266,7 @@ namespace DataAnnotation.Controllers
 		[HttpPost]
 		public IActionResult RemoveUnfinishedSetup()
 		{
+			Console.WriteLine("UNFINISHED SETUP");
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
 			using (_context)
 			{

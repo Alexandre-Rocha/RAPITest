@@ -124,6 +124,11 @@ export class SetupTest extends Component {
         data.append('rungenerated', this.state.timeSpecification.rungenerated);
 
         const token = await authService.getAccessToken();
+        console.log("lalala")
+        console.log(data)
+        for (const [key, value] of data.entries()) {
+            console.log(`${key}: ${value}`);
+          }
         fetch(`SetupTest/UploadFile`, {
             method: 'POST',
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
@@ -132,6 +137,12 @@ export class SetupTest extends Component {
             if (!res.ok) {
                 res.text().then(text => this.setState({ step: 6, errorMessage: text}))
             } else {
+                console.log("lelele")
+                console.log(data)
+                for (const [key, value] of data.entries()) {
+                    console.log(`${key}: ${value}`);
+                  }
+                console.log("over");
                 this.setState({ step: 5 })
             }
         })
