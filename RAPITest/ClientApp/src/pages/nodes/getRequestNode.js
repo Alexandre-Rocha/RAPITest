@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react';
+//import { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
@@ -14,19 +14,19 @@ function GetRequestNode({ data, isConnectable }) {
   console.log("[Get request node] Test ID: ",data.custom._testIndex)
 
 
-  const [testName, setTestName] = useState(""); // p sure this is supposed to be server, not testName
-  const [path, setPath] = useState(""); 
+  //const [testName, setTestName] = useState(""); // p sure this is supposed to be server, not testName
+  //const [path, setPath] = useState(""); 
   
 
   const onChange = (evt) => {
     console.log(evt.target.value);
-    setTestName(evt.target.value)
+    //setTestName(evt.target.value)
     data.custom.mycallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
   };
 
   const onChange2 = (evt) => {
     console.log(evt.target.value);
-    setPath(evt.target.value)
+    //setPath(evt.target.value)
     data.custom.mycallback2(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
     data.custom.methodcallback("Get", data.custom._wfIndex, data.custom._testIndex)
   };

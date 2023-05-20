@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react';
+import {  useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
@@ -16,11 +16,11 @@ function TestNameNode({ data, isConnectable }) {
     setTestName(newTestName)
   }
 
-  const onChange = useCallback((evt) => {
+  const onChange = (evt) => {
     console.log(evt.target.value);
     setStateTestName(evt.target.value)
     data.custom.mycallback(evt.target.value)
-  }, []);
+  }
   
 
   return (

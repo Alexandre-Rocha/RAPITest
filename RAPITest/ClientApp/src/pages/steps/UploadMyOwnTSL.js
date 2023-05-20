@@ -1,4 +1,4 @@
-﻿import React, { Component } from 'react';
+import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap';
 import Dropzone from '../../components/Dropzone'
@@ -112,7 +112,6 @@ export class UploadMyOwnTSL extends Component {
     }
 
     continueCallback() {
-        console.log("inside the uplaodTslComponent, continue callback");
         if (this.state.acceptDIC === null) {
             this.props.handlerTest(this.state.acceptTSL, null, this.state.acceptDLL)
         } else {
@@ -240,10 +239,7 @@ export class UploadMyOwnTSL extends Component {
                 <Row>
                     <Col>
                         <div style={{ paddingTop: "75px", textAlign: "center" }}>
-                        <button type="button" disabled={this.state.acceptTSL === null} onClick={this.continueCallback}>
-  <img style={{ marginRight: "10px" }} width="30" height="30" src={continueIcon} alt="Logo" />
-  Continue
-</button>
+                            <AwesomeButton type="primary" disabled={this.state.acceptTSL === null} onPress={this.continueCallback}><img style={{ marginRight: "10px" }} width="30" height="30" src={continueIcon} alt="Logo" />Continue</AwesomeButton>
                         </div>
                     </Col>
                     <Col>
@@ -251,9 +247,7 @@ export class UploadMyOwnTSL extends Component {
                     </Col>
                 </Row>
                 <div style={{ marginTop: '100px' }}>
-                <button type="button" onClick={this.props.goBackToSelection}>
-  Go Back
-</button>
+                    <AwesomeButton  type="primary" onPress={this.props.goBackToSelection}><img style={{ marginRight: "15px" }} width="50" height="50" src={backIcon} alt="Logo" />Go Back</AwesomeButton>
                 </div>
             </Container >
 

@@ -1,0 +1,8 @@
+.editor-container {
+     display: flex;
+  }
+  
+  .sidebar {
+    width: 200px;
+    /* Add any additional styles for the sidebar */
+  }

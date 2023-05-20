@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import ReactFlow, { applyEdgeChanges, applyNodeChanges, addEdge, Panel, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider } from 'reactflow';
+import React, { useRef, useState } from 'react';
+import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
 import ApiFileNode from './nodes/apiFileNode';
 import GetRequestNode from './nodes/getRequestNode';
-import ServerURLNode from './nodes/serverURLNode';
+//import ServerURLNode from './nodes/serverURLNode';
 import StatusVerificationNode from './nodes/statusVerificationNode';
 import TestNameNode from './nodes/testNameNode';
 
@@ -13,13 +13,16 @@ import WorkflowNode from './nodes/workflowNode';
 import DeleteRequestNode from './nodes/deleteRequestNode';
 import SchemaVerificationNode from './nodes/schemaVerificationNode';
 
+
+import './Rflow5.css'
+
 const YAML = require('json-to-pretty-yaml');
 
 
 const initialNodes = []
 const initialEdges = []
 
-const nodeTypes = { getRequest: GetRequestNode, testName: TestNameNode, status: StatusVerificationNode, apiFile: ApiFileNode, testID: TestIDNode, wf: WorkflowNode, deleteRequest: DeleteRequestNode, schema:SchemaVerificationNode }
+const nodeTypes = { getRequest: GetRequestNode, testName: TestNameNode, status: StatusVerificationNode, apiFile: ApiFileNode, testID: TestIDNode, wf: WorkflowNode, deleteRequest: DeleteRequestNode, schema: SchemaVerificationNode }
 
 function deepCopy(obj) {
     if (typeof obj !== "object" || obj === null) {
@@ -54,12 +57,18 @@ function Flow() {
 
     const [testConfName, setTestConfName] = useState("New test configuration")
 
-
+/*
     const [timerSettings, setTimerSettings] = useState({    //TODO: hardcoded
         runimmediately: 'true',
         interval: 'Never',
         rungenerated: 'true'
-    })
+    })*/
+
+    const [runImmediately, setRunImmediatly] = useState('true')
+
+    const [runInterval, setRunInterval] = useState('Never')
+
+    const [runGenerated, setRunGenerated] = useState('true')
 
     const nodeId = useRef(1)
     const currWfIndex = useRef(-1)
@@ -93,7 +102,7 @@ function Flow() {
 
 
 
-    const saveWorkflow = useCallback(() => {
+    const saveWorkflow = () => {
 
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
@@ -126,9 +135,9 @@ function Flow() {
             return newWorkflows
         })
 
-    }, [workflows]);
+    };
 
-    const finishSetup = useCallback(async () => {
+    const finishSetup = async () => {
         let newFile = YAML.stringify(workflows);
         console.log(newFile);
         var blob = new Blob([newFile], {
@@ -160,9 +169,9 @@ function Flow() {
             data.append(file.name, file)
           }
         } */
-        data.append('runimmediately', timerSettings.runimmediately);
-        data.append('interval', timerSettings.interval);
-        data.append('rungenerated', timerSettings.rungenerated);
+        data.append('runimmediately', runImmediately);
+        data.append('interval', runInterval);
+        data.append('rungenerated', runGenerated);
 
         const token = await authService.getAccessToken();
 
@@ -177,87 +186,34 @@ function Flow() {
                 console.log("Test setup was successful!")
             }
         })
-    }, [workflows])
-    async function a() {
-
-        //TODO: meio que tá feito por agora; falta dps apagar comentários para suportar mais coisas e tentar perceber pq é o testSpecification tem de ser array
-
-        // Build TSL file
-        let newFile = YAML.stringify(workflows);
-        var blob = new Blob([newFile], {
-            type: 'text/plain'
-        });
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = 'Created_TSL.yaml';
-        a.click();
-
-        const file = new File([blob], 'sample.txt')
-
-        let testSpecification = [file]
-
-        let data = new FormData();
-        /* if (dictionary !== null) {
-          data.append('dictionary.txt', dictionary);
-        } */
-        let i = 1
-        if (testSpecification !== null) {
-            for (const file of testSpecification) {
-                data.append("tsl_" + i + ".yaml", file)
-                i++
-            }
-        }
-        /* if (dllFiles !== null) {
-          for (const file of dllFiles) {
-            data.append(file.name, file)
-          }
-        } */
-        data.append('runimmediately', timerSettings.runimmediately);
-        data.append('interval', timerSettings.interval);
-        data.append('rungenerated', timerSettings.rungenerated);
-
-        const token = await authService.getAccessToken();
-
-        fetch(`SetupTest/UploadFile`, {
-            method: 'POST',
-            headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
-            body: data
-        }).then(res => {
-            if (!res.ok) {
-                console.error("Test setup failed...");
-            } else {
-                console.log("Test setup was successful!")
-            }
-        })
-
     }
 
 
-    const onTestNameChange = useCallback((newTestName) => {
+
+    const onTestNameChange = (newTestName) => {
         console.log("New test name: ", newTestName);
         setTestName(newTestName)
-    }, [])
+    }
 
-    const onApiFileChange = useCallback((newApiFile) => {
+    const onApiFileChange = (newApiFile) => {
         console.log("New API file: ", newApiFile);
         setApiFile(newApiFile)
-    }, [])
+    }
 
-    const onTestIDChange = useCallback((newTestID, _wfIndex, _testIndex) => {
+    const onTestIDChange = (newTestID, _wfIndex, _testIndex) => {
         console.log("New test id: ", newTestID);
         //setTestName(newTestID)
         console.log("New test id: ", _wfIndex);
         console.log("New test id: ", _testIndex);
-        
+
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].TestID = newTestID
             return newWorkflows
         })
-    }, [workflows])
+    }
 
-    const onServerURLChange = useCallback((newURL, _wfIndex, _testIndex) => {
+    const onServerURLChange = (newURL, _wfIndex, _testIndex) => {
         console.log("New server URL: ", newURL);
         setServerURL(newURL)
 
@@ -267,9 +223,9 @@ function Flow() {
             return newWorkflows
         })
 
-    }, [workflows])
+    }
 
-    const onPathChange = useCallback((newPath, _wfIndex, _testIndex) => {
+    const onPathChange = (newPath, _wfIndex, _testIndex) => {
         console.log("New path: ", newPath);
         setPath(newPath)
 
@@ -279,9 +235,9 @@ function Flow() {
             return newWorkflows
         })
 
-    }, [workflows])
+    }
 
-    const onHttpMethodChange = useCallback((newHttpMethod,  _wfIndex, _testIndex) => {
+    const onHttpMethodChange = (newHttpMethod, _wfIndex, _testIndex) => {
         console.log("New HTTP Method: ", newHttpMethod);
         setHttpMethod(newHttpMethod)
 
@@ -291,9 +247,9 @@ function Flow() {
             return newWorkflows
         })
 
-    }, [workflows])
+    }
 
-    const onWfNameChange = useCallback((newWfId) => {
+    const onWfNameChange = (newWfId) => {
 
         console.log("New workflow: ", newWfId);
         console.log("Curr workflow: ", currWfIndex.current);
@@ -304,9 +260,9 @@ function Flow() {
             newWorkflows[currWfIndex.current].WorkflowID = newWfId;
             return newWorkflows;
         });
-    }, []);
+    }
 
-    const onVerificationStatusChange = useCallback((newStatus, _wfIndex, _testIndex) => {
+    const onVerificationStatusChange = (newStatus, _wfIndex, _testIndex) => {
         console.log("New verification status: ", newStatus);
         setVerificationStatus(newStatus)
 
@@ -315,10 +271,10 @@ function Flow() {
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Code = newStatus    //TODO: hardcoded 0
             return newWorkflows
         })
-    }, [workflows])
+    }
 
 
-    const onVerificationSchemaChange = useCallback((newStatus, _wfIndex, _testIndex) => {
+    const onVerificationSchemaChange = (newStatus, _wfIndex, _testIndex) => {
         console.log("New verification schema: ", newStatus);
         setVerificationStatus(newStatus)
 
@@ -327,29 +283,10 @@ function Flow() {
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Schema = newStatus    //TODO: hardcoded 0
             return newWorkflows
         })
-    }, [workflows])
+    }
 
-    const handleUpdateNodeProps = () => {
-        const node = reactFlowInstance.getNodes().find(el => el.id === '2');
-        setNodes((nds) =>
-            nds.map((node) => {
-                if (node.id === '1') {
-                    // it's important that you create a new object here
-                    // in order to notify react flow about the change
-                    node.data = {
-                        ...node.data,
-                        custom: {
-                            ...node.data.custom,
-                            apiName: "newName"
-                        }
-                    };
-                }
-
-                return node;
-            }))
-    };
-
-    const onConnect = useCallback(
+  
+    const onConnect = 
         (connection) => {
 
             const { source, target } = connection;
@@ -357,41 +294,40 @@ function Flow() {
             let sourceNode = reactFlowInstance.getNode(source)
             let targetNode = reactFlowInstance.getNode(target)
 
-            if (sourceNode.type == "wf") {
+            if (sourceNode.type === "wf") {
                 onConnectWorkflow(sourceNode, targetNode, connection)
             }
-            else if (sourceNode.type == "testID") {
+            else if (sourceNode.type === "testID") {
                 onConnectTest(sourceNode, targetNode, connection)
             }
             else {
                 onConnectNormal(sourceNode, targetNode, connection)
             }
 
-        }, [setEdges, workflows, setWorkflows]
-    );
+        }
 
-    const onConnectWorkflow = useCallback(
+    const onConnectWorkflow = 
         (sourceNode, targetNode, connection) => {
 
             // this method is called if sourceNode is workflow node
 
             let sourceWorkflow = sourceNode.data.custom._wfIndex
 
-            if (targetNode.type == "wf") {  //reject
+            if (targetNode.type === "wf") {  //reject
                 alert("u cant do that")
                 return false
             }
-            else if (targetNode.type == "testID") {  //accept
+            else if (targetNode.type === "testID") {  //accept
                 // set test index to next one (in wf node)
-                
-                console.log("wfs: ",workflows)
-                console.log("wfinex: ",sourceNode.data.custom._wfIndex)
-                console.log("polsf: ",workflows[sourceNode.data.custom._wfIndex])
+
+                console.log("wfs: ", workflows)
+                console.log("wfinex: ", sourceNode.data.custom._wfIndex)
+                console.log("polsf: ", workflows[sourceNode.data.custom._wfIndex])
                 let newTestIndex = workflows[sourceNode.data.custom._wfIndex].Tests.length//sourceNode.data.custom.Tests.length 
-                
+
                 targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow, _testIndex: newTestIndex } };   // set wfId of test node(tgt) to be the same as wf node(src)
                 setNodes((nodes) =>
-                    nodes.map((node) => (node.id == targetNode.id ? targetNode : node))
+                    nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
                 );
 
                 //TODO: here is when i should connect the test and wf
@@ -414,10 +350,8 @@ function Flow() {
 
             setEdges((eds) => addEdge(connection, eds))
 
-        }, [setEdges, workflows, setWorkflows]
-    );
-
-    const onConnectTest = useCallback(
+        }
+    const onConnectTest = 
         (sourceNode, targetNode, connection) => {
 
             // this method is called if sourceNode is test node
@@ -428,11 +362,11 @@ function Flow() {
             let sourceTest = sourceNode.data.custom._testIndex
 
 
-            if (targetNode.type == "testID") {  //reject
+            if (targetNode.type === "testID") {  //reject
                 alert("u cant do that")
                 return false
             }
-            else if (targetNode.type == "wf") {  //accept
+            else if (targetNode.type === "wf") {  //accept
                 sourceNode.data = { ...sourceNode.data, custom: { ...sourceNode.data.custom, _wfIndex: targetWorkflow } };    // set wfId of test node(src) to be the same as wf node(tgt)
                 setNodes((nodes) =>
                     nodes.map((node) => (node.id === sourceNode.id ? sourceNode : node))
@@ -444,13 +378,13 @@ function Flow() {
 
                 // can only do this if test node is already connected to workflow node
                 // and if normal node not connected to anything else
-                const testIsConToWf = (sourceNode.data.custom._wfIndex != -1 && sourceNode.data.custom._testIndex != -1)
-                const normalIsNotConn = (targetNode.data.custom._wfIndex == -1 || targetNode.data.custom._testIndex == -1)
+                const testIsConToWf = (sourceNode.data.custom._wfIndex !== -1 && sourceNode.data.custom._testIndex !== -1)
+                const normalIsNotConn = (targetNode.data.custom._wfIndex === -1 || targetNode.data.custom._testIndex === -1)
 
                 if (testIsConToWf && normalIsNotConn) {
                     targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow, _testIndex: sourceTest } };   // set wfId and testId of normal node(tgt) to be the same as test node(src)
                     setNodes((nodes) =>
-                        nodes.map((node) => (node.id == targetNode.id ? targetNode : node))
+                        nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
                     );
                 }
                 else {
@@ -461,10 +395,9 @@ function Flow() {
 
             setEdges((eds) => addEdge(connection, eds))
 
-        }, [setEdges]
-    );
-
-    const onConnectNormal = useCallback(
+        }
+    
+    const onConnectNormal = 
         (sourceNode, targetNode, connection) => {
 
             // this method is called if sourceNode is a normal node (not wf, not test)
@@ -475,29 +408,29 @@ function Flow() {
             let sourceTest = sourceNode.data.custom._testIndex
             let targetTest = targetNode.data.custom._testIndex
 
-            if (targetNode.type == "wf") {  //reject
+            if (targetNode.type === "wf") {  //reject
                 alert("u cant do that")
                 return false
 
             }
-            else if (targetNode.type == "testID") {  //accept
+            else if (targetNode.type === "testID") {  //accept
                 //TODO: handle connection to test node
             }
             else {   //target is regular node; accept
                 //TODO: handle connection to normal node
                 //falta ver as condiçoes
 
-                const normalSrcIsConToTest = (sourceNode.data.custom._wfIndex != -1 && sourceNode.data.custom._testIndex != -1)
-                const normalTrgIsNotConn = (targetNode.data.custom._wfIndex == -1 || targetNode.data.custom._testIndex == -1)
+                const normalSrcIsConToTest = (sourceNode.data.custom._wfIndex !== -1 && sourceNode.data.custom._testIndex !== -1)
+                const normalTrgIsNotConn = (targetNode.data.custom._wfIndex === -1 || targetNode.data.custom._testIndex === -1)
 
-                const normalSrcIsNotConn = (sourceNode.data.custom._wfIndex == -1 && sourceNode.data.custom._testIndex == -1)
-                const normalTrgIsConToTest = (targetNode.data.custom._wfIndex != -1 || targetNode.data.custom._testIndex != -1)
+                const normalSrcIsNotConn = (sourceNode.data.custom._wfIndex === -1 && sourceNode.data.custom._testIndex === -1)
+                const normalTrgIsConToTest = (targetNode.data.custom._wfIndex !== -1 || targetNode.data.custom._testIndex !== -1)
 
                 if (normalSrcIsConToTest && normalTrgIsNotConn) {
 
                     targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow, _testIndex: sourceTest } };   // set wfId and testId of normal node(tgt) to be the same as normal node(src)
                     setNodes((nodes) =>
-                        nodes.map((node) => (node.id == targetNode.id ? targetNode : node))
+                        nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
                     );
                 }
 
@@ -517,8 +450,7 @@ function Flow() {
 
             setEdges((eds) => addEdge(connection, eds))
 
-        }, [setEdges]
-    );
+        }
 
 
     const dumpState = () => {
@@ -536,7 +468,7 @@ function Flow() {
 
     }
 
-    const onClickName = useCallback(() => {
+    const onClickName = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -555,9 +487,9 @@ function Flow() {
             type: 'testName'
         };
         reactFlowInstance.addNodes(newNode);
-    }, []);
+    }
 
-    const onClickGet = useCallback(() => {
+    const onClickGet = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -579,10 +511,10 @@ function Flow() {
             type: 'getRequest'
         };
         reactFlowInstance.addNodes(newNode);
-    }, []);
+    }
 
 
-    const onClickDelete = useCallback(() => {
+    const onClickDelete = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -604,9 +536,9 @@ function Flow() {
             type: 'deleteRequest'
         };
         reactFlowInstance.addNodes(newNode);
-    }, []);
+    }
 
-    const onClickID = useCallback(() => {
+    const onClickID = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -644,7 +576,7 @@ function Flow() {
         };
         reactFlowInstance.addNodes(newNode);
 
-        
+
         /*
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows);
@@ -654,11 +586,11 @@ function Flow() {
 
         currTestIndex.current += 1
 
-    }, []);
+    }
 
-    const onClickApi = useCallback(() => {
+    const onClickApi = () => {
         console.log("LLLLLLLLLLLLLLLLLLLLL");
-        console.log(testName);
+        console.log(testConfName);
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -671,17 +603,17 @@ function Flow() {
                 //label: `Node ${id}`,
                 custom: {
                     mycallback: onApiFileChange,
-                    newApiName: testName
+                    newApiName: testConfName
                 }
             },
             type: 'apiFile'
         };
         reactFlowInstance.addNodes(newNode);
-    }, [testName]);
+    }
 
 
 
-    const onClickWorkflowNode = useCallback(() => {
+    const onClickWorkflowNode = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -726,13 +658,13 @@ function Flow() {
         //onNewWorkflow() //TODO:HERE?
 
 
-    }, [workflows, setWorkflows]);
+    }
 
 
 
 
 
-    const onClickStatus = useCallback(() => {
+    const onClickStatus = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -752,10 +684,10 @@ function Flow() {
             type: 'status'
         };
         reactFlowInstance.addNodes(newNode);
-    }, []);
+    }
 
 
-    const onClickSchema = useCallback(() => {
+    const onClickSchema = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -775,10 +707,10 @@ function Flow() {
             type: 'schema'
         };
         reactFlowInstance.addNodes(newNode);
-    }, []);
+    }
 
-
-    const onClickUrl = useCallback(() => {
+/*
+    const onClickUrl = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -796,14 +728,14 @@ function Flow() {
             type: 'url'
         };
         reactFlowInstance.addNodes(newNode);
-    }, []);
+    }*/
 
     const onTestConfNameChange = (newTestConfName) => {
         const newName = newTestConfName.target.value
         console.log("New test configuration name: ", newName);
         setTestConfName(newName)
     }
-
+/*
     const onApiSpecChange = () => {
         //...
     }
@@ -813,19 +745,125 @@ function Flow() {
         console.log("New timer settings: ", newTimerSettings);
         setTestConfName(newTimerSettings)
     }
+*/
+    const onRunGeneratedChange = (runGenerated) => {
+        const aux = runGenerated.target.value
+        const run = aux === "yes" ? "true" : "false"
+        console.log("Run generated: ", run);
+        setRunGenerated(run)
+    }
+
+    const onRunImmediatelyChange = (runImmediately) => {
+        const aux = runImmediately.target.value
+        const run = aux === "yes" ? "true" : "false"
+        console.log("Run immediately: ", run);
+        setRunImmediatly(run)
+    }
+
+    const onRunIntervalChange = (runInterval) => { //TODO:
+        const aux = runInterval.target.value
+        console.log("Run immediately: ", aux);
+        setRunInterval(aux)
+    }
 
     return (
 
-        <div>
+        <div className='editor-container'>
 
-            <div id="side-menu">
-                <label>Name of test configuration:</label>
-                <input id="text" name="text" onChange={onTestConfNameChange} className="nodrag" />
 
-                <label>API Specification:</label>
 
-                <label>Timer settings:</label>
-            </div>
+            <aside className="sidebar">
+                <div id="side-menu">
+                    <label>Name of test configuration:</label>
+                    <input id="text" name="text" onChange={onTestConfNameChange} className="nodrag" />
+
+                    <label>API Specification:</label>
+
+                    <label>Timer settings:</label>
+
+                    <div>
+                        <div>
+                            <label>Run Generated?</label>
+                            <div>
+                                <input type="radio" id="runGeneratedYes" name="runGenerated" value="yes" onChange={onRunGeneratedChange} />
+                                <label htmlFor="runGeneratedYes">Yes</label>
+                                <input type="radio" id="runGeneratedNo" name="runGenerated" value="no" onChange={onRunGeneratedChange}/>
+                                <label htmlFor="runGeneratedNo">No</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label>Run Immediately?</label>
+                            <div>
+                                <input type="radio" id="runImmediatelyYes" name="runImmediately" value="yes" onChange={onRunImmediatelyChange} />
+                                <label htmlFor="runImmediatelyYes">Yes</label>
+                                <input type="radio" id="runImmediatelyNo" name="runImmediately" value="no" onChange={onRunImmediatelyChange} />
+                                <label htmlFor="runImmediatelyNo">No</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label>Select Run Interval:</label>
+                            <div>
+                                <input type="radio" id="runInterval1" name="runInterval" value="1 hour" onChange={onRunIntervalChange} />
+                                <label htmlFor="runInterval1">1 hour</label>
+                                <input type="radio" id="runInterval2" name="runInterval" value="12 hours" onChange={onRunIntervalChange}/>
+                                <label htmlFor="runInterval2">12 hours</label>
+                                <input type="radio" id="runInterval3" name="runInterval" value="24 hours" onChange={onRunIntervalChange}/>
+                                <label htmlFor="runInterval3">24 hours</label>
+                                <input type="radio" id="runInterval4" name="runInterval" value="1 week" onChange={onRunIntervalChange}/>
+                                <label htmlFor="runInterval4">1 week</label>
+                                <input type="radio" id="runInterval5" name="runInterval" value="Never" onChange={onRunIntervalChange}/>
+                                <label htmlFor="runInterval5">Never</label>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <button onClick={onClickName} className="btn-add">
+                        add test name node
+                    </button>
+
+                    <button onClick={onClickApi} className="btn-add">
+                        add API file node
+                    </button>
+
+                    <button onClick={onClickWorkflowNode} className="btn-add">
+                        add workflow node
+                    </button>
+
+                    <button onClick={onClickID} className="btn-add">
+                        add test ID
+                    </button>
+
+
+                    <button onClick={onClickGet} className="btn-add">
+                        add get request node
+                    </button>
+
+                    <button onClick={onClickDelete} className="btn-add">
+                        add delete request node
+                    </button>
+
+                    <button onClick={onClickStatus} className="btn-add">
+                        add verification status code node
+                    </button>
+
+                    <button onClick={onClickSchema} className="btn-add">
+                        add verification schema node
+                    </button>
+
+                    <button onClick={dumpState} className="btn-add">
+                        log all state
+                    </button>
+
+                    <button onClick={saveWorkflow} className="btn-add">
+                        saveChanges
+                    </button>
+
+                    <button onClick={finishSetup} className="btn-add">
+                        finishSetup
+                    </button>
+                </div>
+            </aside>
 
             <div style={{ height: 700, width: 1300 }}>
                 <ReactFlow
@@ -841,50 +879,8 @@ function Flow() {
                 </ReactFlow>
 
             </div>
-            <button onClick={onClickName} className="btn-add">
-                add test name node
-            </button>
-
-            <button onClick={onClickApi} className="btn-add">
-                add API file node
-            </button>
-
-            <button onClick={onClickWorkflowNode} className="btn-add">
-                add workflow node
-            </button>
-
-            <button onClick={onClickID} className="btn-add">
-                add test ID
-            </button>
 
 
-            <button onClick={onClickGet} className="btn-add">
-                add get request node
-            </button>
-
-            <button onClick={onClickDelete} className="btn-add">
-                add delete request node
-            </button>
-
-            <button onClick={onClickStatus} className="btn-add">
-                add verification status code node
-            </button>
-
-            <button onClick={onClickSchema} className="btn-add">
-                add verification schema node
-            </button>
-
-            <button onClick={dumpState} className="btn-add">
-                log all state
-            </button>
-
-            <button onClick={saveWorkflow} className="btn-add">
-                saveChanges
-            </button>
-
-            <button onClick={finishSetup} className="btn-add">
-                finishSetup
-            </button>
             {/*
             <button onClick={() => currWfIndex.current += 1} className="btn-add">
                 +1 workflow
@@ -903,7 +899,7 @@ function Flow() {
             </button>
 
             */}
-            
+
         </div>
     );
 }

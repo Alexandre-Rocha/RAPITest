@@ -1,11 +1,7 @@
-import { useCallback, useState, useEffect } from 'react';
+import {  useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
-import { UploadApiSpecification } from '../../pages/steps/UploadApiSpecification';
 
-import authService from '../../pages/api-authorization/AuthorizeService';
-import { UploadMyOwnTSL } from '../../pages/steps/UploadMyOwnTSL';
-import { Link } from 'react-router-dom';
 
 const handleStyle = { left: 10 };
 
@@ -19,10 +15,10 @@ function TestNameNode({ data, isConnectable }) {
     setTestName(newTestName)
   }
 
-  const onChange = useCallback((evt) => {
+  const onChange = (evt) => {
     console.log(evt.target.value);
     setStateTestName(evt.target.value)
-  }, []);
+  }
   
 
   return (
