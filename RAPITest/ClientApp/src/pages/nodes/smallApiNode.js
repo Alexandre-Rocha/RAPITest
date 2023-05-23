@@ -1,11 +1,9 @@
-import { useCallback, useState, useEffect } from 'react';
+import {  useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 import { UploadApiSpecification } from '../../pages/steps/UploadApiSpecification';
 
-import authService from '../../pages/api-authorization/AuthorizeService';
-import { UploadMyOwnTSL } from '../../pages/steps/UploadMyOwnTSL';
-import { Link } from 'react-router-dom';
+import { SmallApiUpload } from './SmallApiUpload';
 
 const handleStyle = { left: 10 };
 
@@ -31,7 +29,7 @@ const handlerAPI = function (paths, servers, schemas, schemasValues, setUploaded
   })*/
 }
 
-
+/*
 const handlerTest = function(tsl, dictionary, dll, setUploadedTest, sendTest, setDic, setTestSpec, setDll ) {
   
   console.log("handlertest")
@@ -48,7 +46,7 @@ const handlerTest = function(tsl, dictionary, dll, setUploadedTest, sendTest, se
 
   //sendTest()
 
-}
+}*/
 
 
 
@@ -56,13 +54,13 @@ function SmallApiNode({ data, isConnectable }) {
 
   const [uploaded, setUploaded] = useState(false); 
 
-  const [dictionary, setDictionary] = useState(null);
-  const [testSpecification, setTestSpecification] = useState(null);
-  const [dllFiles, setDllFiles] = useState(null);
+  //const [dictionary, setDictionary] = useState(null);
+  //const [testSpecification, setTestSpecification] = useState(null);
+  //const [dllFiles, setDllFiles] = useState(null);
 
 
   //data.custom.mycallback(evt.target.value)
-
+/*
   const [apiName, setApiName] = useState(""); 
   
   const setStateFunctionTSL = (newValue) => {
@@ -84,7 +82,7 @@ function SmallApiNode({ data, isConnectable }) {
   const onChange = useCallback((evt) => {
     console.log(evt.target.value);
     setApiName(evt.target.value)
-  }, []);
+  }, []);*/
 
 
   /*async function sendTestSetup() {
@@ -133,8 +131,8 @@ function SmallApiNode({ data, isConnectable }) {
         <label htmlFor="text">API File upload</label>
 
       </div>
-      {uploaded == false ?
-        <UploadApiSpecification handlerAPI={(paths, servers, schemas, schemasValues) => handlerAPI(paths, servers, schemas, schemasValues, setUploaded, data.custom.mycallback)} apiTitle={defApiName} ></UploadApiSpecification> : <div>api uploaded</div>}
+      {uploaded === false ?
+        <SmallApiUpload handlerAPI={(paths, servers, schemas, schemasValues) => handlerAPI(paths, servers, schemas, schemasValues, setUploaded, data.custom.mycallback)} apiTitle={defApiName} ></SmallApiUpload> : <div>api uploaded</div>}
     
       <Handle
         type="source"

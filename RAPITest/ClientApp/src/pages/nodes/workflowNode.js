@@ -33,7 +33,7 @@ function WorkflowNode({ data, isConnectable }) {
         <label htmlFor="text">Name of new workflow:</label>
         <input id="text" name="text" onChange={onChange} className="nodrag" />
       </div>
-      <div>
+      {/* <div>
         <label htmlFor="readonly">Read-only field:</label>
         <input
           id="readonly"
@@ -43,7 +43,7 @@ function WorkflowNode({ data, isConnectable }) {
           value={testName}
           className="nodrag"
         />
-      </div>
+      </div> */}
       <Handle
         type="source"
         position={Position.Bottom}

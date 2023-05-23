@@ -26,13 +26,13 @@ function StatusVerificationNode({ data, isConnectable }) {
     <div className="text-updater-node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       <div>
-        <label htmlFor="readonly">status node example</label>
+        <label htmlFor="readonly">Status node</label>
       </div>
       <div>
-        <label htmlFor="text">status code:</label>
+        <label htmlFor="text">Status Code:</label>
         <input id="text" name="text" onChange={onChange} className="nodrag" />
       </div>
-      <div>
+      {/* <div>
         <label htmlFor="readonly">Read-only field - state is working:</label>
         <input
           id="readonly"
@@ -42,7 +42,7 @@ function StatusVerificationNode({ data, isConnectable }) {
           value={testName}
           className="nodrag"
         />
-      </div>
+      </div> */}
       <Handle
         type="source"
         position={Position.Bottom}

@@ -1,8 +1,36 @@
 .editor-container {
      display: flex;
+     height: max-content;
   }
   
   .sidebar {
-    width: 200px;
     /* Add any additional styles for the sidebar */
+    display: flex;
+    margin-right: 2px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 750px;
+
+    flex-grow: 1;
+  }
+
+  .sidebarDiv {
+    /* Add any additional styles for the sidebar */
+    display: flex;
+    flex-direction: column;
+    margin-left: 1px;
+    margin-right: 1px;
+  }
+  .editor-outline{
+    outline: 2px solid black;
+    flex-grow: 4;
+    margin-left: 5px;
+  }
+
+  .node-button{
+    flex-grow: 1;
+  }
+
+  .node-radio{
+    margin: 0 5px 0 5px;
   }

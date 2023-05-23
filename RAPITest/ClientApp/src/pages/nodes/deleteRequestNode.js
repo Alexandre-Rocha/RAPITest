@@ -36,7 +36,7 @@ function DeleteRequestNode({ data, isConnectable }) {
     <div className="text-updater-node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       <div>
-        <label htmlFor="readonly">DELETE node example</label>
+        <label htmlFor="readonly">DELETE node </label>
       </div>
       <div>
         <label htmlFor="text">Server URL:</label>

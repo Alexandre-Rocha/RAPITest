@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap';
 import { Row, Col, Form } from 'react-bootstrap'
 import Dropzone from '../../components/Dropzone'
-import './UploadFile.css';
+//import './UploadFile.css';
 import { warningMessage, dangerMessage } from '../../components/AlertComp'
 import authService from '../api-authorization/AuthorizeService';
 import Loader from 'react-loader-spinner'
@@ -11,7 +11,7 @@ import Loader from 'react-loader-spinner'
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-export class UploadApiSpecification extends Component {
+export class SmallApiUpload extends Component {
 
     constructor() {
 
@@ -117,8 +117,8 @@ export class UploadApiSpecification extends Component {
                                 history={this.props.history}
                                 text={
                                     <div align="center">
-                                        <p>Drop your API specification here, or click to select it.</p>
-                                        <p>Only .yaml or .json files will be accepted</p>
+                                        <p>Upload API specification</p>
+                                        <p>(.yaml or .json only)</p>
                                     </div>}
                                 />
                         </div>
@@ -126,9 +126,6 @@ export class UploadApiSpecification extends Component {
                 </div>}
                 {!this.state.showInput && <div>
                     <Row>
-                        <Col style={{marginTop:'15px'}}>
-                            <h4>Please wait while the OpenAPI Specification is processed</h4>
-                        </Col>
                         <Col>
                             <Loader type="Grid" color="#00BFFF" height={55} width={55} />
                         </Col>

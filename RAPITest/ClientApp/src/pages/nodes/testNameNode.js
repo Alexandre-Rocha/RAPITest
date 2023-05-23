@@ -30,7 +30,7 @@ function TestNameNode({ data, isConnectable }) {
         <label htmlFor="text">Name of new test configuration:</label>
         <input id="text" name="text" onChange={onChange} className="nodrag" />
       </div>
-      <div>
+      {/* <div>
         <label htmlFor="readonly">Read-only field:</label>
         <input
           id="readonly"
@@ -40,7 +40,7 @@ function TestNameNode({ data, isConnectable }) {
           value={testName}
           className="nodrag"
         />
-      </div>
+      </div> */}
       <Handle
         type="source"
         position={Position.Bottom}

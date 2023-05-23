@@ -14,7 +14,10 @@ import DeleteRequestNode from './nodes/deleteRequestNode';
 import SchemaVerificationNode from './nodes/schemaVerificationNode';
 
 
+import SmallApiNode from './nodes/smallApiNode';
+
 import './Rflow5.css'
+import { SmallApiUpload } from './nodes/SmallApiUpload';
 
 const YAML = require('json-to-pretty-yaml');
 
@@ -22,7 +25,7 @@ const YAML = require('json-to-pretty-yaml');
 const initialNodes = []
 const initialEdges = []
 
-const nodeTypes = { getRequest: GetRequestNode, testName: TestNameNode, status: StatusVerificationNode, apiFile: ApiFileNode, testID: TestIDNode, wf: WorkflowNode, deleteRequest: DeleteRequestNode, schema: SchemaVerificationNode }
+const nodeTypes = { getRequest: GetRequestNode, testName: TestNameNode, status: StatusVerificationNode, apiFile: SmallApiNode, testID: TestIDNode, wf: WorkflowNode, deleteRequest: DeleteRequestNode, schema: SchemaVerificationNode }
 
 function deepCopy(obj) {
     if (typeof obj !== "object" || obj === null) {
@@ -57,12 +60,12 @@ function Flow() {
 
     const [testConfName, setTestConfName] = useState("New test configuration")
 
-/*
-    const [timerSettings, setTimerSettings] = useState({    //TODO: hardcoded
-        runimmediately: 'true',
-        interval: 'Never',
-        rungenerated: 'true'
-    })*/
+    /*
+        const [timerSettings, setTimerSettings] = useState({    //TODO: hardcoded
+            runimmediately: 'true',
+            interval: 'Never',
+            rungenerated: 'true'
+        })*/
 
     const [runImmediately, setRunImmediatly] = useState('true')
 
@@ -285,8 +288,8 @@ function Flow() {
         })
     }
 
-  
-    const onConnect = 
+
+    const onConnect =
         (connection) => {
 
             const { source, target } = connection;
@@ -306,7 +309,7 @@ function Flow() {
 
         }
 
-    const onConnectWorkflow = 
+    const onConnectWorkflow =
         (sourceNode, targetNode, connection) => {
 
             // this method is called if sourceNode is workflow node
@@ -351,7 +354,7 @@ function Flow() {
             setEdges((eds) => addEdge(connection, eds))
 
         }
-    const onConnectTest = 
+    const onConnectTest =
         (sourceNode, targetNode, connection) => {
 
             // this method is called if sourceNode is test node
@@ -396,8 +399,8 @@ function Flow() {
             setEdges((eds) => addEdge(connection, eds))
 
         }
-    
-    const onConnectNormal = 
+
+    const onConnectNormal =
         (sourceNode, targetNode, connection) => {
 
             // this method is called if sourceNode is a normal node (not wf, not test)
@@ -709,43 +712,43 @@ function Flow() {
         reactFlowInstance.addNodes(newNode);
     }
 
-/*
-    const onClickUrl = () => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                //label: `Node ${id}`,
-                custom: {
-                    mycallback: onServerURLChange
-                }
-            },
-            type: 'url'
-        };
-        reactFlowInstance.addNodes(newNode);
-    }*/
+    /*
+        const onClickUrl = () => {
+            const id = `${nodeId.current}`;
+            nodeId.current += 1
+            const newNode = {
+                id,
+                position: {
+                    x: Math.random() * 500,
+                    y: Math.random() * 500,
+                },
+                data: {
+                    //label: `Node ${id}`,
+                    custom: {
+                        mycallback: onServerURLChange
+                    }
+                },
+                type: 'url'
+            };
+            reactFlowInstance.addNodes(newNode);
+        }*/
 
     const onTestConfNameChange = (newTestConfName) => {
         const newName = newTestConfName.target.value
         console.log("New test configuration name: ", newName);
         setTestConfName(newName)
     }
-/*
-    const onApiSpecChange = () => {
-        //...
-    }
-
-    const onTimerSettingsChange = (newTimerSettings) => {
-        const newSettings = newTimerSettings.target.value
-        console.log("New timer settings: ", newTimerSettings);
-        setTestConfName(newTimerSettings)
-    }
-*/
+    /*
+        const onApiSpecChange = () => {
+            //...
+        }
+    
+        const onTimerSettingsChange = (newTimerSettings) => {
+            const newSettings = newTimerSettings.target.value
+            console.log("New timer settings: ", newTimerSettings);
+            setTestConfName(newTimerSettings)
+        }
+    */
     const onRunGeneratedChange = (runGenerated) => {
         const aux = runGenerated.target.value
         const run = aux === "yes" ? "true" : "false"
@@ -768,120 +771,132 @@ function Flow() {
 
     return (
 
-        <div className='editor-container'>
+        <div>
+
+
+            <div className='editor-container'>
 
 
 
-            <aside className="sidebar">
-                <div id="side-menu">
-                    <label>Name of test configuration:</label>
-                    <input id="text" name="text" onChange={onTestConfNameChange} className="nodrag" />
+                <aside className="sidebar">
+                    <div id="side-menu" className="sidebarDiv">
+                        <p></p>
+                        <label><b>Name of test configuration:</b></label>
+                        <input id="text" name="text" onChange={onTestConfNameChange} className="nodrag" />
 
-                    <label>API Specification:</label>
+                        <label><b>API Specification:</b></label>
 
-                    <label>Timer settings:</label>
+                        <SmallApiUpload></SmallApiUpload>
 
-                    <div>
+
+                        <label><b>Timer settings:</b></label>
+
                         <div>
-                            <label>Run Generated?</label>
                             <div>
-                                <input type="radio" id="runGeneratedYes" name="runGenerated" value="yes" onChange={onRunGeneratedChange} />
-                                <label htmlFor="runGeneratedYes">Yes</label>
-                                <input type="radio" id="runGeneratedNo" name="runGenerated" value="no" onChange={onRunGeneratedChange}/>
-                                <label htmlFor="runGeneratedNo">No</label>
+                                <label>Run Generated?</label>
+                                <div>
+                                    <input className='node-radio' type="radio" id="runGeneratedYes" name="runGenerated" value="yes" onChange={onRunGeneratedChange} />
+                                    <label htmlFor="runGeneratedYes">Yes</label>
+                                    <input className='node-radio' type="radio" id="runGeneratedNo" name="runGenerated" value="no" onChange={onRunGeneratedChange} />
+                                    <label htmlFor="runGeneratedNo">No</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label>Run Immediately?</label>
+                                <div>
+                                    <input className='node-radio' type="radio" id="runImmediatelyYes" name="runImmediately" value="yes" onChange={onRunImmediatelyChange} />
+                                    <label htmlFor="runImmediatelyYes">Yes</label>
+                                    <input className='node-radio' type="radio" id="runImmediatelyNo" name="runImmediately" value="no" onChange={onRunImmediatelyChange} />
+                                    <label htmlFor="runImmediatelyNo">No</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label>Select Run Interval:</label>
+                                <div>
+                                    <input className='node-radio' type="radio" id="runInterval1" name="runInterval" value="1 hour" onChange={onRunIntervalChange} />
+                                    <label htmlFor="runInterval1">1 hour</label>
+                                    <input className='node-radio' type="radio" id="runInterval2" name="runInterval" value="12 hours" onChange={onRunIntervalChange} />
+                                    <label htmlFor="runInterval2">12 hours</label>
+                                    <input className='node-radio' type="radio" id="runInterval3" name="runInterval" value="24 hours" onChange={onRunIntervalChange} />
+                                    <label htmlFor="runInterval3">24 hours</label>
+                                    <input className='node-radio' type="radio" id="runInterval4" name="runInterval" value="1 week" onChange={onRunIntervalChange} />
+                                    <label htmlFor="runInterval4">1 week</label>
+                                    <input className='node-radio' type="radio" id="runInterval5" name="runInterval" value="Never" onChange={onRunIntervalChange} />
+                                    <label htmlFor="runInterval5">Never</label>
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <label>Run Immediately?</label>
-                            <div>
-                                <input type="radio" id="runImmediatelyYes" name="runImmediately" value="yes" onChange={onRunImmediatelyChange} />
-                                <label htmlFor="runImmediatelyYes">Yes</label>
-                                <input type="radio" id="runImmediatelyNo" name="runImmediately" value="no" onChange={onRunImmediatelyChange} />
-                                <label htmlFor="runImmediatelyNo">No</label>
-                            </div>
-                        </div>
-                        <div>
-                            <label>Select Run Interval:</label>
-                            <div>
-                                <input type="radio" id="runInterval1" name="runInterval" value="1 hour" onChange={onRunIntervalChange} />
-                                <label htmlFor="runInterval1">1 hour</label>
-                                <input type="radio" id="runInterval2" name="runInterval" value="12 hours" onChange={onRunIntervalChange}/>
-                                <label htmlFor="runInterval2">12 hours</label>
-                                <input type="radio" id="runInterval3" name="runInterval" value="24 hours" onChange={onRunIntervalChange}/>
-                                <label htmlFor="runInterval3">24 hours</label>
-                                <input type="radio" id="runInterval4" name="runInterval" value="1 week" onChange={onRunIntervalChange}/>
-                                <label htmlFor="runInterval4">1 week</label>
-                                <input type="radio" id="runInterval5" name="runInterval" value="Never" onChange={onRunIntervalChange}/>
-                                <label htmlFor="runInterval5">Never</label>
-                            </div>
-                        </div>
+
+                        <p></p>
+                        <b>Nodes</b>
+                        <label>Flow-related</label>
+
+                        {/* <button onClick={onClickApi} className="node-button">
+                            add API file node
+                        </button> */}
+
+                        <button onClick={onClickWorkflowNode} className="node-button">
+                            Add Workflow
+                        </button>
+
+                        <button onClick={onClickID} className="node-button">
+                            Add Test 
+                        </button>
+
+                        <label>HTTP Requests</label>
+
+                        <button onClick={onClickGet} className="node-button">
+                            Add GET request 
+                        </button>
+
+                        <button onClick={onClickDelete} className="node-button">
+                            Add DELETE request
+                        </button>
+
+                        <label>Verifications</label>
+
+                        <button onClick={onClickStatus} className="node-button">
+                            Add Status Code verification
+                        </button>
+
+                        <button onClick={onClickSchema} className="node-button">
+                            Add Schema verification
+                        </button>
+
+                        <label>Setup-related</label>
+
+                        
+
+                        <button onClick={saveWorkflow} className="node-button">
+                            Save changes
+                        </button>
+
+                        <button onClick={finishSetup} className="node-button">
+                            Finish Setup
+                        </button>
+
+
+
                     </div>
+                </aside>
 
+                <div className='editor-outline' style={{ height: 750, width: 1300 }}>
+                    <ReactFlow
+                        nodes={nodes}
+                        edges={edges}
+                        nodeTypes={nodeTypes}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                    >
+                        <Background color='#000000' variant={'dots'} />
+                        <Controls />
+                    </ReactFlow>
 
-                    <button onClick={onClickName} className="btn-add">
-                        add test name node
-                    </button>
-
-                    <button onClick={onClickApi} className="btn-add">
-                        add API file node
-                    </button>
-
-                    <button onClick={onClickWorkflowNode} className="btn-add">
-                        add workflow node
-                    </button>
-
-                    <button onClick={onClickID} className="btn-add">
-                        add test ID
-                    </button>
-
-
-                    <button onClick={onClickGet} className="btn-add">
-                        add get request node
-                    </button>
-
-                    <button onClick={onClickDelete} className="btn-add">
-                        add delete request node
-                    </button>
-
-                    <button onClick={onClickStatus} className="btn-add">
-                        add verification status code node
-                    </button>
-
-                    <button onClick={onClickSchema} className="btn-add">
-                        add verification schema node
-                    </button>
-
-                    <button onClick={dumpState} className="btn-add">
-                        log all state
-                    </button>
-
-                    <button onClick={saveWorkflow} className="btn-add">
-                        saveChanges
-                    </button>
-
-                    <button onClick={finishSetup} className="btn-add">
-                        finishSetup
-                    </button>
                 </div>
-            </aside>
-
-            <div style={{ height: 700, width: 1300 }}>
-                <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    nodeTypes={nodeTypes}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                >
-                    <Background variant={'dots'} />
-                    <Controls />
-                </ReactFlow>
-
-            </div>
 
 
-            {/*
+                {/*
             <button onClick={() => currWfIndex.current += 1} className="btn-add">
                 +1 workflow
             </button>
@@ -900,6 +915,9 @@ function Flow() {
 
             */}
 
+            </div>
+
+            
         </div>
     );
 }

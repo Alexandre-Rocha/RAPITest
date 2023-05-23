@@ -36,7 +36,7 @@ function GetRequestNode({ data, isConnectable }) {
     <div className="text-updater-node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       <div>
-        <label htmlFor="readonly">GET node example</label>
+        <label htmlFor="readonly">GET node </label>
       </div>
       <div>
         <label htmlFor="text">Server URL:</label>
