@@ -2,7 +2,7 @@
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import './deleteRequestNode.css'
+import './css/deleteRequestNode.css'
 
 const handleStyle = { left: 10 };
 

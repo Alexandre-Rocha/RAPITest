@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import './workflowNode.css'
+import './css/serverURLNode.css'
 
 const handleStyle = { left: 10 };
 
 
-function WorkflowNode({ data, isConnectable }) {
+function ServerURLNode({ data, isConnectable }) {
 
-  console.log("[Workflow node] Workflow ID: ",data.custom._wfIndex)
+  console.log("[Server URL node] Workflow ID: ",data.custom.workflowID)
+
 
   const [testName, setTestName] = useState(data?.myData || ""); 
   
@@ -18,22 +19,20 @@ function WorkflowNode({ data, isConnectable }) {
     setTestName(newTestName)
   }
 
-
-  const onChange = (evt) => {
+  const onChange = useCallback((evt) => {
     console.log(evt.target.value);
     setStateTestName(evt.target.value)
-    data.custom.mycallback(evt.target.value)
-  };
+  }, []);
   
 
   return (
     <div className="text-updater-node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       <div>
-        <label htmlFor="text">Name of new workflow:</label>
+        <label htmlFor="text">Server URL:</label>
         <input id="text" name="text" onChange={onChange} className="nodrag" />
       </div>
-      {/* <div>
+      <div>
         <label htmlFor="readonly">Read-only field:</label>
         <input
           id="readonly"
@@ -43,7 +42,7 @@ function WorkflowNode({ data, isConnectable }) {
           value={testName}
           className="nodrag"
         />
-      </div> */}
+      </div>
       <Handle
         type="source"
         position={Position.Bottom}
@@ -57,4 +56,4 @@ function WorkflowNode({ data, isConnectable }) {
 }
 
 
-export default WorkflowNode;
+export default ServerURLNode;

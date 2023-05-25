@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap';
 import { Row, Col, Form } from 'react-bootstrap'
-import Dropzone from '../../components/Dropzone'
+import Dropzone from '../../../components/Dropzone';
 //import './UploadFile.css';
-import { warningMessage, dangerMessage } from '../../components/AlertComp'
-import authService from '../api-authorization/AuthorizeService';
+import { warningMessage, dangerMessage } from '../../../components/AlertComp'
+import authService from '../../api-authorization/AuthorizeService';
 import Loader from 'react-loader-spinner'
 
 

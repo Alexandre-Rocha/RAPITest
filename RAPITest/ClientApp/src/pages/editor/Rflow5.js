@@ -7,7 +7,7 @@ import GetRequestNode from './nodes/getRequestNode';
 import StatusVerificationNode from './nodes/statusVerificationNode';
 import TestNameNode from './nodes/testNameNode';
 
-import authService from './api-authorization/AuthorizeService';
+import authService from '../api-authorization/AuthorizeService';
 import TestIDNode from './nodes/testIDNode';
 import WorkflowNode from './nodes/workflowNode';
 import DeleteRequestNode from './nodes/deleteRequestNode';
@@ -56,6 +56,9 @@ function Flow() {
     const [path, setPath] = useState("") //new
     const [httpMethod, setHttpMethod] = useState("Get")
     const [verificationStatus, setVerificationStatus] = useState()
+
+
+    const [uploaded, setUploaded] = useState(false)
 
 
     const [testConfName, setTestConfName] = useState("New test configuration")
@@ -317,7 +320,7 @@ function Flow() {
             let sourceWorkflow = sourceNode.data.custom._wfIndex
 
             if (targetNode.type === "wf") {  //reject
-                alert("u cant do that")
+                alert("you cant do that")
                 return false
             }
             else if (targetNode.type === "testID") {  //accept
@@ -347,7 +350,7 @@ function Flow() {
 
             }
             else {   //reject
-                alert("u cant do that")
+                alert("you cant do that")
                 return false
             }
 
@@ -366,7 +369,7 @@ function Flow() {
 
 
             if (targetNode.type === "testID") {  //reject
-                alert("u cant do that")
+                alert("you cant do that")
                 return false
             }
             else if (targetNode.type === "wf") {  //accept
@@ -391,7 +394,7 @@ function Flow() {
                     );
                 }
                 else {
-                    alert("u cant do that")
+                    alert("you cant do that")
                     return false
                 }
             }
@@ -412,7 +415,7 @@ function Flow() {
             let targetTest = targetNode.data.custom._testIndex
 
             if (targetNode.type === "wf") {  //reject
-                alert("u cant do that")
+                alert("you cant do that")
                 return false
 
             }
@@ -444,7 +447,7 @@ function Flow() {
                     );
                 }
                 else {
-                    alert("u cant to that")
+                    alert("you cant to that")
                     return false
                 }
 
@@ -663,10 +666,6 @@ function Flow() {
 
     }
 
-
-
-
-
     const onClickStatus = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
@@ -769,6 +768,28 @@ function Flow() {
         setRunInterval(aux)
     }
 
+
+    const  handlerAPI = function (paths, servers, schemas, schemasValues) {
+
+        console.log("hadnlerapi")
+        let obj = { paths, servers, schemas, schemasValues }
+        console.log(obj);
+        setUploaded(true)
+      
+        setApiFile(obj)
+      
+        //sendTest()
+      
+        /*this.setState({
+            paths: paths,
+            servers: servers,
+            schemas: schemas,
+            schemasValues: schemasValues,
+            step:3
+        })*/
+      }
+
+    
     return (
 
         <div>
@@ -786,7 +807,8 @@ function Flow() {
 
                         <label><b>API Specification:</b></label>
 
-                        <SmallApiUpload></SmallApiUpload>
+                        {uploaded === false ?
+        <SmallApiUpload handlerAPI={handlerAPI} apiTitle={"aaaa"} ></SmallApiUpload> : <div>api uploaded</div>}
 
 
                         <label><b>Timer settings:</b></label>
@@ -832,7 +854,7 @@ function Flow() {
                         <label>Flow-related</label>
 
                         {/* <button onClick={onClickApi} className="node-button">
-                            add API file node
+                            Add API spec
                         </button> */}
 
                         <button onClick={onClickWorkflowNode} className="node-button">
@@ -873,6 +895,14 @@ function Flow() {
 
                         <button onClick={finishSetup} className="node-button">
                             Finish Setup
+                        </button>
+
+
+                        <p></p>
+                        <label>Dev </label>
+
+                        <button onClick={onClickApi} className="node-button">
+                            Add API spec
                         </button>
 
 

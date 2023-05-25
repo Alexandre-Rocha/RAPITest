@@ -1,8 +1,9 @@
 import {  useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
-import { UploadApiSpecification } from '../../pages/steps/UploadApiSpecification';
+import { UploadApiSpecification } from '../../steps/UploadApiSpecification';
 
+import { SmallApiUpload } from './SmallApiUpload';
 
 const handleStyle = { left: 10 };
 
@@ -49,7 +50,7 @@ const handlerTest = function(tsl, dictionary, dll, setUploadedTest, sendTest, se
 
 
 
-function ApiFileNode({ data, isConnectable }) {
+function SmallApiNode({ data, isConnectable }) {
 
   const [uploaded, setUploaded] = useState(false); 
 
@@ -131,7 +132,7 @@ function ApiFileNode({ data, isConnectable }) {
 
       </div>
       {uploaded === false ?
-        <UploadApiSpecification handlerAPI={(paths, servers, schemas, schemasValues) => handlerAPI(paths, servers, schemas, schemasValues, setUploaded, data.custom.mycallback)} apiTitle={defApiName} ></UploadApiSpecification> : <div>api uploaded</div>}
+        <SmallApiUpload handlerAPI={(paths, servers, schemas, schemasValues) => handlerAPI(paths, servers, schemas, schemasValues, setUploaded, data.custom.mycallback)} apiTitle={defApiName} ></SmallApiUpload> : <div>api uploaded</div>}
     
       <Handle
         type="source"
@@ -148,4 +149,4 @@ function ApiFileNode({ data, isConnectable }) {
 
 
 
-export default ApiFileNode;
+export default SmallApiNode;

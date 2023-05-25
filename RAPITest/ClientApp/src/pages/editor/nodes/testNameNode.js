@@ -1,18 +1,13 @@
-import { useState } from 'react';
+import {  useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import './testIDNode.css'
+import './css/testNameNode.css'
 
 const handleStyle = { left: 10 };
 
 
-function TestIDNode({ data, isConnectable }) {
-
-  console.log("[Test node] Workflow ID: ",data.custom._wfIndex)
-  console.log("[Test node] Test ID: ",data.custom._testIndex)
-
-
+function TestNameNode({ data, isConnectable }) {
 
   const [testName, setTestName] = useState(data?.myData || ""); 
   
@@ -23,16 +18,16 @@ function TestIDNode({ data, isConnectable }) {
 
   const onChange = (evt) => {
     console.log(evt.target.value);
-    setStateTestName(evt.target.value)//todo:achoq e preciso
-    data.custom.mycallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
-  };
+    setStateTestName(evt.target.value)
+    data.custom.mycallback(evt.target.value)
+  }
   
 
   return (
     <div className="text-updater-node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       <div>
-        <label htmlFor="text">Name of new test ID:</label>
+        <label htmlFor="text">Name of new test configuration:</label>
         <input id="text" name="text" onChange={onChange} className="nodrag" />
       </div>
       {/* <div>
@@ -59,4 +54,4 @@ function TestIDNode({ data, isConnectable }) {
 }
 
 
-export default TestIDNode;
+export default TestNameNode;

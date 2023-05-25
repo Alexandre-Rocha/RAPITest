@@ -2,23 +2,27 @@ import { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import './schemaVerificationNode.css'
+import './css/workflowNode.css'
 
 const handleStyle = { left: 10 };
 
 
-function SchemaVerificationNode({ data, isConnectable }) {
+function WorkflowNode({ data, isConnectable }) {
 
-  console.log("[Schema node] Workflow ID: ",data.custom._wfIndex)
-  console.log("[Schema node] Test ID: ",data.custom._testIndex)
+  console.log("[Workflow node] Workflow ID: ",data.custom._wfIndex)
 
-  const [testName, setTestName] = useState(""); 
+  const [testName, setTestName] = useState(data?.myData || ""); 
+  
+  const setStateTestName = (newTestName) => {
+    console.log('setStateTestName is being called with', newTestName);
+    setTestName(newTestName)
+  }
+
 
   const onChange = (evt) => {
     console.log(evt.target.value);
-    setTestName(evt.target.value)
-    data.custom.mycallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
-
+    setStateTestName(evt.target.value)
+    data.custom.mycallback(evt.target.value)
   };
   
 
@@ -26,14 +30,11 @@ function SchemaVerificationNode({ data, isConnectable }) {
     <div className="text-updater-node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       <div>
-        <label htmlFor="readonly">schema verification node example</label>
-      </div>
-      <div>
-        <label htmlFor="text">paste the schema:</label>
+        <label htmlFor="text">Name of new workflow:</label>
         <input id="text" name="text" onChange={onChange} className="nodrag" />
       </div>
-      <div>
-        <label htmlFor="readonly">Read-only field - state is working:</label>
+      {/* <div>
+        <label htmlFor="readonly">Read-only field:</label>
         <input
           id="readonly"
           name="readonly"
@@ -42,7 +43,7 @@ function SchemaVerificationNode({ data, isConnectable }) {
           value={testName}
           className="nodrag"
         />
-      </div>
+      </div> */}
       <Handle
         type="source"
         position={Position.Bottom}
@@ -56,4 +57,4 @@ function SchemaVerificationNode({ data, isConnectable }) {
 }
 
 
-export default SchemaVerificationNode;
+export default WorkflowNode;
