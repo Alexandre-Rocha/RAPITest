@@ -9,15 +9,17 @@ const handleStyle = { left: 10 };
 
 function StatusVerificationNode({ data, isConnectable }) {
 
+  
+
+  const [statusCode, setStatusCode] = useState(data.custom.initialStatusCode); 
+
   console.log("[Status node] Workflow ID: ",data.custom._wfIndex)
   console.log("[Status node] Test ID: ",data.custom._testIndex)
 
-  const [testName, setTestName] = useState(""); 
-
   const onChange = (evt) => {
     console.log(evt.target.value);
-    setTestName(evt.target.value)
-    data.custom.mycallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+    setStatusCode(evt.target.value)
+    data.custom.onStatusCodeChange(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
 
   };
   
@@ -30,7 +32,7 @@ function StatusVerificationNode({ data, isConnectable }) {
       </div>
       <div>
         <label htmlFor="text">Status Code:</label>
-        <input id="text" name="text" onChange={onChange} className="nodrag" />
+        <input value={statusCode} id="text" name="text" onChange={onChange} className="nodrag" />
       </div>
       {/* <div>
         <label htmlFor="readonly">Read-only field - state is working:</label>

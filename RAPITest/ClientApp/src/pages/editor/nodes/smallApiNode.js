@@ -3,7 +3,7 @@ import { Handle, Position } from 'reactflow';
 import React from 'react';
 import { UploadApiSpecification } from '../../steps/UploadApiSpecification';
 
-import { SmallApiUpload } from './SmallApiUpload';
+import { SmallApiUpload } from '../other-components/SmallApiUpload';
 
 const handleStyle = { left: 10 };
 

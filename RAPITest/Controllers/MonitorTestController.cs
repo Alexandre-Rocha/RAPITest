@@ -120,7 +120,18 @@ namespace RAPITest.Controllers
 			ModelsLibrary.Models.EFModels.Report report = reports.FirstOrDefault();
 			if (report == null) return NotFound();
 
-			VisualizeReportModel v = new VisualizeReportModel();
+			ModelsLibrary.Models.EFModels.Api api = report.Api;
+            Console.WriteLine("Will this work?");
+			Console.WriteLine(report);
+            //Console.WriteLine(report.ReportFile);
+            Console.WriteLine("pls?");
+            Console.WriteLine(Encoding.Default.GetString(api.Tsl));
+            Console.WriteLine(report.ToString());
+			Console.WriteLine(report.Api);
+            Console.WriteLine(api.ToString());
+            Console.WriteLine(api.Tsl.ToString());
+
+            VisualizeReportModel v = new VisualizeReportModel();
 			v.Report = Encoding.Default.GetString(report.ReportFile);
 			v.ApiName = report.Api.ApiTitle;
 

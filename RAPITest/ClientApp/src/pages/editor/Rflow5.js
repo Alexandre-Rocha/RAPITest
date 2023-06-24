@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom/cjs/react-router-dom';
 import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
 import ApiFileNode from './nodes/apiFileNode';
@@ -17,9 +18,11 @@ import SchemaVerificationNode from './nodes/schemaVerificationNode';
 import SmallApiNode from './nodes/smallApiNode';
 
 import './Rflow5.css'
-import { SmallApiUpload } from './nodes/SmallApiUpload';
+import { SmallApiUpload } from './other-components/SmallApiUpload';
 
 const YAML = require('json-to-pretty-yaml');
+
+const jsYaml = require('js-yaml')
 
 
 const initialNodes = []
@@ -49,8 +52,13 @@ function Flow() {
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
+    const location = useLocation();
+    const dajbroni = location.state.bigObj;
 
-    const [testName, setTestName] = useState("oopo")
+    console.log(dajbroni);
+
+    //console.log(objectData);
+
     const [apiFile, setApiFile] = useState()
     const [serverURL, setServerURL] = useState("")
     const [path, setPath] = useState("") //new
@@ -77,8 +85,8 @@ function Flow() {
     const [runGenerated, setRunGenerated] = useState('true')
 
     const nodeId = useRef(1)
-    const currWfIndex = useRef(-1)
-    const currTestIndex = useRef(-1)
+    const maxWfIndex = useRef(-1)
+    //const currTestIndex = useRef(-1)
 
     const reactFlowInstance = useReactFlow()
 
@@ -196,10 +204,6 @@ function Flow() {
 
 
 
-    const onTestNameChange = (newTestName) => {
-        console.log("New test name: ", newTestName);
-        setTestName(newTestName)
-    }
 
     const onApiFileChange = (newApiFile) => {
         console.log("New API file: ", newApiFile);
@@ -212,11 +216,16 @@ function Flow() {
         console.log("New test id: ", _wfIndex);
         console.log("New test id: ", _testIndex);
 
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            newWorkflows[_wfIndex].Tests[_testIndex].TestID = newTestID
-            return newWorkflows
-        })
+        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
+
+        if (_wfIndex !== -1 && _testIndex !== -1) {
+            setWorkflows(oldWorkflows => {
+                const newWorkflows = deepCopy(oldWorkflows)
+                newWorkflows[_wfIndex].Tests[_testIndex].TestID = newTestID
+                return newWorkflows
+            })
+        }
+
     }
 
     const onServerURLChange = (newURL, _wfIndex, _testIndex) => {
@@ -258,12 +267,12 @@ function Flow() {
     const onWfNameChange = (newWfId) => {
 
         console.log("New workflow: ", newWfId);
-        console.log("Curr workflow: ", currWfIndex.current);
+        console.log("Curr workflow: ", maxWfIndex.current);
 
 
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows);
-            newWorkflows[currWfIndex.current].WorkflowID = newWfId;
+            newWorkflows[maxWfIndex.current].WorkflowID = newWfId;
             return newWorkflows;
         });
     }
@@ -300,6 +309,8 @@ function Flow() {
             let sourceNode = reactFlowInstance.getNode(source)
             let targetNode = reactFlowInstance.getNode(target)
 
+            console.log("onConnect; source: %s; target: %s;", sourceNode.type, targetNode.type)
+
             if (sourceNode.type === "wf") {
                 onConnectWorkflow(sourceNode, targetNode, connection)
             }
@@ -329,9 +340,16 @@ function Flow() {
                 console.log("wfs: ", workflows)
                 console.log("wfinex: ", sourceNode.data.custom._wfIndex)
                 console.log("polsf: ", workflows[sourceNode.data.custom._wfIndex])
-                let newTestIndex = workflows[sourceNode.data.custom._wfIndex].Tests.length//sourceNode.data.custom.Tests.length 
+                let newTestIndex = workflows[sourceNode.data.custom._wfIndex].Tests.length //sourceNode.data.custom.Tests.length TODO:added +1 recently, check this better...nvm
+
+              
 
                 targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow, _testIndex: newTestIndex } };   // set wfId of test node(tgt) to be the same as wf node(src)
+                
+                console.log("targetNodeId");
+                console.log(typeof targetNode.id);
+                console.log(targetNode.id);
+
                 setNodes((nodes) =>
                     nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
                 );
@@ -461,7 +479,7 @@ function Flow() {
 
     const dumpState = () => {
         console.log("Logging the state...")
-        console.log("Test name: ", testName);
+        console.log("Test configuration name: ", testConfName);
         console.log("API file: ", apiFile);
         console.log("Server URL: ", serverURL);
         console.log("HTTP Method: ", httpMethod);
@@ -469,33 +487,26 @@ function Flow() {
         console.log("----------------------------");
         console.log("Workflows: ");
         console.log(workflows);
-        console.log("Current workflow: ", currWfIndex);
-        console.log("Current test: ", currTestIndex);
+        console.log("Current workflow: ", maxWfIndex);
+
+        console.log("----------------------------");
+        console.log("Nodes: ");
+        console.log(nodes);
+
+        console.log("----------------------------");
+        console.log("Edges: ");
+        console.log(edges);
+        //console.log("Current test: ", currTestIndex);
 
     }
 
-    const onClickName = () => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                //label: `Node ${id}`,
-                custom: {
-                    mycallback: onTestNameChange,
-                    //mycallback2: onPathChange
-                }
-            },
-            type: 'testName'
-        };
-        reactFlowInstance.addNodes(newNode);
-    }
+
 
     const onClickGet = () => {
+        createGetNode()
+    }
+
+    const createGetNode = (initialServer = "", initialPath = "", _wfIndex = -1, _testIndex = -1)=>{
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -510,13 +521,19 @@ function Flow() {
                     mycallback: onServerURLChange,
                     mycallback2: onPathChange,
                     methodcallback: onHttpMethodChange,
-                    _wfIndex: -1,
-                    _testIndex: -1
+                    initialServer: initialServer,
+                    initialPath: initialPath,
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex,
+                    paths: apiFile.paths,
+                    servers: apiFile.servers
                 }
             },
             type: 'getRequest'
         };
         reactFlowInstance.addNodes(newNode);
+
+        return id;
     }
 
 
@@ -544,16 +561,18 @@ function Flow() {
         reactFlowInstance.addNodes(newNode);
     }
 
-    const onClickID = () => {
+
+
+    const createTestNode = (testName, _wfIndex = -1, _testIndex = -1) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
         let newTest = {
             _testIndex: -1,
-            Server: serverURL, //https://petstore3.swagger.io/api/v3    
-            TestID: "NEW TEST",
-            Path: path,//   /pet/1
-            Method: httpMethod,
+            Server: "", //https://petstore3.swagger.io/api/v3    
+            TestID: testName,
+            Path: "",//   /pet/1
+            Method: "",
             Headers: [{
                 keyItem: '',
                 valueItem: ''
@@ -571,16 +590,28 @@ function Flow() {
             data: {
                 //label: `Node ${id}`,
                 custom: {
-                    mycallback: onTestIDChange,
+                    nameChangeCallback: onTestIDChange,
                     //mycallback2: onPathChange
-                    _wfIndex: -1,
-                    _testIndex: -1,   //TODO:
-                    test: newTest
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex,   //TODO:
+                    test: newTest,
+                    testName: testName //TODO:this info is also in test, maybe test is not necessart? idk
                 }
             },
             type: 'testID'
         };
         reactFlowInstance.addNodes(newNode);
+
+        //currTestIndex.current += 1
+
+        return id;
+    }
+
+    const onClickTestNode = () => {
+
+        //create node with no wfIndex and no textIndex because that will be decided on connection
+        //node is created with an empty test inside so that when connection to wfNode happens, test is put in correct position
+        createTestNode("new test name")
 
 
         /*
@@ -590,7 +621,7 @@ function Flow() {
             return newWorkflows;
         });*/
 
-        currTestIndex.current += 1
+
 
     }
 
@@ -619,11 +650,186 @@ function Flow() {
 
 
 
-    const onClickWorkflowNode = () => {
+    const onClickChangeWf = () => {
+
+        const testname = "changed test name"
+        const httpmethod = "Get"
+        const verifStatus = 200
+
+        const oldWorkflowsA = [
+            {
+                "WorkflowID": "wf1",
+                "Stress": null,
+                "Tests": [
+                    {
+                        "Server": "https://petstore3.swagger.io/api/v3",
+                        "TestID": "t1",
+                        "Path": "/pet/1",
+                        "Method": "Get",
+                        "Headers": [
+                            {
+                                "keyItem": "",
+                                "valueItem": ""
+                            }
+                        ],
+                        "Body": "",
+                        "Verifications": [
+                            {
+                                "Code": "200",
+                                "Schema": ""
+                            }
+                        ]
+                    },
+                    {
+                        "Server": "https://petstore3.swagger.io/api/v3",
+                        "TestID": "t2",
+                        "Path": "/pet/2",
+                        "Method": "Get",
+                        "Headers": [
+                            {
+                                "keyItem": "",
+                                "valueItem": ""
+                            }
+                        ],
+                        "Body": "",
+                        "Verifications": [
+                            {
+                                "Code": "200",
+                                "Schema": ""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+
+        const workflowsA = [
+            {
+                "WorkflowID": "wf1",
+                "Tests": [
+                    {
+                        "Server": "https://petstore3.swagger.io/api/v3",
+                        "TestID": "t1",
+                        "Path": "/pet/1",
+                        "Method": "Get",
+                        "Verifications": [
+                            {
+                                "Code": "200"
+                            }
+                        ]
+                    },
+                    {
+                        "Server": "https://petstore3.swagger.io/api/v3",
+                        "TestID": "t2",
+                        "Path": "/pet/2",
+                        "Method": "Get",
+                        "Verifications": [
+                            {
+                                "Code": "200"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+
+
+        const yamlFlows = YAML.stringify(workflowsA)
+
+        console.log("lakak");
+        console.log(yamlFlows);
+
+        const newstate = jsYaml.load(yamlFlows)
+
+        console.log("lekke");
+        console.log(newstate);
+
+        setWorkflows(newstate)
+
+        
+
+
+        //for each wf
+        // add wf node
+        //add stress
+        //for each test
+        // add test node
+
+        let yamlWfIndex = 0;
+        let currYamlTestIndex = 0;
+
+        let listOfEdgesLists = []
+
+        newstate.forEach(wf => {
+            //add nodes
+            console.log("adding wf node")
+
+            wf._wfIndex = yamlWfIndex
+
+
+            maxWfIndex.current += 1
+            const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID) 
+
+            let testNodeIdsList = [] 
+
+            let edgesList = []
+            
+            //add stress
+            //
+            wf.Tests.forEach(test => {
+
+                test._testIndex = currYamlTestIndex
+
+
+                console.log("adding test node");
+
+                const testNodeId = createTestNode(test.TestID, yamlWfIndex, currYamlTestIndex) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
+
+                testNodeIdsList.push(testNodeId)
+
+                //createGetNode
+                
+                //createStatusVerificationNode
+
+                //create the edge for this test
+
+                const newEdge = {
+                    id: "wf:"+wfNodeID.toString()+"-test:"+testNodeId.toString(),
+                    source: wfNodeID.toString(),
+                    target: testNodeId.toString()
+                }
+
+                edgesList.push(newEdge)
+
+                currYamlTestIndex = currYamlTestIndex + 1
+
+
+            })
+
+            currYamlTestIndex = 0
+
+            listOfEdgesLists = listOfEdgesLists.concat(edgesList)
+
+            yamlWfIndex = yamlWfIndex + 1;
+
+
+        });
+  
+        setEdges((edges) => {
+            let newEdges = edges.concat(listOfEdgesLists)
+            return newEdges
+        })
+
+    
+
+        console.log("edges set");
+
+    }
+
+
+    const createWorkflowNode = (wfIndex, wfName) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
-
-        currWfIndex.current += 1
 
         const newNode = {
             id,
@@ -634,18 +840,31 @@ function Flow() {
             data: {
                 //label: `Node ${id}`,
                 custom: {
-                    mycallback: onWfNameChange,
-                    //mycallback2: onPathChange
-                    _wfIndex: currWfIndex.current
+                    nameChangeCallback: onWfNameChange,
+                    //mycallback2: onPathChange,
+                    wfName: wfName,
+                    _wfIndex: wfIndex
                 }
             },
             type: 'wf'
         };
         reactFlowInstance.addNodes(newNode);
 
+        return id;
+    }
 
+
+    const onClickWorkflowNode = () => {
+
+        //create node with wf index equal to the max current index + 1
+        //ex if there are 3 workflows currently, the maxWfIndex is 3 and will be 4 after creating wf (which will have wfIndex 4)
+        maxWfIndex.current += 1
+        createWorkflowNode(maxWfIndex.current)
+
+
+        //create the actual workflow
         let newWf = {
-            _wfIndex: currWfIndex.current,
+            _wfIndex: maxWfIndex.current,
             WorkflowID: "NEW WORKFLOW",
             Stress: null, //{Delay: 1, Count:1, Threads: 3}
             Tests: []
@@ -657,16 +876,13 @@ function Flow() {
             return newWorkflows;
         });
 
-
-
-        //setCurrWorkflow(prevIndex => prevIndex + 1)
-
-        //onNewWorkflow() //TODO:HERE?
-
-
     }
 
     const onClickStatus = () => {
+        createStatusVerificationNode()
+    }
+
+    const createStatusVerificationNode = (status = "", _wfIndex = -1, _testIndex = -1)=>{
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -678,16 +894,18 @@ function Flow() {
             data: {
                 //label: `Node ${id}`,
                 custom: {
-                    mycallback: onVerificationStatusChange,
-                    _wfIndex: -1,
-                    _testIndex: -1
+                    onStatusCodeChange: onVerificationStatusChange,
+                    initialStatusCode: status,
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex
                 }
             },
             type: 'status'
         };
         reactFlowInstance.addNodes(newNode);
-    }
 
+        return id;
+    }
 
     const onClickSchema = () => {
         const id = `${nodeId.current}`;
@@ -769,17 +987,18 @@ function Flow() {
     }
 
 
-    const  handlerAPI = function (paths, servers, schemas, schemasValues) {
+    const handlerAPI = function (paths, servers, schemas, schemasValues) {
 
         console.log("hadnlerapi")
         let obj = { paths, servers, schemas, schemasValues }
         console.log(obj);
         setUploaded(true)
-      
+
         setApiFile(obj)
-      
+
+
         //sendTest()
-      
+
         /*this.setState({
             paths: paths,
             servers: servers,
@@ -787,9 +1006,9 @@ function Flow() {
             schemasValues: schemasValues,
             step:3
         })*/
-      }
+    }
 
-    
+
     return (
 
         <div>
@@ -808,7 +1027,7 @@ function Flow() {
                         <label><b>API Specification:</b></label>
 
                         {uploaded === false ?
-        <SmallApiUpload handlerAPI={handlerAPI} apiTitle={"aaaa"} ></SmallApiUpload> : <div>api uploaded</div>}
+                            <SmallApiUpload handlerAPI={handlerAPI} apiTitle={testConfName} ></SmallApiUpload> : <div>api uploaded</div>}
 
 
                         <label><b>Timer settings:</b></label>
@@ -861,14 +1080,14 @@ function Flow() {
                             Add Workflow
                         </button>
 
-                        <button onClick={onClickID} className="node-button">
-                            Add Test 
+                        <button onClick={onClickTestNode} className="node-button">
+                            Add Test
                         </button>
 
                         <label>HTTP Requests</label>
 
                         <button onClick={onClickGet} className="node-button">
-                            Add GET request 
+                            Add GET request
                         </button>
 
                         <button onClick={onClickDelete} className="node-button">
@@ -887,7 +1106,7 @@ function Flow() {
 
                         <label>Setup-related</label>
 
-                        
+
 
                         <button onClick={saveWorkflow} className="node-button">
                             Save changes
@@ -903,6 +1122,14 @@ function Flow() {
 
                         <button onClick={onClickApi} className="node-button">
                             Add API spec
+                        </button>
+
+                        <button onClick={onClickChangeWf} className="node-button">
+                            Change entire Workflow
+                        </button>
+
+                        <button onClick={dumpState} className="node-button">
+                            Dump state
                         </button>
 
 
@@ -947,7 +1174,7 @@ function Flow() {
 
             </div>
 
-            
+
         </div>
     );
 }

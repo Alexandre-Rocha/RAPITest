@@ -1,7 +1,8 @@
 ﻿import React, { Component } from 'react';
+import { Link } from 'react-router-dom/cjs/react-router-dom';
 import authService from './api-authorization/AuthorizeService'
 import 'bootstrap/dist/css/bootstrap.css'
-import { Container, Row, Col, InputGroup, FormControl, Tab , Nav} from 'react-bootstrap'
+import { Container, Row, Col, InputGroup, FormControl, Tab, Nav } from 'react-bootstrap'
 import 'bootstrap';
 import './MonitorTest.css'
 import ModalComp from '../components/ModalComp.js'
@@ -47,7 +48,7 @@ export class MonitorTest extends Component {
             [e.target.name]: e.target.value
         })
     }
-    
+
     //get user apis
     async componentDidMount() {
         this.checkTestCompletions();
@@ -112,7 +113,7 @@ export class MonitorTest extends Component {
                 let url = window.URL.createObjectURL(blob);
                 let a = document.createElement('a');
                 a.href = url;
-                a.download = apiTitle + '_' + latestReportDate+'.json';
+                a.download = apiTitle + '_' + latestReportDate + '.json';
                 a.click();
             });
         });
@@ -139,7 +140,7 @@ export class MonitorTest extends Component {
         })
     }
 
-    async RunNow(apiId,item) {
+    async RunNow(apiId, item) {
         const token = await authService.getAccessToken();
 
         item.RunningNow = true;
@@ -152,6 +153,23 @@ export class MonitorTest extends Component {
         this.setState({})
     }
 
+    async editInEditor(ApiId, APITitle, LatestReport) { //TODO:HERE
+        console.log("Edit in editor button was pressed")
+        console.log(ApiId);
+        console.log(APITitle);
+        console.log(LatestReport);
+        //TODO: o download aqui n é do tsl...ver como ir pegar o tsl a bd...
+        const bigObj = {ab:"sfaf"}
+        //this.props.history.push(`devEditor`)
+
+        this.props.history.push({
+            pathname: 'devEditor',
+            state: { bigObj }
+        });
+
+    }
+
+
     renderTestButtons(item) {
         if (item.ErrorMessages !== null) return <AwesomeButton type="secondary" onPress={() => this.enableDeleteModal(item.ApiId)}>Delete Test</AwesomeButton>
         if ((item.LatestReport === "-" && item.NextTest === "-") || (item.RunningNow !== undefined)) {
@@ -163,17 +181,17 @@ export class MonitorTest extends Component {
                     <div style={{ display: "inline-block", paddingRight: "10px" }}>
                         <AwesomeButton type="primary" onPress={() => this.RunNow(item.ApiId)}>Run Tests</AwesomeButton>
                     </div>
-                    <AwesomeButton type="secondary" onPress={() => this.enableDeleteModal(item.ApiId)}>Delete Test</AwesomeButton>                   
+                    <AwesomeButton type="secondary" onPress={() => this.enableDeleteModal(item.ApiId)}>Delete Test</AwesomeButton>
                 </div>
             )
         }
         return (
             <div>
                 <div>
-                    <div style={{ paddingLeft: "5px", paddingRight:'5px', display: "inline-block"}}>
+                    <div style={{ paddingLeft: "5px", paddingRight: '5px', display: "inline-block" }}>
                         <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.visualizeReport(item.ApiId)}><img style={{ marginRight: "15px" }} width="50" height="50" src={reportIcon} alt="Logo" />Analyse</AwesomeButton>
                     </div>
-                    <div style={{ paddingRight: '5px',  display: "inline-block" }}>
+                    <div style={{ paddingRight: '5px', display: "inline-block" }}>
                         <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.DownloadReport(item.ApiId, item.APITitle, item.LatestReport)}><img style={{ marginRight: "15px" }} width="50" height="50" src={downloadIcon} alt="Logo" />Download</AwesomeButton>
                     </div>
                     <div style={{ display: "inline-block" }}>
@@ -186,17 +204,31 @@ export class MonitorTest extends Component {
                 <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>
                     <AwesomeButton className="buttonEdit" type="secondary" onPress={() => this.enableDeleteModal(item.ApiId)}><img width="50" height="50" src={deleteIcon} alt="Logo" /></AwesomeButton>
                 </div>
+                <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>
+                    <button onClick={this.editInEditor}>
+                        <Link to="/devEditor">Edit in Workflow Editor</Link>
+                    </button>
+                    <button onClick={this.editInEditor}>
+                        <Link to={{ pathname: '/devEditor', state: { objectData: { a: "www" } } }}>Go to About</Link>
+                    </button>
+                    <button onClick={() => this.editInEditor(item.ApiId, item.APITitle, item.LatestReport)}>
+                        Go to About deb
+                    </button>
+                </div>{/*  TODO:HERE */}
             </div>
         )
     }
 
+
+
+
     renderMetaData(item) {
         if (item.ErrorMessages !== null) {
             return (
-                <div style={{ marginBottom:"10px" }}>
+                <div style={{ marginBottom: "10px" }}>
                     <h4>Validation failed with the following errors:</h4>
                     <ul className="list-group">
-                        {item.ErrorMessages.map((item,i) => {
+                        {item.ErrorMessages.map((item, i) => {
                             return <li key={i} className="list-group-item">{item}</li>
                         })}
                     </ul>
@@ -216,7 +248,7 @@ export class MonitorTest extends Component {
     }
 
     editName(apiId, apiTitle) {
-        this.setState({ apiTitleToEdit: apiTitle, idToRemove:apiId, showEditNameModal: true })
+        this.setState({ apiTitleToEdit: apiTitle, idToRemove: apiId, showEditNameModal: true })
     }
 
     async newName(name) {
@@ -235,10 +267,10 @@ export class MonitorTest extends Component {
                         value.APITitle = name
                     }
                 })
-                this.setState({ apis:aux, showEditNameModal: false })
+                this.setState({ apis: aux, showEditNameModal: false })
             }
         })
-        
+
     }
 
     disableEditNameModal() { this.setState({ showEditNameModal: false }) }
@@ -253,39 +285,39 @@ export class MonitorTest extends Component {
                 </div>
                 <Container style={{ marginTop: "20px" }}>
                     <Tab.Container id="list-group-tabs-example">
-                    <Row>
-                        <Col>
-                            <InputGroup className="mb-3">
-                                <InputGroup.Text id="basic search">{
-                                    <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-search" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                        <path fillRule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z" />
-                                        <path fillRule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z" />
-                                    </svg>
-                                }</InputGroup.Text>
-                                <FormControl placeholder="Search by name ..." name="searchByName" type="text" onChange={this.handleOnChange} />
-                            </InputGroup>
-                          
+                        <Row>
+                            <Col>
+                                <InputGroup className="mb-3">
+                                    <InputGroup.Text id="basic search">{
+                                        <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-search" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                            <path fillRule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z" />
+                                            <path fillRule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z" />
+                                        </svg>
+                                    }</InputGroup.Text>
+                                    <FormControl placeholder="Search by name ..." name="searchByName" type="text" onChange={this.handleOnChange} />
+                                </InputGroup>
+
                                 <Nav variant="pills" className="flex-column">
                                     {Array.from(this.state.apis).map(([key, item]) => {
                                         if (item.APITitle.toLowerCase().includes(this.state.searchByName.toLowerCase()))
-                                        return <div style={{ paddingBottom:"5px" }} key={key}><Nav.Item className="testItem" style={{ borderColor: "#dfdfdf", borderStyle: "solid", borderRadius: "7px", boxShadow: "1px 3px 1px #9E9E9E" }} >
-                                            <Nav.Link style={{}} eventKey={"#details-" + item.ApiId}><svg className="bi bi-file-text" width="100" height="35" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path fillRule="evenodd" d="M4 1h8a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V3a2 2 0 012-2zm0 1a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1H4z" clipRule="evenodd" /><path fillRule="evenodd" d="M4.5 10.5A.5.5 0 015 10h3a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm0-2A.5.5 0 015 8h6a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm0-2A.5.5 0 015 6h6a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm0-2A.5.5 0 015 4h6a.5.5 0 010 1H5a.5.5 0 01-.5-.5z" clipRule="evenodd" /></svg>{item.APITitle.length > 55 ? item.APITitle.substring(0, 52) + '...' : item.APITitle}</Nav.Link>
-                                        </Nav.Item></div>
-                                    return <div key={key}></div>
-                                })}
+                                            return <div style={{ paddingBottom: "5px" }} key={key}><Nav.Item className="testItem" style={{ borderColor: "#dfdfdf", borderStyle: "solid", borderRadius: "7px", boxShadow: "1px 3px 1px #9E9E9E" }} >
+                                                <Nav.Link style={{}} eventKey={"#details-" + item.ApiId}><svg className="bi bi-file-text" width="100" height="35" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path fillRule="evenodd" d="M4 1h8a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V3a2 2 0 012-2zm0 1a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1H4z" clipRule="evenodd" /><path fillRule="evenodd" d="M4.5 10.5A.5.5 0 015 10h3a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm0-2A.5.5 0 015 8h6a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm0-2A.5.5 0 015 6h6a.5.5 0 010 1H5a.5.5 0 01-.5-.5zm0-2A.5.5 0 015 4h6a.5.5 0 010 1H5a.5.5 0 01-.5-.5z" clipRule="evenodd" /></svg>{item.APITitle.length > 55 ? item.APITitle.substring(0, 52) + '...' : item.APITitle}</Nav.Link>
+                                            </Nav.Item></div>
+                                        return <div key={key}></div>
+                                    })}
                                 </Nav>
-                           
-                        </Col>
-                        <Col>
-                            <Tab.Content>
+
+                            </Col>
+                            <Col>
+                                <Tab.Content>
                                     {Array.from(this.state.apis).map(([key, item]) => {
                                         return <Tab.Pane key={key} style={{ borderColor: "#45ABD1", borderStyle: "solid", borderRadius: "20px", padding: 7, boxShadow: "1px 3px 1px #9E9E9E" }} eventKey={"#details-" + item.ApiId} aria-labelledby={'list-' + item.APITitle}>
-                                        {this.renderMetaData(item)}
-                                        {this.renderTestButtons(item)}
-                                    </Tab.Pane>
-                                })}
-                            </Tab.Content>
-                        </Col>
+                                            {this.renderMetaData(item)}
+                                            {this.renderTestButtons(item)}
+                                        </Tab.Pane>
+                                    })}
+                                </Tab.Content>
+                            </Col>
                         </Row>
                     </Tab.Container>
                     <ModalComp

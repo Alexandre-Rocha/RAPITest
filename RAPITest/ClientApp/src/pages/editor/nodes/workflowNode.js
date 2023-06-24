@@ -9,21 +9,30 @@ const handleStyle = { left: 10 };
 
 function WorkflowNode({ data, isConnectable }) {
 
-  console.log("[Workflow node] Workflow ID: ",data.custom._wfIndex)
-
-  const [testName, setTestName] = useState(data?.myData || ""); 
   
-  const setStateTestName = (newTestName) => {
-    console.log('setStateTestName is being called with', newTestName);
-    setTestName(newTestName)
-  }
+
+
+  const [wfIndex, setWfIndex] = useState(data.custom._wfIndex || 0)
+
+  const [wfName, setWfName] = useState(data.custom.wfName || "") //TODO:there must be smth here in case data has nothing
+  
+  console.log("[Workflow node] Workflow ID: ", wfIndex)
 
 
   const onChange = (evt) => {
     console.log(evt.target.value);
-    setStateTestName(evt.target.value)
-    data.custom.mycallback(evt.target.value)
+    setWfName(evt.target.value)
+    data.custom.nameChangeCallback(evt.target.value)
   };
+  
+
+  const onIncrement = ()=> {
+    setWfIndex(oldWfIndex => oldWfIndex + 1)
+  }
+
+  const onDecrement = ()=> {
+    setWfIndex(oldWfIndex => oldWfIndex - 1)
+  }
   
 
   return (
@@ -31,7 +40,12 @@ function WorkflowNode({ data, isConnectable }) {
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
       <div>
         <label htmlFor="text">Name of new workflow:</label>
-        <input id="text" name="text" onChange={onChange} className="nodrag" />
+        <input value={wfName} id="text" name="text" onChange={onChange} className="nodrag" />
+      </div>
+      <div>
+        wf: {wfIndex}
+        <button onClick={onIncrement}>increment</button>
+        <button onClick={onDecrement}>decrement</button>
       </div>
       {/* <div>
         <label htmlFor="readonly">Read-only field:</label>
@@ -44,13 +58,13 @@ function WorkflowNode({ data, isConnectable }) {
           className="nodrag"
         />
       </div> */}
-      <Handle
+      {/* <Handle
         type="source"
         position={Position.Bottom}
         id="a"
         style={handleStyle}
         isConnectable={isConnectable}
-      />
+      /> */}
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>
   );
