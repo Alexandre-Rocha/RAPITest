@@ -120,17 +120,6 @@ namespace RAPITest.Controllers
 			ModelsLibrary.Models.EFModels.Report report = reports.FirstOrDefault();
 			if (report == null) return NotFound();
 
-			ModelsLibrary.Models.EFModels.Api api = report.Api;
-            Console.WriteLine("Will this work?");
-			Console.WriteLine(report);
-            //Console.WriteLine(report.ReportFile);
-            Console.WriteLine("pls?");
-            Console.WriteLine(Encoding.Default.GetString(api.Tsl));
-            Console.WriteLine(report.ToString());
-			Console.WriteLine(report.Api);
-            Console.WriteLine(api.ToString());
-            Console.WriteLine(api.Tsl.ToString());
-
             VisualizeReportModel v = new VisualizeReportModel();
 			v.Report = Encoding.Default.GetString(report.ReportFile);
 			v.ApiName = report.Api.ApiTitle;
@@ -144,7 +133,30 @@ namespace RAPITest.Controllers
 			return Ok(v);
 		}
 
-		[HttpGet]
+        [HttpGet]
+        public IActionResult ReturnTsl([FromQuery] int apiId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+
+            IOrderedQueryable<ModelsLibrary.Models.EFModels.Report> reports = _context.Report.Include(report => report.Api).Where(r => r.ApiId == apiId).OrderByDescending(r => r.ReportDate);
+            ModelsLibrary.Models.EFModels.Report report = reports.FirstOrDefault();
+            if (report == null) return NotFound();
+
+            ModelsLibrary.Models.EFModels.Api api = report.Api;
+
+			string tsl = Encoding.Default.GetString(api.Tsl);
+            Console.WriteLine(tsl);
+
+			String tslS = new String(tsl);
+
+			IActionResult ok = Ok(tslS);
+
+			Console.WriteLine(ok.ToString());
+
+            return Ok(tslS);
+        }
+
+        [HttpGet]
 		public IActionResult ReturnReportSpecific([FromQuery] int apiId, DateTime date)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId

@@ -126,15 +126,15 @@ function GetRequestNode({ data, isConnectable }) {
         </select>
       </div> */}
 
-      <div>
+      {/* <div>
         <label htmlFor="text">Server URL:</label>
         <input id="text" name="text" onChange={onChange} className="nodrag" />
-      </div>
+      </div> */}
 
-      <div>
+      {/* <div>
         <label htmlFor="text">Path:</label>
         <input id="text" name="text" onChange={onChange2} className="nodrag" />
-      </div>
+      </div> */}
 
       <Handle
         type="source"

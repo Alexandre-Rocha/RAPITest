@@ -16,6 +16,8 @@ function StatusVerificationNode({ data, isConnectable }) {
   console.log("[Status node] Workflow ID: ",data.custom._wfIndex)
   console.log("[Status node] Test ID: ",data.custom._testIndex)
 
+  console.log("[Status node] Status Code: ",statusCode)
+
   const onChange = (evt) => {
     console.log(evt.target.value);
     setStatusCode(evt.target.value)

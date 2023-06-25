@@ -64,11 +64,17 @@ export class Home extends Component {
                             lastLogin: finalString,
                             render: true
                         })
+                    }).catch(err =>{
+                        console.log("Error in GetUserDetails");
+                        console.error(err);
                     })
                 }
                 else {
                     this.setState({ render: true })
                 }
+            }).catch(err =>{
+                console.log("Error in GetUserDetails");
+                console.error(err);
             })
         }
         else {

@@ -53,9 +53,16 @@ function Flow() {
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
     const location = useLocation();
-    const dajbroni = location.state.bigObj;
+    const dajbroni = location?.state?.tslState;
 
-    console.log(dajbroni);
+    if (dajbroni) {
+        console.log(dajbroni);
+        // Perform further operations with dajbroni
+      } else {
+        console.log('tslState does not exist');
+        // Handle the case when tslState does not exist
+      }
+
 
     //console.log(objectData);
 
@@ -787,19 +794,45 @@ function Flow() {
 
                 testNodeIdsList.push(testNodeId)
 
-                //createGetNode
+                const getNodeServer = test.Server
+                const getNodePath = test.Path
+
+                const getNodeId = createGetNode(getNodeServer, getNodePath, yamlWfIndex, currYamlTestIndex)
                 
-                //createStatusVerificationNode
+
+                const statusNodeCode = test.Verifications[0].Code   //TODO: verifications is an array....
+
+                const statusVerifNodeId = createStatusVerificationNode(statusNodeCode, yamlWfIndex, currYamlTestIndex)
 
                 //create the edge for this test
 
-                const newEdge = {
+                const newEdgeWfTest = {
                     id: "wf:"+wfNodeID.toString()+"-test:"+testNodeId.toString(),
                     source: wfNodeID.toString(),
                     target: testNodeId.toString()
                 }
 
-                edgesList.push(newEdge)
+
+                const newEdgeTestGet = {
+                    id: "test:"+testNodeId.toString()+"-get:"+getNodeId.toString(),
+                    source: testNodeId.toString(),
+                    target: getNodeId.toString()
+                }
+
+
+                const newEdgeGetStatus = {
+                    id: "get:"+getNodeId.toString()+"-status:"+statusVerifNodeId.toString(),
+                    source: getNodeId.toString(),
+                    target: statusVerifNodeId.toString()
+                }
+
+                
+
+
+
+                edgesList.push(newEdgeWfTest)
+                edgesList.push(newEdgeTestGet)
+                edgesList.push(newEdgeGetStatus)
 
                 currYamlTestIndex = currYamlTestIndex + 1
 

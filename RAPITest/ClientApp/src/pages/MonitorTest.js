@@ -16,6 +16,10 @@ import reportIcon from '../assets/statsSmall.png'
 import downloadIcon from '../assets/cloud.png'
 import runIcon from '../assets/play.png'
 
+const YAML = require('json-to-pretty-yaml');
+
+const jsYaml = require('js-yaml')
+
 export class MonitorTest extends Component {
 
     static displayName = MonitorTest.name;
@@ -154,18 +158,39 @@ export class MonitorTest extends Component {
     }
 
     async editInEditor(ApiId, APITitle, LatestReport) { //TODO:HERE
+
+        const token = await authService.getAccessToken();
+
         console.log("Edit in editor button was pressed")
         console.log(ApiId);
         console.log(APITitle);
         console.log(LatestReport);
         //TODO: o download aqui n é do tsl...ver como ir pegar o tsl a bd...
-        const bigObj = {ab:"sfaf"}
         //this.props.history.push(`devEditor`)
 
-        this.props.history.push({
-            pathname: 'devEditor',
-            state: { bigObj }
-        });
+
+        fetch(`MonitorTest/ReturnTsl?apiId=${ApiId}`, {
+            method: 'GET',
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        }).then(response => response.text())
+            .then(resp => {
+                console.log("return tsl?");//TODO:
+                console.log(resp);
+
+                // from js to yaml str
+                //const yamlFlows = YAML.stringify(workflowsA)
+
+                // from yaml str to js
+                //const newstate = jsYaml.load(yamlFlows)
+
+                const tslState = jsYaml.load(resp)
+
+                this.props.history.push({
+                    pathname: 'devEditor',
+                    state: { tslState }
+                });
+            })
+
 
     }
 
