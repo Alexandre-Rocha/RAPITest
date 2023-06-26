@@ -212,7 +212,34 @@ namespace DataAnnotation.Controllers
 			return BadRequest(aPISpecificationInfo);
 		}
 
-		[HttpPost]
+        [HttpPost]
+        [DisableRequestSizeLimit]
+        [DisableFormValueModelBinding]
+        public IActionResult GetSpecificationDetailsPure(IFormCollection data)
+        {
+            List<IFormFile> files = data.Files.ToList();
+
+
+            Console.WriteLine("datale");
+            foreach (var key in data.Keys)
+            {
+                Console.WriteLine($"{key}: {data[key]}");
+            }
+
+            IFormFile apispec = files.Single();
+
+            APISpecificationInfo aPISpecificationInfo = GetAPISpecificationInfo.GetSpecInfo(apispec);
+
+            if (aPISpecificationInfo.Error == null)
+            {
+
+                return Ok(aPISpecificationInfo);
+            }
+
+            return BadRequest(aPISpecificationInfo);
+        }
+
+        [HttpPost]
 		public async Task<IActionResult> GetSpecificationDetailsURL(IFormCollection data)
 		{
 			string url = data["apiSpecification"];

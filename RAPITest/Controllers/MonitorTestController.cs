@@ -157,6 +157,29 @@ namespace RAPITest.Controllers
         }
 
         [HttpGet]
+        public IActionResult ReturnSpec([FromQuery] int apiId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+
+            IOrderedQueryable<ModelsLibrary.Models.EFModels.Report> reports = _context.Report.Include(report => report.Api).Where(r => r.ApiId == apiId).OrderByDescending(r => r.ReportDate);
+            ModelsLibrary.Models.EFModels.Report report = reports.FirstOrDefault();
+            if (report == null) return NotFound();
+
+            ModelsLibrary.Models.EFModels.Api api = report.Api;
+
+            string spec = Encoding.Default.GetString(api.ApiSpecification);
+            Console.WriteLine(spec);
+
+            String specS = new String(spec);
+
+            IActionResult ok = Ok(specS);
+
+            Console.WriteLine(ok.ToString());
+
+            return Ok(specS);
+        }
+
+        [HttpGet]
 		public IActionResult ReturnReportSpecific([FromQuery] int apiId, DateTime date)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId

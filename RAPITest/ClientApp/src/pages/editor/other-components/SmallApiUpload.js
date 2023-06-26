@@ -40,8 +40,13 @@ export class SmallApiUpload extends Component {
 
                 let data = new FormData();
                 data.append('apiSpecification', accept[0]);
+                console.log("amamsifahygujfusi");
+                console.log(accept[0]);
+                console.log(this.props.apiTitle);
                 data.append('title', this.props.apiTitle);
                 const token = await authService.getAccessToken();
+
+                console.log(data);
                 fetch(`SetupTest/GetSpecificationDetails`, {
                     method: 'POST',
                     headers: !token ? {} : { 'Authorization': `Bearer ${token}` },

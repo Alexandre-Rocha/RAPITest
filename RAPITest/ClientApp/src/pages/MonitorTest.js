@@ -168,6 +168,13 @@ export class MonitorTest extends Component {
         //TODO: o download aqui n é do tsl...ver como ir pegar o tsl a bd...
         //this.props.history.push(`devEditor`)
 
+        let tslState;
+        let apiFile = {
+            servers:"",
+            paths:"",
+            schemas:"",
+            schemasValues:""
+        }
 
         fetch(`MonitorTest/ReturnTsl?apiId=${ApiId}`, {
             method: 'GET',
@@ -183,13 +190,49 @@ export class MonitorTest extends Component {
                 // from yaml str to js
                 //const newstate = jsYaml.load(yamlFlows)
 
-                const tslState = jsYaml.load(resp)
+                tslState = jsYaml.load(resp)
 
-                this.props.history.push({
-                    pathname: 'devEditor',
-                    state: { tslState }
-                });
+
+            }).then(idk => {
+                fetch(`MonitorTest/ReturnSpec?apiId=${ApiId}`, {
+                    method: 'GET',
+                    headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+                }).then(response => response.json()).then(spec => {
+
+                    console.log("spec?");
+                    console.log(spec);
+
+                    console.log(spec.paths);
+                    console.log(spec.servers);
+                    console.log(spec.components.schemas);
+                    console.log(spec.components.schemas);
+
+                    apiFile.paths = Object.keys(spec.paths);
+                    apiFile.servers = Object.keys(spec.servers);
+                    
+
+                    const keysArray = Object.keys(spec.components.schemas);
+                    const propsArray = Object.values(spec.components.schemas).map((obj) => JSON.stringify(obj));
+
+                    console.log(keysArray);
+                    console.log(propsArray);
+
+                    apiFile.schemas = keysArray;
+                    apiFile.schemasValues = propsArray
+
+                    /* this.props.history.push({
+                        pathname: 'devEditor',
+                        state: { tslState }
+                    }); */
+                    return spec
+                }).then(idk=>{
+                     this.props.history.push({
+                        pathname: 'devEditor',
+                        state: { tslState, apiFile, APITitle }
+                    }); 
+                })
             })
+
 
 
     }
@@ -230,15 +273,16 @@ export class MonitorTest extends Component {
                     <AwesomeButton className="buttonEdit" type="secondary" onPress={() => this.enableDeleteModal(item.ApiId)}><img width="50" height="50" src={deleteIcon} alt="Logo" /></AwesomeButton>
                 </div>
                 <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>
-                    <button onClick={this.editInEditor}>
+                    {/* <button onClick={this.editInEditor}>
                         <Link to="/devEditor">Edit in Workflow Editor</Link>
                     </button>
                     <button onClick={this.editInEditor}>
                         <Link to={{ pathname: '/devEditor', state: { objectData: { a: "www" } } }}>Go to About</Link>
-                    </button>
-                    <button onClick={() => this.editInEditor(item.ApiId, item.APITitle, item.LatestReport)}>
-                        Go to About deb
-                    </button>
+                    </button> */}
+                    {/* <button onClick={() => this.editInEditor(item.ApiId, item.APITitle, item.LatestReport)}>
+                        Edit in Workflow editor
+                    </button> */}
+                    <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.editInEditor(item.ApiId, item.APITitle, item.LatestReport)}><img style={{ marginRight: "15px" }} width="50" height="50" src={editIcon} alt="Logo" />Edit in Workflow editor</AwesomeButton>
                 </div>{/*  TODO:HERE */}
             </div>
         )

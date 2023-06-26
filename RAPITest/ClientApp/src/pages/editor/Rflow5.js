@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect} from 'react';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom';
 import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -53,20 +53,17 @@ function Flow() {
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
     const location = useLocation();
-    const dajbroni = location?.state?.tslState;
-
-    if (dajbroni) {
-        console.log(dajbroni);
-        // Perform further operations with dajbroni
-      } else {
-        console.log('tslState does not exist');
-        // Handle the case when tslState does not exist
-      }
-
+    
 
     //console.log(objectData);
 
-    const [apiFile, setApiFile] = useState()
+    const [apiFile, setApiFile] = useState(location?.state?.apiFile || null)
+    //const [apiFile, setApiFile] = useState()
+
+  
+
+    console.log("aoiii");
+    console.log(location?.state?.apiFile);
     const [serverURL, setServerURL] = useState("")
     const [path, setPath] = useState("") //new
     const [httpMethod, setHttpMethod] = useState("Get")
@@ -76,7 +73,7 @@ function Flow() {
     const [uploaded, setUploaded] = useState(false)
 
 
-    const [testConfName, setTestConfName] = useState("New test configuration")
+    const [testConfName, setTestConfName] = useState(location?.state?.APITitle || "New test configuration")
 
     /*
         const [timerSettings, setTimerSettings] = useState({    //TODO: hardcoded
@@ -97,10 +94,21 @@ function Flow() {
 
     const reactFlowInstance = useReactFlow()
 
-    const [workflows, setWorkflows] = useState([])
+    const [workflows, setWorkflows] = useState(location?.state?.tslState || []);
 
+/* 
+    const dajbroni = location?.state?.tslState;
 
+    if (dajbroni) {
+        console.log(dajbroni);
+        // Perform further operations with dajbroni
+        createNodes(workflows)
+      } else {
+        console.log('tslState does not exist');
+        // Handle the case when tslState does not exist
+      }
 
+ */
 
     /*
     this comment is just to visualize state schema
@@ -514,6 +522,11 @@ function Flow() {
     }
 
     const createGetNode = (initialServer = "", initialPath = "", _wfIndex = -1, _testIndex = -1)=>{
+        
+        console.log("aldabugada");
+        console.log(apiFile.paths);
+        console.log(apiFile.servers);
+
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -656,106 +669,7 @@ function Flow() {
     }
 
 
-
-    const onClickChangeWf = () => {
-
-        const testname = "changed test name"
-        const httpmethod = "Get"
-        const verifStatus = 200
-
-        const oldWorkflowsA = [
-            {
-                "WorkflowID": "wf1",
-                "Stress": null,
-                "Tests": [
-                    {
-                        "Server": "https://petstore3.swagger.io/api/v3",
-                        "TestID": "t1",
-                        "Path": "/pet/1",
-                        "Method": "Get",
-                        "Headers": [
-                            {
-                                "keyItem": "",
-                                "valueItem": ""
-                            }
-                        ],
-                        "Body": "",
-                        "Verifications": [
-                            {
-                                "Code": "200",
-                                "Schema": ""
-                            }
-                        ]
-                    },
-                    {
-                        "Server": "https://petstore3.swagger.io/api/v3",
-                        "TestID": "t2",
-                        "Path": "/pet/2",
-                        "Method": "Get",
-                        "Headers": [
-                            {
-                                "keyItem": "",
-                                "valueItem": ""
-                            }
-                        ],
-                        "Body": "",
-                        "Verifications": [
-                            {
-                                "Code": "200",
-                                "Schema": ""
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-
-        const workflowsA = [
-            {
-                "WorkflowID": "wf1",
-                "Tests": [
-                    {
-                        "Server": "https://petstore3.swagger.io/api/v3",
-                        "TestID": "t1",
-                        "Path": "/pet/1",
-                        "Method": "Get",
-                        "Verifications": [
-                            {
-                                "Code": "200"
-                            }
-                        ]
-                    },
-                    {
-                        "Server": "https://petstore3.swagger.io/api/v3",
-                        "TestID": "t2",
-                        "Path": "/pet/2",
-                        "Method": "Get",
-                        "Verifications": [
-                            {
-                                "Code": "200"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-
-
-        const yamlFlows = YAML.stringify(workflowsA)
-
-        console.log("lakak");
-        console.log(yamlFlows);
-
-        const newstate = jsYaml.load(yamlFlows)
-
-        console.log("lekke");
-        console.log(newstate);
-
-        setWorkflows(newstate)
-
-        
-
-
+    const createNodes = (newstate) =>{
         //for each wf
         // add wf node
         //add stress
@@ -856,6 +770,108 @@ function Flow() {
     
 
         console.log("edges set");
+    }
+
+    const onClickChangeWf = () => {
+
+        /* const testname = "changed test name"
+        const httpmethod = "Get"
+        const verifStatus = 200
+
+        const oldWorkflowsA = [
+            {
+                "WorkflowID": "wf1",
+                "Stress": null,
+                "Tests": [
+                    {
+                        "Server": "https://petstore3.swagger.io/api/v3",
+                        "TestID": "t1",
+                        "Path": "/pet/1",
+                        "Method": "Get",
+                        "Headers": [
+                            {
+                                "keyItem": "",
+                                "valueItem": ""
+                            }
+                        ],
+                        "Body": "",
+                        "Verifications": [
+                            {
+                                "Code": "200",
+                                "Schema": ""
+                            }
+                        ]
+                    },
+                    {
+                        "Server": "https://petstore3.swagger.io/api/v3",
+                        "TestID": "t2",
+                        "Path": "/pet/2",
+                        "Method": "Get",
+                        "Headers": [
+                            {
+                                "keyItem": "",
+                                "valueItem": ""
+                            }
+                        ],
+                        "Body": "",
+                        "Verifications": [
+                            {
+                                "Code": "200",
+                                "Schema": ""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ] */
+
+        const workflowsA = [
+            {
+                "WorkflowID": "wf1",
+                "Tests": [
+                    {
+                        "Server": "https://petstore3.swagger.io/api/v3",
+                        "TestID": "t1",
+                        "Path": "/pet/1",
+                        "Method": "Get",
+                        "Verifications": [
+                            {
+                                "Code": "200"
+                            }
+                        ]
+                    },
+                    {
+                        "Server": "https://petstore3.swagger.io/api/v3",
+                        "TestID": "t2",
+                        "Path": "/pet/2",
+                        "Method": "Get",
+                        "Verifications": [
+                            {
+                                "Code": "200"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+
+
+        const yamlFlows = YAML.stringify(workflowsA)
+
+        console.log("lakak");
+        console.log(yamlFlows);
+
+        const newstate = jsYaml.load(yamlFlows)
+
+        console.log("lekke");
+        console.log(newstate);
+
+        setWorkflows(newstate)
+
+        
+        createNodes(newstate)
+
+        
 
     }
 
@@ -1042,6 +1058,34 @@ function Flow() {
     }
 
 
+   /*  const dajbroni = location?.state?.tslState;
+
+    if (dajbroni) {
+        console.log(dajbroni);
+        // Perform further operations with dajbroni
+        //createNodes(workflows)
+      } else {
+        console.log('tslState does not exist');
+        // Handle the case when tslState does not exist
+      } */
+
+
+      useEffect(() => {
+        const dajbroni = location?.state?.tslState;
+        if (dajbroni) {
+          console.log(dajbroni);
+          // Perform further operations with dajbroni
+          createNodes(workflows)
+        } else {
+          console.log('tslState does not exist');
+          // Handle the case when tslState does not exist
+        }
+      }, []); // Empty dependency array ensures the effect runs only once
+      
+
+      console.log(apiFile);
+      console.log("apooooFile");
+
     return (
 
         <div>
@@ -1055,11 +1099,11 @@ function Flow() {
                     <div id="side-menu" className="sidebarDiv">
                         <p></p>
                         <label><b>Name of test configuration:</b></label>
-                        <input id="text" name="text" onChange={onTestConfNameChange} className="nodrag" />
+                        <input value={testConfName} id="text" name="text" onChange={onTestConfNameChange} className="nodrag" />
 
                         <label><b>API Specification:</b></label>
 
-                        {uploaded === false ?
+                        {(uploaded === false &&  location?.state?.APITitle === undefined) ?
                             <SmallApiUpload handlerAPI={handlerAPI} apiTitle={testConfName} ></SmallApiUpload> : <div>api uploaded</div>}
 
 
