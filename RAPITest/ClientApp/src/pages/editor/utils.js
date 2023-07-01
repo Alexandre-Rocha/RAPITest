@@ -1,4 +1,24 @@
 
+    /*
+    this comment is just to visualize state schema
+
+    workflows = [wf1,wf2,...]
+    wf = {WorkflowID,Stress,Tests[t1,t2,...]}
+    Tests = {
+        Server,TestID,Path,Method,Headers[h1,h2...],Body,Verifications[v1,v2...]
+    }
+    Headers = {
+        keyItem,valueItem
+    }
+    Verifications = {
+        Code,Schema //missing some verifications
+    }
+
+    workflows[currWorkflow].Tests[currTest].Path
+    */
+
+
+    
 
 /*
 {

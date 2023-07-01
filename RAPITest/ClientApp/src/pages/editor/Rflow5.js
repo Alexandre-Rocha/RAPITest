@@ -1,12 +1,10 @@
-import React, { useRef, useState, useEffect} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom';
 import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
-import ApiFileNode from './nodes/apiFileNode';
 import GetRequestNode from './nodes/getRequestNode';
 //import ServerURLNode from './nodes/serverURLNode';
 import StatusVerificationNode from './nodes/statusVerificationNode';
-import TestNameNode from './nodes/testNameNode';
 
 import authService from '../api-authorization/AuthorizeService';
 import TestIDNode from './nodes/testIDNode';
@@ -14,21 +12,18 @@ import WorkflowNode from './nodes/workflowNode';
 import DeleteRequestNode from './nodes/deleteRequestNode';
 import SchemaVerificationNode from './nodes/schemaVerificationNode';
 
-
-import SmallApiNode from './nodes/smallApiNode';
-
 import './Rflow5.css'
+
 import { SmallApiUpload } from './other-components/SmallApiUpload';
 
 const YAML = require('json-to-pretty-yaml');
-
 const jsYaml = require('js-yaml')
 
 
 const initialNodes = []
 const initialEdges = []
 
-const nodeTypes = { getRequest: GetRequestNode, testName: TestNameNode, status: StatusVerificationNode, apiFile: SmallApiNode, testID: TestIDNode, wf: WorkflowNode, deleteRequest: DeleteRequestNode, schema: SchemaVerificationNode }
+const nodeTypes = { getRequest: GetRequestNode, status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, deleteRequest: DeleteRequestNode, schema: SchemaVerificationNode }
 
 function deepCopy(obj) {
     if (typeof obj !== "object" || obj === null) {
@@ -48,186 +43,72 @@ function deepCopy(obj) {
 }
 
 function Flow() {
-    console.log("Component rendering");
+
+    // #region State and Hooks
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
+   
     const location = useLocation();
-    
-
-    //console.log(objectData);
-
-    const [apiFile, setApiFile] = useState(location?.state?.apiFile || null)
-    //const [apiFile, setApiFile] = useState()
-
-  
-
-    console.log("aoiii");
-    console.log(location?.state?.apiFile);
-    const [serverURL, setServerURL] = useState("")
-    const [path, setPath] = useState("") //new
-    const [httpMethod, setHttpMethod] = useState("Get")
-    const [verificationStatus, setVerificationStatus] = useState()
-
-
-    const [uploaded, setUploaded] = useState(false)
-
-
-    const [testConfName, setTestConfName] = useState(location?.state?.APITitle || "New test configuration")
-
-    /*
-        const [timerSettings, setTimerSettings] = useState({    //TODO: hardcoded
-            runimmediately: 'true',
-            interval: 'Never',
-            rungenerated: 'true'
-        })*/
-
-    const [runImmediately, setRunImmediatly] = useState('true')
-
-    const [runInterval, setRunInterval] = useState('Never')
-
-    const [runGenerated, setRunGenerated] = useState('true')
-
-    const nodeId = useRef(1)
-    const maxWfIndex = useRef(-1)
-    //const currTestIndex = useRef(-1)
-
     const reactFlowInstance = useReactFlow()
 
+    // This will have servers, paths, schemas and schemavalues
+    const [apiFile, setApiFile] = useState(location?.state?.apiFile || null)
+
+    // Whether or not api spec has been uploaded //TODO: is it being set properly when throug old config?
+    const [uploaded, setUploaded] = useState(false)
+
+    const [testConfName, setTestConfName] = useState(location?.state?.APITitle || "")
+
+    //TODO: have the defaults be shown to user too
+    const [runImmediately, setRunImmediatly] = useState('true')
+    const [runInterval, setRunInterval] = useState('Never')
+    const [runGenerated, setRunGenerated] = useState('true')
+
+    // aux variables to see current max nodeId and n of workflows
+    const nodeId = useRef(1)
+    const maxWfIndex = useRef(-1)
+
+    // Comes pre-set if from old config, otherwise empty
     const [workflows, setWorkflows] = useState(location?.state?.tslState || []);
 
-/* 
-    const dajbroni = location?.state?.tslState;
+    // #endregion
 
-    if (dajbroni) {
-        console.log(dajbroni);
-        // Perform further operations with dajbroni
-        createNodes(workflows)
-      } else {
-        console.log('tslState does not exist');
-        // Handle the case when tslState does not exist
-      }
 
- */
+    // #region onChange in Editor
 
-    /*
-    this comment is just to visualize state schema
-
-    workflows = [wf1,wf2,...]
-    wf = {WorkflowID,Stress,Tests[t1,t2,...]}
-    Tests = {
-        Server,TestID,Path,Method,Headers[h1,h2...],Body,Verifications[v1,v2...]
-    }
-    Headers = {
-        keyItem,valueItem
-    }
-    Verifications = {
-        Code,Schema //TODO:missing some verifications
+    const onTestConfNameChange = (newTestConfName) => {
+        const newName = newTestConfName.target.value
+        console.log("[Editor] New test configuration name: ", newName);
+        setTestConfName(newName)
     }
 
-    workflows[currWorkflow].Tests[currTest].Path
-    */
+    //TODO: why is there no onApiUpload?
 
-
-
-
-    const saveWorkflow = () => {
-
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-
-            for (let wfIndex = 0; wfIndex < newWorkflows.length; wfIndex++) {
-                const workflow = newWorkflows[wfIndex];
-                delete workflow.Stress
-                delete workflow._wfIndex
-
-                for (let testIndex = 0; testIndex < workflow.Tests.length; testIndex++) {
-                    const test = workflow.Tests[testIndex];
-                    delete test.Headers
-                    delete test.Body
-                    delete test._testIndex
-                    for (let ver = 0; ver < test.Verifications.length; ver++) {
-                        const verification = test.Verifications[ver];
-                        if (!verification.Schema) {
-                            delete verification.Schema
-                        }
-                    }
-                }
-            }
-            /*
-            delete newWorkflows[0].Stress
-            delete newWorkflows[0].Tests[0].Headers
-            delete newWorkflows[0].Tests[0].Body
-            delete newWorkflows[0].Tests[0].Verifications.Schema
-            */
-
-            return newWorkflows
-        })
-
-    };
-
-    const finishSetup = async () => {
-        let newFile = YAML.stringify(workflows);
-        console.log(newFile);
-        var blob = new Blob([newFile], {
-            type: 'text/plain'
-        });
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = 'Created_TSL.yaml';
-        a.click();
-
-        const file = new File([blob], 'sample.txt')
-
-        let testSpecification = [file]
-
-        let data = new FormData();
-        /* if (dictionary !== null) {
-          data.append('dictionary.txt', dictionary);
-        } */
-        let i = 1
-        if (testSpecification !== null) {
-            for (const file of testSpecification) {
-                data.append("tsl_" + i + ".yaml", file)
-                i++
-            }
-        }
-        /* if (dllFiles !== null) {
-          for (const file of dllFiles) {
-            data.append(file.name, file)
-          }
-        } */
-        data.append('runimmediately', runImmediately);
-        data.append('interval', runInterval);
-        data.append('rungenerated', runGenerated);
-
-        const token = await authService.getAccessToken();
-
-        fetch(`SetupTest/UploadFile`, {
-            method: 'POST',
-            headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
-            body: data
-        }).then(res => {
-            if (!res.ok) {
-                console.error("Test setup failed...");
-            } else {
-                console.log("Test setup was successful!")
-            }
-        })
+    const onRunGeneratedChange = (runGenerated) => {
+        const aux = runGenerated.target.value
+        const run = aux === "yes" ? "true" : "false"
+        console.log("[Editor] Run generated: ", run);
+        setRunGenerated(run)
+    }
+    const onRunImmediatelyChange = (runImmediately) => {
+        const aux = runImmediately.target.value
+        const run = aux === "yes" ? "true" : "false"
+        console.log("[Editor] Run immediately: ", run);
+        setRunImmediatly(run)
+    }
+    const onRunIntervalChange = (runInterval) => {
+        const run = runInterval.target.value
+        console.log("[Editor] Run interval: ", run);
+        setRunInterval(run)
     }
 
+    // #endregion
 
 
-
-    const onApiFileChange = (newApiFile) => {
-        console.log("New API file: ", newApiFile);
-        setApiFile(newApiFile)
-    }
+    // #region onChange callbacks
 
     const onTestIDChange = (newTestID, _wfIndex, _testIndex) => {
         console.log("New test id: ", newTestID);
-        //setTestName(newTestID)
         console.log("New test id: ", _wfIndex);
         console.log("New test id: ", _testIndex);
 
@@ -244,39 +125,27 @@ function Flow() {
     }
 
     const onServerURLChange = (newURL, _wfIndex, _testIndex) => {
-        console.log("New server URL: ", newURL);
-        setServerURL(newURL)
-
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Server = newURL
             return newWorkflows
         })
-
     }
 
     const onPathChange = (newPath, _wfIndex, _testIndex) => {
-        console.log("New path: ", newPath);
-        setPath(newPath)
-
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Path = newPath
             return newWorkflows
         })
-
     }
 
     const onHttpMethodChange = (newHttpMethod, _wfIndex, _testIndex) => {
-        console.log("New HTTP Method: ", newHttpMethod);
-        setHttpMethod(newHttpMethod)
-
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
-            newWorkflows[_wfIndex].Tests[_testIndex].Method = newHttpMethod    //TODO: hardcoded 0
+            newWorkflows[_wfIndex].Tests[_testIndex].Method = newHttpMethod
             return newWorkflows
         })
-
     }
 
     const onWfNameChange = (newWfId) => {
@@ -293,9 +162,6 @@ function Flow() {
     }
 
     const onVerificationStatusChange = (newStatus, _wfIndex, _testIndex) => {
-        console.log("New verification status: ", newStatus);
-        setVerificationStatus(newStatus)
-
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Code = newStatus    //TODO: hardcoded 0
@@ -305,9 +171,6 @@ function Flow() {
 
 
     const onVerificationSchemaChange = (newStatus, _wfIndex, _testIndex) => {
-        console.log("New verification schema: ", newStatus);
-        setVerificationStatus(newStatus)
-
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Schema = newStatus    //TODO: hardcoded 0
@@ -315,6 +178,10 @@ function Flow() {
         })
     }
 
+    // #endregion
+
+
+    // #region Connection logic
 
     const onConnect =
         (connection) => {
@@ -357,10 +224,10 @@ function Flow() {
                 console.log("polsf: ", workflows[sourceNode.data.custom._wfIndex])
                 let newTestIndex = workflows[sourceNode.data.custom._wfIndex].Tests.length //sourceNode.data.custom.Tests.length TODO:added +1 recently, check this better...nvm
 
-              
+
 
                 targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow, _testIndex: newTestIndex } };   // set wfId of test node(tgt) to be the same as wf node(src)
-                
+
                 console.log("targetNodeId");
                 console.log(typeof targetNode.id);
                 console.log(targetNode.id);
@@ -491,44 +358,16 @@ function Flow() {
 
         }
 
-
-    const dumpState = () => {
-        console.log("Logging the state...")
-        console.log("Test configuration name: ", testConfName);
-        console.log("API file: ", apiFile);
-        console.log("Server URL: ", serverURL);
-        console.log("HTTP Method: ", httpMethod);
-        console.log("Verification Status: ", verificationStatus);
-        console.log("----------------------------");
-        console.log("Workflows: ");
-        console.log(workflows);
-        console.log("Current workflow: ", maxWfIndex);
-
-        console.log("----------------------------");
-        console.log("Nodes: ");
-        console.log(nodes);
-
-        console.log("----------------------------");
-        console.log("Edges: ");
-        console.log(edges);
-        //console.log("Current test: ", currTestIndex);
-
-    }
+    // #endregion
 
 
+    
+    // #region Create Nodes
 
-    const onClickGet = () => {
-        createGetNode()
-    }
-
-    const createGetNode = (initialServer = "", initialPath = "", _wfIndex = -1, _testIndex = -1)=>{
-        
-        console.log("aldabugada");
-        console.log(apiFile.paths);
-        console.log(apiFile.servers);
-
+  const createWorkflowNode = (wfIndex, wfName) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
+
         const newNode = {
             id,
             position: {
@@ -536,52 +375,18 @@ function Flow() {
                 y: Math.random() * 500,
             },
             data: {
-                //label: `Node ${id}`,
                 custom: {
-                    mycallback: onServerURLChange,
-                    mycallback2: onPathChange,
-                    methodcallback: onHttpMethodChange,
-                    initialServer: initialServer,
-                    initialPath: initialPath,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex,
-                    paths: apiFile.paths,
-                    servers: apiFile.servers
+                    nameChangeCallback: onWfNameChange,
+                    wfName: wfName,
+                    _wfIndex: wfIndex
                 }
             },
-            type: 'getRequest'
+            type: 'wf'
         };
         reactFlowInstance.addNodes(newNode);
 
         return id;
     }
-
-
-    const onClickDelete = () => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                //label: `Node ${id}`,
-                custom: {
-                    mycallback: onServerURLChange,
-                    mycallback2: onPathChange,
-                    methodcallback: onHttpMethodChange,
-                    _wfIndex: -1,
-                    _testIndex: -1
-                }
-            },
-            type: 'deleteRequest'
-        };
-        reactFlowInstance.addNodes(newNode);
-    }
-
-
 
     const createTestNode = (testName, _wfIndex = -1, _testIndex = -1) => {
         const id = `${nodeId.current}`;
@@ -613,7 +418,7 @@ function Flow() {
                     nameChangeCallback: onTestIDChange,
                     //mycallback2: onPathChange
                     _wfIndex: _wfIndex,
-                    _testIndex: _testIndex,   //TODO:
+                    _testIndex: _testIndex,
                     test: newTest,
                     testName: testName //TODO:this info is also in test, maybe test is not necessart? idk
                 }
@@ -627,27 +432,12 @@ function Flow() {
         return id;
     }
 
-    const onClickTestNode = () => {
+    const createGetNode = (initialServer = "", initialPath = "", _wfIndex = -1, _testIndex = -1) => {
 
-        //create node with no wfIndex and no textIndex because that will be decided on connection
-        //node is created with an empty test inside so that when connection to wfNode happens, test is put in correct position
-        createTestNode("new test name")
+        console.log("aldabugada");
+        console.log(apiFile.paths);
+        console.log(apiFile.servers);
 
-
-        /*
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows);
-            newWorkflows[currWfIndex.current].Tests.push(newTest)
-            return newWorkflows;
-        });*/
-
-
-
-    }
-
-    const onClickApi = () => {
-        console.log("LLLLLLLLLLLLLLLLLLLLL");
-        console.log(testConfName);
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -659,22 +449,50 @@ function Flow() {
             data: {
                 //label: `Node ${id}`,
                 custom: {
-                    mycallback: onApiFileChange,
-                    newApiName: testConfName
+                    serverChangeCallback: onServerURLChange,
+                    pathChangeCallback: onPathChange,
+                    methodChangeCallback: onHttpMethodChange,
+                    initialServer: initialServer,
+                    initialPath: initialPath,
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex,
+                    paths: apiFile.paths,
+                    servers: apiFile.servers
                 }
             },
-            type: 'apiFile'
+            type: 'getRequest'
         };
         reactFlowInstance.addNodes(newNode);
+
+        return id;
     }
 
+    const createStatusVerificationNode = (status = "", _wfIndex = -1, _testIndex = -1) => {
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+                    onStatusCodeChange: onVerificationStatusChange,
+                    initialStatusCode: status,
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex
+                }
+            },
+            type: 'status'
+        };
+        reactFlowInstance.addNodes(newNode);
 
-    const createNodes = (newstate) =>{
-        //for each wf
-        // add wf node
-        //add stress
-        //for each test
-        // add test node
+        return id;
+    }
+
+    //TODO: improve algorithm, its kinda hardcoded atm
+    const createNodes = (newstate) => {
 
         let yamlWfIndex = 0;
         let currYamlTestIndex = 0;
@@ -689,12 +507,12 @@ function Flow() {
 
 
             maxWfIndex.current += 1
-            const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID) 
+            const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID)
 
-            let testNodeIdsList = [] 
+            let testNodeIdsList = []
 
             let edgesList = []
-            
+
             //add stress
             //
             wf.Tests.forEach(test => {
@@ -709,10 +527,12 @@ function Flow() {
                 testNodeIdsList.push(testNodeId)
 
                 const getNodeServer = test.Server
+                console.log(test.Server);
+                console.log(test.Path);
                 const getNodePath = test.Path
 
                 const getNodeId = createGetNode(getNodeServer, getNodePath, yamlWfIndex, currYamlTestIndex)
-                
+
 
                 const statusNodeCode = test.Verifications[0].Code   //TODO: verifications is an array....
 
@@ -721,26 +541,26 @@ function Flow() {
                 //create the edge for this test
 
                 const newEdgeWfTest = {
-                    id: "wf:"+wfNodeID.toString()+"-test:"+testNodeId.toString(),
+                    id: "wf:" + wfNodeID.toString() + "-test:" + testNodeId.toString(),
                     source: wfNodeID.toString(),
                     target: testNodeId.toString()
                 }
 
 
                 const newEdgeTestGet = {
-                    id: "test:"+testNodeId.toString()+"-get:"+getNodeId.toString(),
+                    id: "test:" + testNodeId.toString() + "-get:" + getNodeId.toString(),
                     source: testNodeId.toString(),
                     target: getNodeId.toString()
                 }
 
 
                 const newEdgeGetStatus = {
-                    id: "get:"+getNodeId.toString()+"-status:"+statusVerifNodeId.toString(),
+                    id: "get:" + getNodeId.toString() + "-status:" + statusVerifNodeId.toString(),
                     source: getNodeId.toString(),
                     target: statusVerifNodeId.toString()
                 }
 
-                
+
 
 
 
@@ -761,70 +581,126 @@ function Flow() {
 
 
         });
-  
+
         setEdges((edges) => {
             let newEdges = edges.concat(listOfEdgesLists)
             return newEdges
         })
 
-    
+
 
         console.log("edges set");
     }
 
+    // #endregion
+
+    
+    // #region onClick in Editor
+
+    const onClickWorkflowNode = () => {
+
+        //create node with wf index equal to the max current index + 1
+        //ex if there are 3 workflows currently, the maxWfIndex is 3 and will be 4 after creating wf (which will have wfIndex 4)
+        maxWfIndex.current += 1
+        createWorkflowNode(maxWfIndex.current)
+
+
+        //create the actual workflow
+        let newWf = {
+            _wfIndex: maxWfIndex.current,
+            WorkflowID: "NEW WORKFLOW",
+            Stress: null, //{Delay: 1, Count:1, Threads: 3}
+            Tests: []
+        }
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows);
+            newWorkflows.push(newWf)
+            return newWorkflows;
+        });
+
+    }
+
+    const onClickTestNode = () => {
+
+        //create node with no wfIndex and no textIndex because that will be decided on connection
+        //node is created with an empty test inside so that when connection to wfNode happens, test is put in correct position
+        createTestNode("new test name")
+
+
+        /*
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows);
+            newWorkflows[currWfIndex.current].Tests.push(newTest)
+            return newWorkflows;
+        });*/
+
+
+
+    }
+
+    const onClickGet = () => {
+        createGetNode()
+    }
+
+    const onClickDelete = () => {
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                //label: `Node ${id}`,
+                custom: {
+                    mycallback: onServerURLChange,
+                    mycallback2: onPathChange,
+                    methodcallback: onHttpMethodChange,
+                    _wfIndex: -1,
+                    _testIndex: -1
+                }
+            },
+            type: 'deleteRequest'
+        };
+        reactFlowInstance.addNodes(newNode);
+    }
+
+    const onClickStatus = () => {
+        createStatusVerificationNode()
+    }
+
+    //TODO:
+    const onClickSchema = () => {
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+                    mycallback: onVerificationSchemaChange,
+                    _wfIndex: -1,
+                    _testIndex: -1
+                }
+            },
+            type: 'schema'
+        };
+        reactFlowInstance.addNodes(newNode);
+    }
+
+    // #endregion
+
+
+    // #region others/misc
+
     const onClickChangeWf = () => {
 
-        /* const testname = "changed test name"
-        const httpmethod = "Get"
-        const verifStatus = 200
 
-        const oldWorkflowsA = [
-            {
-                "WorkflowID": "wf1",
-                "Stress": null,
-                "Tests": [
-                    {
-                        "Server": "https://petstore3.swagger.io/api/v3",
-                        "TestID": "t1",
-                        "Path": "/pet/1",
-                        "Method": "Get",
-                        "Headers": [
-                            {
-                                "keyItem": "",
-                                "valueItem": ""
-                            }
-                        ],
-                        "Body": "",
-                        "Verifications": [
-                            {
-                                "Code": "200",
-                                "Schema": ""
-                            }
-                        ]
-                    },
-                    {
-                        "Server": "https://petstore3.swagger.io/api/v3",
-                        "TestID": "t2",
-                        "Path": "/pet/2",
-                        "Method": "Get",
-                        "Headers": [
-                            {
-                                "keyItem": "",
-                                "valueItem": ""
-                            }
-                        ],
-                        "Body": "",
-                        "Verifications": [
-                            {
-                                "Code": "200",
-                                "Schema": ""
-                            }
-                        ]
-                    }
-                ]
-            }
-        ] */
-
+        //TODO: add way to upload tsl as file similar to this
         const workflowsA = [
             {
                 "WorkflowID": "wf1",
@@ -858,243 +734,145 @@ function Flow() {
 
         const yamlFlows = YAML.stringify(workflowsA)
 
-        console.log("lakak");
-        console.log(yamlFlows);
-
         const newstate = jsYaml.load(yamlFlows)
-
-        console.log("lekke");
-        console.log(newstate);
 
         setWorkflows(newstate)
 
-        
         createNodes(newstate)
 
-        
-
     }
 
-
-    const createWorkflowNode = (wfIndex, wfName) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                //label: `Node ${id}`,
-                custom: {
-                    nameChangeCallback: onWfNameChange,
-                    //mycallback2: onPathChange,
-                    wfName: wfName,
-                    _wfIndex: wfIndex
-                }
-            },
-            type: 'wf'
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-
-    const onClickWorkflowNode = () => {
-
-        //create node with wf index equal to the max current index + 1
-        //ex if there are 3 workflows currently, the maxWfIndex is 3 and will be 4 after creating wf (which will have wfIndex 4)
-        maxWfIndex.current += 1
-        createWorkflowNode(maxWfIndex.current)
-
-
-        //create the actual workflow
-        let newWf = {
-            _wfIndex: maxWfIndex.current,
-            WorkflowID: "NEW WORKFLOW",
-            Stress: null, //{Delay: 1, Count:1, Threads: 3}
-            Tests: []
-        }   //TODO:here
+    
+    //TODO: in the future check this as well as finishSetup()
+    const saveWorkflow = () => {
 
         setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows);
-            newWorkflows.push(newWf)
-            return newWorkflows;
-        });
+            const newWorkflows = deepCopy(oldWorkflows)
 
-    }
+            for (let wfIndex = 0; wfIndex < newWorkflows.length; wfIndex++) {
+                const workflow = newWorkflows[wfIndex];
+                delete workflow.Stress
+                delete workflow._wfIndex
 
-    const onClickStatus = () => {
-        createStatusVerificationNode()
-    }
-
-    const createStatusVerificationNode = (status = "", _wfIndex = -1, _testIndex = -1)=>{
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                //label: `Node ${id}`,
-                custom: {
-                    onStatusCodeChange: onVerificationStatusChange,
-                    initialStatusCode: status,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex
-                }
-            },
-            type: 'status'
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-    const onClickSchema = () => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                //label: `Node ${id}`,
-                custom: {
-                    mycallback: onVerificationSchemaChange,
-                    _wfIndex: -1,
-                    _testIndex: -1
-                }
-            },
-            type: 'schema'
-        };
-        reactFlowInstance.addNodes(newNode);
-    }
-
-    /*
-        const onClickUrl = () => {
-            const id = `${nodeId.current}`;
-            nodeId.current += 1
-            const newNode = {
-                id,
-                position: {
-                    x: Math.random() * 500,
-                    y: Math.random() * 500,
-                },
-                data: {
-                    //label: `Node ${id}`,
-                    custom: {
-                        mycallback: onServerURLChange
+                for (let testIndex = 0; testIndex < workflow.Tests.length; testIndex++) {
+                    const test = workflow.Tests[testIndex];
+                    delete test.Headers
+                    delete test.Body
+                    delete test._testIndex
+                    for (let ver = 0; ver < test.Verifications.length; ver++) {
+                        const verification = test.Verifications[ver];
+                        if (!verification.Schema) {
+                            delete verification.Schema
+                        }
                     }
-                },
-                type: 'url'
-            };
-            reactFlowInstance.addNodes(newNode);
-        }*/
+                }
+            }
+            /*
+            delete newWorkflows[0].Stress
+            delete newWorkflows[0].Tests[0].Headers
+            delete newWorkflows[0].Tests[0].Body
+            delete newWorkflows[0].Tests[0].Verifications.Schema
+            */
 
-    const onTestConfNameChange = (newTestConfName) => {
-        const newName = newTestConfName.target.value
-        console.log("New test configuration name: ", newName);
-        setTestConfName(newName)
-    }
-    /*
-        const onApiSpecChange = () => {
-            //...
+            return newWorkflows
+        })
+
+    };
+
+    const finishSetup = async () => {
+        let newFile = YAML.stringify(workflows);
+        console.log(newFile);
+        var blob = new Blob([newFile], {
+            type: 'text/plain'
+        });
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = 'Created_TSL.yaml';
+        a.click();
+
+        const file = new File([blob], 'sample.txt')
+
+        let testSpecification = [file]
+
+        let data = new FormData();
+        /* if (dictionary !== null) {
+          data.append('dictionary.txt', dictionary);
+        } */
+        let i = 1
+        if (testSpecification !== null) {
+            for (const file of testSpecification) {
+                data.append("tsl_" + i + ".yaml", file)
+                i++
+            }
         }
-    
-        const onTimerSettingsChange = (newTimerSettings) => {
-            const newSettings = newTimerSettings.target.value
-            console.log("New timer settings: ", newTimerSettings);
-            setTestConfName(newTimerSettings)
-        }
-    */
-    const onRunGeneratedChange = (runGenerated) => {
-        const aux = runGenerated.target.value
-        const run = aux === "yes" ? "true" : "false"
-        console.log("Run generated: ", run);
-        setRunGenerated(run)
+        /* if (dllFiles !== null) {
+          for (const file of dllFiles) {
+            data.append(file.name, file)
+          }
+        } */
+        data.append('runimmediately', runImmediately);
+        data.append('interval', runInterval);
+        data.append('rungenerated', runGenerated);
+
+        const token = await authService.getAccessToken();
+
+        fetch(`SetupTest/UploadFile`, {
+            method: 'POST',
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
+            body: data
+        }).then(res => {
+            if (!res.ok) {
+                console.error("Test setup failed...");
+            } else {
+                console.log("Test setup was successful!")
+            }
+        })
     }
 
-    const onRunImmediatelyChange = (runImmediately) => {
-        const aux = runImmediately.target.value
-        const run = aux === "yes" ? "true" : "false"
-        console.log("Run immediately: ", run);
-        setRunImmediatly(run)
+    const dumpState = () => {
+        console.log("Logging the state...")
+        console.log("API file: ", apiFile);
+
+        console.log("----------------------------");
+        console.log("Workflows: ");
+        console.log(workflows);
+
+        console.log("----------------------------");
+        console.log("Nodes: ");
+        console.log(nodes);
+
+        console.log("----------------------------");
+        console.log("Edges: ");
+        console.log(edges);
     }
 
-    const onRunIntervalChange = (runInterval) => { //TODO:
-        const aux = runInterval.target.value
-        console.log("Run immediately: ", aux);
-        setRunInterval(aux)
-    }
 
 
+    //TODO: maybe I can analyse this to see how the schemasvalues are passed to do same in MonitorTests
     const handlerAPI = function (paths, servers, schemas, schemasValues) {
-
-        console.log("hadnlerapi")
-        let obj = { paths, servers, schemas, schemasValues }
-        console.log(obj);
+        let apiContents = { paths, servers, schemas, schemasValues }
         setUploaded(true)
-
-        setApiFile(obj)
-
-
-        //sendTest()
-
-        /*this.setState({
-            paths: paths,
-            servers: servers,
-            schemas: schemas,
-            schemasValues: schemasValues,
-            step:3
-        })*/
+        setApiFile(apiContents)
     }
 
-
-   /*  const dajbroni = location?.state?.tslState;
-
-    if (dajbroni) {
-        console.log(dajbroni);
-        // Perform further operations with dajbroni
-        //createNodes(workflows)
-      } else {
-        console.log('tslState does not exist');
-        // Handle the case when tslState does not exist
-      } */
-
-
-      useEffect(() => {
-        const dajbroni = location?.state?.tslState;
-        if (dajbroni) {
-          console.log(dajbroni);
-          // Perform further operations with dajbroni
-          createNodes(workflows)
+    /* eslint-disable */
+    // If there is state coming from MonitorTests, create corresponding nodes
+    useEffect(() => {
+        if (location?.state?.tslState) {
+            createNodes(workflows)
         } else {
-          console.log('tslState does not exist');
-          // Handle the case when tslState does not exist
+            console.log('[Editor] No state has been found; no nodes will be created');
         }
-      }, []); // Empty dependency array ensures the effect runs only once
-      
+    }, []); // Empty dependency array ensures the effect runs only once -> THIS IS WHY ESLINT IS DISABLED (dependencies dont matter)
+    /* eslint-enable */
 
-      console.log(apiFile);
-      console.log("apooooFile");
+    // #endregion
+
 
     return (
-
         <div>
-
-
             <div className='editor-container'>
-
-
-
                 <aside className="sidebar">
                     <div id="side-menu" className="sidebarDiv">
                         <p></p>
@@ -1103,7 +881,7 @@ function Flow() {
 
                         <label><b>API Specification:</b></label>
 
-                        {(uploaded === false &&  location?.state?.APITitle === undefined) ?
+                        {(uploaded === false && location?.state?.APITitle === undefined) ?
                             <SmallApiUpload handlerAPI={handlerAPI} apiTitle={testConfName} ></SmallApiUpload> : <div>api uploaded</div>}
 
 
@@ -1197,10 +975,6 @@ function Flow() {
                         <p></p>
                         <label>Dev </label>
 
-                        <button onClick={onClickApi} className="node-button">
-                            Add API spec
-                        </button>
-
                         <button onClick={onClickChangeWf} className="node-button">
                             Change entire Workflow
                         </button>
@@ -1228,30 +1002,7 @@ function Flow() {
                     </ReactFlow>
 
                 </div>
-
-
-                {/*
-            <button onClick={() => currWfIndex.current += 1} className="btn-add">
-                +1 workflow
-            </button>
-
-            <button onClick={() => currWfIndex.current -= 1} className="btn-add">
-                -1 workflow
-            </button>
-
-            <button onClick={() => currTestIndex.current += 1} className="btn-add">
-                +1 testID
-            </button>
-
-            <button onClick={() => currTestIndex.current -= 1} className="btn-add">
-                -1 testID
-            </button>
-
-            */}
-
             </div>
-
-
         </div>
     );
 }

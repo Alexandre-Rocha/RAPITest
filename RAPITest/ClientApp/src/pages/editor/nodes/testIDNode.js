@@ -4,52 +4,36 @@ import React from 'react';
 
 import './css/testIDNode.css'
 
-const handleStyle = { left: 10 };
-
 
 function TestIDNode({ data, isConnectable }) {
-
   
+  const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1) // Either id from pre-exisitng TSL or -1 (not assigned)
+  const [testName, setTestName] = useState(data.custom.testName || ""); // Either name from pre-existing TSL or empty name 
 
-
-  const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1) //TODO: idk
-
-  const [testName, setTestName] = useState(data.custom.testName); 
-
+  /* eslint-disable */
   useEffect(() => {
-    console.log("kiokiokio");
-    console.log(data.custom._testIndex);
-    console.log(testIndex);
+    // If text index from props change, reflect onto own state
     if (data.custom._testIndex !== testIndex) {
-      console.log("INSIDE IF");
-      console.log("below this should never be false");
-      console.log(data.custom_testIndex !== testIndex);
-      console.log(data.custom._testIndex);
-      console.log(testIndex);
-      console.log("smsmmsm");
       setTestIndex(data.custom._testIndex);
     }
-  }, [data.custom._testIndex]); //TODO:
-  
+  }, [data.custom._testIndex]); //TODO: I think this is probably not necessary if I do things right.
+  /* eslint-enable */
 
+  
   console.log("[Test node] Workflow ID: ",data.custom._wfIndex)
   console.log("[Test node] Test ID: ", testIndex)
 
-  const setStateTestName = (newTestName) => {
-    console.log('setStateTestName is being called with', newTestName);
-    setTestName(newTestName)
-  }
 
-  const onChange = (evt) => {
-    console.log(evt.target.value);
-    setStateTestName(evt.target.value)//todo:achoq e preciso
+  const onTestNameChange = (evt) => {
+    console.log("[Test node] Test name: ", evt.target.value)
+    setTestName(evt.target.value)
     data.custom.nameChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
   };
 
+  //TODO: Think better on how to implement changing Test order; for now this works
   const onIncrement = ()=> {
     setTestIndex(oldTestIndex => oldTestIndex + 1)
   }
-
   const onDecrement = ()=> {
     setTestIndex(oldTestIndex => oldTestIndex - 1)
   }
@@ -58,36 +42,21 @@ function TestIDNode({ data, isConnectable }) {
   return (
     <div className="text-updater-node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
+
       <div>
-        <label htmlFor="text">Name of new test ID:</label>
-        <input value={testName} id="text" name="text" onChange={onChange} className="nodrag" />
+        <label htmlFor="text">Test name:</label>
+        <input value={testName} id="text" name="text" onChange={onTestNameChange} className="nodrag" />
+      </div>
+
+      <div>
+        Wf: {data.custom._wfIndex}
       </div>
       <div>
-        wf: {data.custom._wfIndex}
+        Test: {testIndex}
+        <button onClick={onIncrement}>+1</button>
+        <button onClick={onDecrement}>-1</button>
       </div>
-      <div>
-        test: {testIndex}
-        <button onClick={onIncrement}>increment</button>
-        <button onClick={onDecrement}>decrement</button>
-      </div>
-      {/* <div>
-        <label htmlFor="readonly">Read-only field:</label>
-        <input
-          id="readonly"
-          name="readonly"
-          type="text"
-          readOnly
-          value={testName}
-          className="nodrag"
-        />
-      </div> */}
-      {/* <Handle
-        type="source"
-        position={Position.Bottom}
-        id="a"
-        style={handleStyle}
-        isConnectable={isConnectable}
-      /> */}
+     
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>
   );

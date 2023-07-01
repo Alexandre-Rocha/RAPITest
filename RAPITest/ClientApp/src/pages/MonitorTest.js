@@ -1,5 +1,4 @@
 ﻿import React, { Component } from 'react';
-import { Link } from 'react-router-dom/cjs/react-router-dom';
 import authService from './api-authorization/AuthorizeService'
 import 'bootstrap/dist/css/bootstrap.css'
 import { Container, Row, Col, InputGroup, FormControl, Tab, Nav } from 'react-bootstrap'
@@ -15,8 +14,6 @@ import deleteIcon from '../assets/bin.png'
 import reportIcon from '../assets/statsSmall.png'
 import downloadIcon from '../assets/cloud.png'
 import runIcon from '../assets/play.png'
-
-const YAML = require('json-to-pretty-yaml');
 
 const jsYaml = require('js-yaml')
 
@@ -157,83 +154,46 @@ export class MonitorTest extends Component {
         this.setState({})
     }
 
-    async editInEditor(ApiId, APITitle, LatestReport) { //TODO:HERE
+    async editInEditor(ApiId, APITitle) { //Navigate to Node Editor
 
         const token = await authService.getAccessToken();
 
-        console.log("Edit in editor button was pressed")
-        console.log(ApiId);
-        console.log(APITitle);
-        console.log(LatestReport);
-        //TODO: o download aqui n é do tsl...ver como ir pegar o tsl a bd...
-        //this.props.history.push(`devEditor`)
-
         let tslState;
         let apiFile = {
-            servers:"",
-            paths:"",
-            schemas:"",
-            schemasValues:""
+            servers: "",
+            paths: "",
+            schemas: "",
+            schemasValues: ""
         }
 
-        fetch(`MonitorTest/ReturnTsl?apiId=${ApiId}`, {
+        // Grab the TSL from the DB and turn into string that can be processed
+        const tslResponse = await fetch(`MonitorTest/ReturnTsl?apiId=${ApiId}`, {
             method: 'GET',
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
-        }).then(response => response.text())
-            .then(resp => {
-                console.log("return tsl?");//TODO:
-                console.log(resp);
+        })
+        const tslString = await tslResponse.text()
 
-                // from js to yaml str
-                //const yamlFlows = YAML.stringify(workflowsA)
+        tslState = jsYaml.load(tslString)
 
-                // from yaml str to js
-                //const newstate = jsYaml.load(yamlFlows)
+        // Grab the Spec from the DB and turn into JS obj
+        const specResponse = await fetch(`MonitorTest/ReturnSpec?apiId=${ApiId}`, {
+            method: 'GET',
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        })
+        const spec = await specResponse.json()
 
-                tslState = jsYaml.load(resp)
+        apiFile.paths = Object.keys(spec.paths);
+        apiFile.servers = spec.servers.map((obj) => obj.url);
 
-
-            }).then(idk => {
-                fetch(`MonitorTest/ReturnSpec?apiId=${ApiId}`, {
-                    method: 'GET',
-                    headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
-                }).then(response => response.json()).then(spec => {
-
-                    console.log("spec?");
-                    console.log(spec);
-
-                    console.log(spec.paths);
-                    console.log(spec.servers);
-                    console.log(spec.components.schemas);
-                    console.log(spec.components.schemas);
-
-                    apiFile.paths = Object.keys(spec.paths);
-                    apiFile.servers = Object.keys(spec.servers);
-                    
-
-                    const keysArray = Object.keys(spec.components.schemas);
-                    const propsArray = Object.values(spec.components.schemas).map((obj) => JSON.stringify(obj));
-
-                    console.log(keysArray);
-                    console.log(propsArray);
-
-                    apiFile.schemas = keysArray;
-                    apiFile.schemasValues = propsArray
-
-                    /* this.props.history.push({
-                        pathname: 'devEditor',
-                        state: { tslState }
-                    }); */
-                    return spec
-                }).then(idk=>{
-                     this.props.history.push({
-                        pathname: 'devEditor',
-                        state: { tslState, apiFile, APITitle }
-                    }); 
-                })
-            })
+        // TODO: Schema and schema values need to be checked again
+        apiFile.schemas = Object.keys(spec.components.schemas);
+        apiFile.schemasValues = Object.values(spec.components.schemas).map((obj) => JSON.stringify(obj));
 
 
+        this.props.history.push({
+            pathname: 'devEditor',
+            state: { tslState, apiFile, APITitle }
+        });
 
     }
 

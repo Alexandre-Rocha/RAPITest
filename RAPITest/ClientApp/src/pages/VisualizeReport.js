@@ -62,8 +62,6 @@ export class VisualizeReport extends Component {
         }).then(res => res.json())
             .then(resp => {
                 resp.Report = JSON.parse(resp.Report)
-                console.log("return report");//TODO:
-                console.log(resp);
                 this.setupReport(resp)
             })
 
