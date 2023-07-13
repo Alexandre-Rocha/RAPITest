@@ -3,6 +3,7 @@ import React from 'react';
 import { useState } from 'react';
 
 import './css/getRequestNode.css'
+import { useEffect } from 'react';
 
 
 function GetRequestNode({ data, isConnectable }) {
@@ -12,7 +13,10 @@ function GetRequestNode({ data, isConnectable }) {
 
   console.log("[Get request node] Workflow ID: ", data.custom._wfIndex)
   console.log("[Get request node] Test ID: ", data.custom._testIndex)
-   
+
+ /*  useEffect(()=>{
+    data.custom.methodChangeCallback("Get", data.custom._wfIndex, data.custom._testIndex)
+  }, [data.custom]) */ //TODO: cant do this yet cuz it crashes cuz it expects state in editor to exist already
 
   const onChangeServer = (event) => {
     setServerURL(event.target.value)

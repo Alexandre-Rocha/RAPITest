@@ -1,8 +1,9 @@
 import React from "react"
 
 
-function TimerSettings() {
+function TimerSettings(props) {
 
+    const {onRunGeneratedChange, onRunImmediatelyChange, onRunIntervalChange} = props
 
     return (
         <div>
@@ -46,3 +47,6 @@ function TimerSettings() {
         </div>
     )
 }
+
+
+export default TimerSettings

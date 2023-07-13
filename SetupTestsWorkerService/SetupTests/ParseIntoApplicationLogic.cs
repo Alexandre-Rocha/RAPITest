@@ -204,12 +204,16 @@ namespace SetupTestsWorkerService.SetupTests
 			List<dynamic> allVerifications = new List<dynamic>();
 			Verification_D verification = verifications[0];
 
+			Console.WriteLine("Setup external verif");
+
 			if (verification.Custom != null)
 			{
 				foreach (string key in verification.Custom)
 				{
 					if (!firstTestSetup.ExternalVerifications.TryGetValue(key, out dynamic value))
 					{
+						Console.WriteLine("Dll reference");
+						Console.WriteLine(firstTestSetup.ExternalVerifications.ToString());
 						firstTestSetup.Errors.Add("DLL reference in TSL file not found, the file name must be exact, case sensitive");
 						return null;
 					}

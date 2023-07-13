@@ -119,6 +119,9 @@ export class SetupTest extends Component {
                 data.append(file.name, file)
             }
         }
+        console.log("test spec");
+        console.log(this.state.testSpecification);
+
         data.append('runimmediately', this.state.timeSpecification.runimmediately);
         data.append('interval', this.state.timeSpecification.interval);
         data.append('rungenerated', this.state.timeSpecification.rungenerated);
@@ -127,7 +130,11 @@ export class SetupTest extends Component {
         console.log("lalala")
         console.log(data)
         for (const [key, value] of data.entries()) {
-            console.log(`${key}: ${value}`);
+            if (typeof value === 'object') {
+              console.log(`${key}:`, value);
+            } else {
+              console.log(`${key}: ${value}`);
+            }
           }
         fetch(`SetupTest/UploadFile`, {
             method: 'POST',
@@ -140,7 +147,11 @@ export class SetupTest extends Component {
                 console.log("lelele")
                 console.log(data)
                 for (const [key, value] of data.entries()) {
-                    console.log(`${key}: ${value}`);
+                    if (typeof value === 'object') {
+                      console.log(`${key}:`, value);
+                    } else {
+                      console.log(`${key}: ${value}`);
+                    }
                   }
                 console.log("over");
                 this.setState({ step: 5 })

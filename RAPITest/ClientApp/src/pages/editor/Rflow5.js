@@ -2,15 +2,17 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom';
 import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
-import GetRequestNode from './nodes/getRequestNode';
-//import ServerURLNode from './nodes/serverURLNode';
 import StatusVerificationNode from './nodes/statusVerificationNode';
 
 import authService from '../api-authorization/AuthorizeService';
 import TestIDNode from './nodes/testIDNode';
 import WorkflowNode from './nodes/workflowNode';
-import DeleteRequestNode from './nodes/deleteRequestNode';
 import SchemaVerificationNode from './nodes/schemaVerificationNode';
+
+import QueryNode from './nodes/queryNode';
+import BodyNode from './nodes/bodyNode';
+import HeadersNode from './nodes/headersNode';
+import RetainNode from './nodes/retainNode';
 
 import './Rflow5.css'
 
@@ -23,7 +25,7 @@ const jsYaml = require('js-yaml')
 const initialNodes = []
 const initialEdges = []
 
-const nodeTypes = { getRequest: GetRequestNode, status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, deleteRequest: DeleteRequestNode, schema: SchemaVerificationNode }
+const nodeTypes = { status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode }
 
 function deepCopy(obj) {
     if (typeof obj !== "object" || obj === null) {
@@ -108,9 +110,6 @@ function Flow() {
     // #region onChange callbacks
 
     const onTestIDChange = (newTestID, _wfIndex, _testIndex) => {
-        console.log("New test id: ", newTestID);
-        console.log("New test id: ", _wfIndex);
-        console.log("New test id: ", _testIndex);
 
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
 
@@ -176,6 +175,122 @@ function Flow() {
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Schema = newStatus    //TODO: hardcoded 0
             return newWorkflows
         })
+    }
+
+    const onHeaderKeyChangeCallback = (index, key, _wfIndex, _testIndex) => {
+        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
+        // o todo de cima foi copiado do do testID
+
+        if (_wfIndex !== -1 && _testIndex !== -1) {
+            setWorkflows(oldWorkflows => {
+                const newWorkflows = deepCopy(oldWorkflows)
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
+                    console.log("if");
+                    newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
+                    console.log(newWorkflows);
+                }
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers[index]) {
+                    newWorkflows[_wfIndex].Tests[_testIndex].Headers[index] = {key:'',value:''}
+                }
+                newWorkflows[_wfIndex].Tests[_testIndex].Headers[index].key = key
+                console.log(newWorkflows);
+                return newWorkflows
+            })
+        }
+    }
+
+    const onHeaderValueChangeCallback = (index, value, _wfIndex, _testIndex) => {
+        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
+        // o todo de cima foi copiado do do testID
+
+        if (_wfIndex !== -1 && _testIndex !== -1) {
+            setWorkflows(oldWorkflows => {
+                const newWorkflows = deepCopy(oldWorkflows)
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
+                    newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
+                }
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers[index]) {
+                    newWorkflows[_wfIndex].Tests[_testIndex].Headers[index] = {key:'',value:''}
+                }
+                newWorkflows[_wfIndex].Tests[_testIndex].Headers[index].value = value
+                return newWorkflows
+            })
+        }
+    }
+
+    const onHeaderAddCallback = (_wfIndex, _testIndex)=>{
+        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
+        // o todo de cima foi copiado do do testID
+
+        if (_wfIndex !== -1 && _testIndex !== -1) {
+            setWorkflows(oldWorkflows => {
+                const newWorkflows = deepCopy(oldWorkflows)
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
+                    newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
+                }
+                newWorkflows[_wfIndex].Tests[_testIndex].Headers.push({key:'',value:''})
+                return newWorkflows
+            })
+        }
+    }
+
+    const onHeaderRemoveCallback = (index, _wfIndex, _testIndex)=>{
+        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
+        // o todo de cima foi copiado do do testID
+
+        if (_wfIndex !== -1 && _testIndex !== -1) {
+            setWorkflows(oldWorkflows => {
+                const newWorkflows = deepCopy(oldWorkflows)
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
+                    newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
+                }
+                newWorkflows[_wfIndex].Tests[_testIndex].Headers.splice(index,1)
+                return newWorkflows
+            })
+        }
+    }
+
+
+    const onQueryKeyChangeCallback = (index, key, _wfIndex, _testIndex) => {
+        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
+        // o todo de cima foi copiado do do testID
+
+        if (_wfIndex !== -1 && _testIndex !== -1) {
+            setWorkflows(oldWorkflows => {
+                const newWorkflows = deepCopy(oldWorkflows)
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query) {
+                    console.log("if");
+                    newWorkflows[_wfIndex].Tests[_testIndex].Query = []
+                    console.log(newWorkflows);
+                }
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query[index]) {
+                    newWorkflows[_wfIndex].Tests[_testIndex].Query[index] = {key:'',value:''}
+                }
+                newWorkflows[_wfIndex].Tests[_testIndex].Query[index].key = key
+                console.log(newWorkflows);
+                return newWorkflows
+            })
+        }
+    }
+
+
+    const onQueryValueChangeCallback = (index, value, _wfIndex, _testIndex) => {
+        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
+        // o todo de cima foi copiado do do testID
+
+        if (_wfIndex !== -1 && _testIndex !== -1) {
+            setWorkflows(oldWorkflows => {
+                const newWorkflows = deepCopy(oldWorkflows)
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query) {
+                    newWorkflows[_wfIndex].Tests[_testIndex].Query = []
+                }
+                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query[index]) {
+                    newWorkflows[_wfIndex].Tests[_testIndex].Query[index] = {key:'',value:''}
+                }
+                newWorkflows[_wfIndex].Tests[_testIndex].Query[index].value = value
+                return newWorkflows
+            })
+        }
     }
 
     // #endregion
@@ -388,7 +503,7 @@ function Flow() {
         return id;
     }
 
-    const createTestNode = (testName, _wfIndex = -1, _testIndex = -1) => {
+    const createTestNode = (testName, initialServer = "", initialPath = "", initialMethod = "",_wfIndex = -1, _testIndex = -1) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -398,11 +513,11 @@ function Flow() {
             TestID: testName,
             Path: "",//   /pet/1
             Method: "",
-            Headers: [{
+            /* Headers: [{
                 keyItem: '',
                 valueItem: ''
             }],//[{keyItem:'',valueItem: ''}]   OPTIONAL
-            Body: '',                           //OPTIONAL
+            Body: '',                           //OPTIONAL */
             Verifications: [{ Code: 200, Schema: '' }]//Verifications: {     Code: 0,     Schema: ""   }    //ONLY CODE VERIFICATON IS MANDATORY
         }
 
@@ -416,6 +531,14 @@ function Flow() {
                 //label: `Node ${id}`,
                 custom: {
                     nameChangeCallback: onTestIDChange,
+                    serverChangeCallback: onServerURLChange,
+                    pathChangeCallback: onPathChange,
+                    methodChangeCallback: onHttpMethodChange,
+                    initialServer: initialServer,
+                    initialPath: initialPath,
+                    initialMethod: initialMethod,
+                    paths: apiFile.paths,
+                    servers: apiFile.servers,//TODO: add http methods somehow nvm only the classic 4 are supported
                     //mycallback2: onPathChange
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex,
@@ -432,14 +555,10 @@ function Flow() {
         return id;
     }
 
-    const createGetNode = (initialServer = "", initialPath = "", _wfIndex = -1, _testIndex = -1) => {
-
-        console.log("aldabugada");
-        console.log(apiFile.paths);
-        console.log(apiFile.servers);
-
+    const createHeadersNode = (initialHeadersArr = [], _wfIndex = -1, _testIndex = -1)=>{
         const id = `${nodeId.current}`;
         nodeId.current += 1
+
         const newNode = {
             id,
             position: {
@@ -447,25 +566,94 @@ function Flow() {
                 y: Math.random() * 500,
             },
             data: {
-                //label: `Node ${id}`,
                 custom: {
-                    serverChangeCallback: onServerURLChange,
-                    pathChangeCallback: onPathChange,
-                    methodChangeCallback: onHttpMethodChange,
-                    initialServer: initialServer,
-                    initialPath: initialPath,
+                    keyChangeCallback: onHeaderKeyChangeCallback,
+                    valueChangeCallback: onHeaderValueChangeCallback,
+                    addHeaderCallback: onHeaderAddCallback,
+                    removeHeaderCallback: onHeaderRemoveCallback,
+                    headers: initialHeadersArr,
                     _wfIndex: _wfIndex,
-                    _testIndex: _testIndex,
-                    paths: apiFile.paths,
-                    servers: apiFile.servers
+                    _testIndex: _testIndex
                 }
             },
-            type: 'getRequest'
+            type: 'headers'
         };
         reactFlowInstance.addNodes(newNode);
 
         return id;
     }
+
+    const createQueryNode = (initialQueryArr = [], _wfIndex = -1, _testIndex = -1)=>{
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+                    keyChangeCallback: onQueryKeyChangeCallback,
+                    valueChangeCallback: onQueryValueChangeCallback,
+                    query: initialQueryArr,
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex
+                }
+            },
+            type: 'query'
+        };
+        reactFlowInstance.addNodes(newNode);
+
+        return id;
+    }
+
+    const createBodyNode = ()=>{
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+                    
+                }
+            },
+            type: 'body'
+        };
+        reactFlowInstance.addNodes(newNode);
+
+        return id;
+    }
+
+    const createRetainNode = (initialRetainArr = [], _wfIndex = -1, _testIndex = -1)=>{
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+
+                }
+            },
+            type: 'retain'
+        };
+        reactFlowInstance.addNodes(newNode);
+
+        return id;
+    }
+    
+
 
     const createStatusVerificationNode = (status = "", _wfIndex = -1, _testIndex = -1) => {
         const id = `${nodeId.current}`;
@@ -491,7 +679,7 @@ function Flow() {
         return id;
     }
 
-    //TODO: improve algorithm, its kinda hardcoded atm
+    //TODO: improve algorithm, its kinda hardcoded atm, missing stress, some nodes, etc
     const createNodes = (newstate) => {
 
         let yamlWfIndex = 0;
@@ -500,41 +688,63 @@ function Flow() {
         let listOfEdgesLists = []
 
         newstate.forEach(wf => {
-            //add nodes
-            console.log("adding wf node")
-
-            wf._wfIndex = yamlWfIndex
-
-
-            maxWfIndex.current += 1
-            const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID)
-
+            
             let testNodeIdsList = []
-
             let edgesList = []
+            
+            wf._wfIndex = yamlWfIndex
+            maxWfIndex.current += 1
+            const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID) //WorkflowID is wf name
 
-            //add stress
-            //
+            
+            if (wf.Stress) {
+                console.log("stress found");
+            }
+            
+
             wf.Tests.forEach(test => {
-
+                
                 test._testIndex = currYamlTestIndex
 
+                // ------------ REQUEST ------------
+                
+                const testNodeServer = test.Server
+                const testNodePath = test.Path
+                const testNodeMethod = test.Method
 
-                console.log("adding test node");
-
-                const testNodeId = createTestNode(test.TestID, yamlWfIndex, currYamlTestIndex) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
+                const testNodeId = createTestNode(test.TestID, testNodeServer, testNodePath, testNodeMethod, yamlWfIndex, currYamlTestIndex) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
 
                 testNodeIdsList.push(testNodeId)
 
-                const getNodeServer = test.Server
-                console.log(test.Server);
-                console.log(test.Path);
-                const getNodePath = test.Path
+                //check optional stuff
 
-                const getNodeId = createGetNode(getNodeServer, getNodePath, yamlWfIndex, currYamlTestIndex)
+                if (test.Body) {
+                    console.log("body found");
+                }
+
+                if (test.Headers) {
+                    console.log("headers found");
+
+                    test.Headers.forEach( header=>{
+                        
+                    })
+                }
+
+                if (test.Query) {
+                    console.log("query found");
+                }
+
+                if (test.Retain) {
+                    console.log("retain found");
+                }
 
 
-                const statusNodeCode = test.Verifications[0].Code   //TODO: verifications is an array....
+                // ----------- VERIFICATIONS ------------
+
+
+
+
+                const statusNodeCode = test.Verifications[0].Code   //Verifications is an array for some reason but always 1 element
 
                 const statusVerifNodeId = createStatusVerificationNode(statusNodeCode, yamlWfIndex, currYamlTestIndex)
 
@@ -547,16 +757,9 @@ function Flow() {
                 }
 
 
-                const newEdgeTestGet = {
-                    id: "test:" + testNodeId.toString() + "-get:" + getNodeId.toString(),
+                const newEdgeTestStatus = {
+                    id: "test:" + testNodeId.toString() + "-get:" + statusVerifNodeId.toString(),
                     source: testNodeId.toString(),
-                    target: getNodeId.toString()
-                }
-
-
-                const newEdgeGetStatus = {
-                    id: "get:" + getNodeId.toString() + "-status:" + statusVerifNodeId.toString(),
-                    source: getNodeId.toString(),
                     target: statusVerifNodeId.toString()
                 }
 
@@ -565,8 +768,7 @@ function Flow() {
 
 
                 edgesList.push(newEdgeWfTest)
-                edgesList.push(newEdgeTestGet)
-                edgesList.push(newEdgeGetStatus)
+                edgesList.push(newEdgeTestStatus)
 
                 currYamlTestIndex = currYamlTestIndex + 1
 
@@ -638,33 +840,6 @@ function Flow() {
 
     }
 
-    const onClickGet = () => {
-        createGetNode()
-    }
-
-    const onClickDelete = () => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                //label: `Node ${id}`,
-                custom: {
-                    mycallback: onServerURLChange,
-                    mycallback2: onPathChange,
-                    methodcallback: onHttpMethodChange,
-                    _wfIndex: -1,
-                    _testIndex: -1
-                }
-            },
-            type: 'deleteRequest'
-        };
-        reactFlowInstance.addNodes(newNode);
-    }
 
     const onClickStatus = () => {
         createStatusVerificationNode()
@@ -690,6 +865,24 @@ function Flow() {
             type: 'schema'
         };
         reactFlowInstance.addNodes(newNode);
+    }
+
+    const onClickBodyNode = () =>{
+        console.log("[Editor] Adding Body node");
+    }
+
+    const onClickHeadersNode = () =>{
+        console.log("[Editor] Adding Headers node");
+        createHeadersNode()
+    }
+
+    const onClickQueryNode = () =>{
+        console.log("[Editor] Adding Query node");
+        createQueryNode()
+    }
+
+    const onClickRetainNode = () =>{
+        console.log("[Editor] Adding Retain node");
     }
 
     // #endregion
@@ -756,7 +949,14 @@ function Flow() {
 
                 for (let testIndex = 0; testIndex < workflow.Tests.length; testIndex++) {
                     const test = workflow.Tests[testIndex];
-                    delete test.Headers
+                    //delete test.Headers TODO: testing headers
+
+                    const transformedHeaders = test.Headers.map(({ key, value }) => `${key}:${value}`);
+                    test.Headers = transformedHeaders
+
+                    /* const transformedQuery = test.Query.map(({ key, value }) => `${key}:${value}`);
+                    test.Query = transformedQuery */
+
                     delete test.Body
                     delete test._testIndex
                     for (let ver = 0; ver < test.Verifications.length; ver++) {
@@ -941,12 +1141,20 @@ function Flow() {
 
                         <label>HTTP Requests</label>
 
-                        <button onClick={onClickGet} className="node-button">
-                            Add GET request
+                        <button onClick={onClickBodyNode} className="node-button">
+                            Add Body
                         </button>
 
-                        <button onClick={onClickDelete} className="node-button">
-                            Add DELETE request
+                        <button onClick={onClickHeadersNode} className="node-button">
+                            Add Headers
+                        </button>
+
+                        <button onClick={onClickQueryNode} className="node-button">
+                            Add Query
+                        </button>
+
+                        <button onClick={onClickRetainNode} className="node-button">
+                            Add Retain
                         </button>
 
                         <label>Verifications</label>

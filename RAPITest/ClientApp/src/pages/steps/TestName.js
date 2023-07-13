@@ -9,6 +9,11 @@ import { AwesomeButton } from "react-awesome-button";
 import "react-awesome-button/dist/styles.css";
 import continueIcon from '../../assets/continue.png'
 
+import editIcon from '../../assets/pencil.png' //TODO: here
+
+import { withRouter } from 'react-router-dom';
+
+
 export class TestName extends Component {
 
     constructor() {
@@ -47,6 +52,10 @@ export class TestName extends Component {
         this.setState({ showWarning: false })
     }
 
+    editInEditor(){
+        window.location.href = '/devEditor'; //TODO: this works but can be better
+    }
+
     render() {
         return (
             <div>
@@ -65,6 +74,24 @@ export class TestName extends Component {
                         <div style={{ textAlign: "center" }}>
                             <AwesomeButton type="primary" onPress={() => this.finalizeCallback()}><img style={{ marginRight: "10px" }} width="30" height="30" src={continueIcon} alt="Logo" />Continue</AwesomeButton>
                         </div>
+                        <br></br>
+                        <br></br>
+
+                        <div style={{ backgroundColor: "rgba(255, 165, 0, 0.4)",display: "flex", flexDirection: "column", alignItems: "center",padding: "10px"   }}>
+                        
+                        
+                        <div style={{ marginTop: "20px", marginBottom: "20px", textAlign: "center" }}>
+    You can set up your test configuration using the 5-steps approach, or you can do everything in the Workflow Editor instead!
+  </div>
+
+                        <div style={{ display: "flex", justifyContent: "center" }}>
+                           <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.editInEditor()}><img style={{ marginRight: "15px" }} width="50" height="50" src={editIcon} alt="Logo" />Go to Workflow Editor</AwesomeButton> 
+                        </div>
+                        
+                        <br></br>
+                        </div>
+
+
                     </Col>
                     <Col sm={8}>
                         <Figure style={{padding: "100px 0px 0px 250px"}}>

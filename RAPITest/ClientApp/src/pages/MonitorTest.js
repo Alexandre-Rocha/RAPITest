@@ -166,6 +166,7 @@ export class MonitorTest extends Component {
             schemasValues: ""
         }
 
+        console.log("trying fetch tsl");
         // Grab the TSL from the DB and turn into string that can be processed
         const tslResponse = await fetch(`MonitorTest/ReturnTsl?apiId=${ApiId}`, {
             method: 'GET',
@@ -175,6 +176,8 @@ export class MonitorTest extends Component {
 
         tslState = jsYaml.load(tslString)
 
+        console.log(tslState);
+
         // Grab the Spec from the DB and turn into JS obj
         const specResponse = await fetch(`MonitorTest/ReturnSpec?apiId=${ApiId}`, {
             method: 'GET',
@@ -183,6 +186,12 @@ export class MonitorTest extends Component {
         const spec = await specResponse.json()
 
         apiFile.paths = Object.keys(spec.paths);
+        
+        //TODO: methods not supported in the backend, only Delete,Get,Post,Put
+        /* const httpMethods = Object.values(spec.paths).flatMap(pathObj => Object.keys(pathObj))
+        const uniqueHttpMethods = Array.from(new Set(httpMethods));
+        const sortedHttpMethods = uniqueHttpMethods.sort();
+ */
         apiFile.servers = spec.servers.map((obj) => obj.url);
 
         // TODO: Schema and schema values need to be checked again
@@ -264,6 +273,7 @@ export class MonitorTest extends Component {
                 </div>
             )
         }
+        //TODO:remove button editor
         return (
             <table className="table table-striped">
                 <tbody>
@@ -271,6 +281,7 @@ export class MonitorTest extends Component {
                     <tr><th>Warnings</th><td>{item.Warnings}</td></tr>
                     <tr><th>Latest Report</th><td>{item.LatestReport}</td></tr>
                     <tr><th>Next Test</th><td>{item.NextTest}</td></tr>
+                    {/* <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.editInEditor(item.ApiId, item.APITitle, item.LatestReport)}><img style={{ marginRight: "15px" }} width="50" height="50" src={editIcon} alt="Logo" />Edit in Workflow editor</AwesomeButton> */}
                 </tbody>
             </table>
         )

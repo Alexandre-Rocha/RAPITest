@@ -16,8 +16,58 @@
 
     workflows[currWorkflow].Tests[currTest].Path
     */
+    
 
 
+    const wfff = {
+      WorkflowID: "cr_pet",
+      Stress: {
+        Count: 10,
+        Threads: 2,
+        Delay: 0
+      },
+      Tests: [
+        {
+          TestID: "createPet",
+          Server: "https://petstore3.io/api/v3",
+          Path: "/pet",
+          Method: "Post",
+          Headers: [
+            { "Content-Type": "application/json" },
+            { Accept: "application/json" }
+          ],
+          Body: "$ref/dictionary/petExample",
+          Retain: [
+            { "petId#$.id": null }
+          ],
+          Verifications: [
+            {
+              Code: 200,
+              Schema: "$ref/definitions/Pet"
+            }
+          ]
+        },
+        {
+          TestID: "readPet",
+          Server: "https://petstore3.io/api/v3",
+          Path: "/pet/{petId}",
+          Method: "Get",
+          Headers: [
+            { Accept: "application/xml" }
+          ],
+          Verifications: [
+            {
+              Code: 200,
+              Contains: "id",
+              Count: "doggie#1",
+              Schema: "$ref/definitions/Pet",
+              Match: "/Pet/name#doggie",
+              Custom: ["CustomVerificationTry1.dll"]
+            }
+          ]
+        }
+      ]
+    };
     
 
 /*
@@ -114,21 +164,29 @@ let header = [{
 
 /*
 let test = {
-            Server: https://petstore3.swagger.io/api/v3 ,
             TestID: "test1",
-            Path: /pet/1 ,
-            Method: "Get"   // Get, Post, Put, Delete (case sensitive)
+            Server: https://petstore3.swagger.io/api/v3 ,                 //MANDATORY
+            Path: /pet/1 ,                                                //MANDATORY
+            Method: "Get",   // Get, Post, Put, Delete (case sensitive)   //MANDATORY
             Headers: [{   
                 keyItem: '',
                 valueItem: ''
-            }],                     // headers are OPTIONAL  
-            Body: '',               // OPTIONAL
+            }],                     
+            Query: //TODO:  
+            Body: '',              
+            Retain: //TODO:
             Verifications: [{
                Code: 200, 
-               Schema: '' 
+               Schema: '' ,
+               Contains: //TODO:
+               Count: //TODO:
+               Match: //TODO:
+               Custom: //TODO:
             }]                   //Verifications is mandatory; inside only Code is mandatory
         }
 */
+
+//TODO: missing query here
   function isValidTest(obj) {
     if (!obj) {
       return false;
