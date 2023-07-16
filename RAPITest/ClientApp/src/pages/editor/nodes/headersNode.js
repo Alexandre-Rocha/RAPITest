@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
+import { Accordion } from 'react-bootstrap';
+
+import './css/generalNode.css'
+import './css/headersNode.css'
+
 function HeadersNode({ data, isConnectable }) {
 
 
@@ -41,8 +46,15 @@ function HeadersNode({ data, isConnectable }) {
   //TODO: n tem nada aver aqui mas no save changes remover headers vazios
 
   return (
-    <div className="text-updater-node">
+    <div className="headers-node node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
+
+
+      
+      <Accordion defaultActiveKey="0">
+        <Accordion.Item className='headers-area area' eventKey="0">
+          <Accordion.Header className='headers-header header'>Headers</Accordion.Header>
+          <Accordion.Body>
 
       <div>
         <label htmlFor="text">Headers node</label>
@@ -68,6 +80,12 @@ function HeadersNode({ data, isConnectable }) {
 
       <button onClick={addHeader}>Add Header</button>
       <button onClick={logState}>Log State</button> {/* HERE */}
+
+
+      </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
+
 
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>

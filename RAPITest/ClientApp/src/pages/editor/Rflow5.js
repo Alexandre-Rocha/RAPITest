@@ -13,10 +13,12 @@ import QueryNode from './nodes/queryNode';
 import BodyNode from './nodes/bodyNode';
 import HeadersNode from './nodes/headersNode';
 import RetainNode from './nodes/retainNode';
+import StressTestNode from './nodes/stressTestNode';
 
 import './Rflow5.css'
 
 import { SmallApiUpload } from './other-components/SmallApiUpload';
+import TimerSettings from './other-components/TimerSettings';
 
 const YAML = require('json-to-pretty-yaml');
 const jsYaml = require('js-yaml')
@@ -25,7 +27,7 @@ const jsYaml = require('js-yaml')
 const initialNodes = []
 const initialEdges = []
 
-const nodeTypes = { status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode }
+const nodeTypes = { status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode, stress: StressTestNode }
 
 function deepCopy(obj) {
     if (typeof obj !== "object" || obj === null) {
@@ -49,7 +51,7 @@ function Flow() {
     // #region State and Hooks
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-   
+
     const location = useLocation();
     const reactFlowInstance = useReactFlow()
 
@@ -61,7 +63,7 @@ function Flow() {
 
     const [testConfName, setTestConfName] = useState(location?.state?.APITitle || "")
 
-    //TODO: have the defaults be shown to user too
+    //TODO: cant grab from db for already conf tests...think of something
     const [runImmediately, setRunImmediatly] = useState('true')
     const [runInterval, setRunInterval] = useState('Never')
     const [runGenerated, setRunGenerated] = useState('true')
@@ -87,14 +89,14 @@ function Flow() {
     //TODO: why is there no onApiUpload?
 
     const onRunGeneratedChange = (runGenerated) => {
-        const aux = runGenerated.target.value
-        const run = aux === "yes" ? "true" : "false"
+        const run = runGenerated.target.value
+        //const run = aux === "true" ? "true" : "false"
         console.log("[Editor] Run generated: ", run);
         setRunGenerated(run)
     }
     const onRunImmediatelyChange = (runImmediately) => {
-        const aux = runImmediately.target.value
-        const run = aux === "yes" ? "true" : "false"
+        const run = runImmediately.target.value
+        //const run = aux === "true" ? "true" : "false"
         console.log("[Editor] Run immediately: ", run);
         setRunImmediatly(run)
     }
@@ -190,7 +192,7 @@ function Flow() {
                     console.log(newWorkflows);
                 }
                 if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Headers[index] = {key:'',value:''}
+                    newWorkflows[_wfIndex].Tests[_testIndex].Headers[index] = { key: '', value: '' }
                 }
                 newWorkflows[_wfIndex].Tests[_testIndex].Headers[index].key = key
                 console.log(newWorkflows);
@@ -210,7 +212,7 @@ function Flow() {
                     newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
                 }
                 if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Headers[index] = {key:'',value:''}
+                    newWorkflows[_wfIndex].Tests[_testIndex].Headers[index] = { key: '', value: '' }
                 }
                 newWorkflows[_wfIndex].Tests[_testIndex].Headers[index].value = value
                 return newWorkflows
@@ -218,7 +220,7 @@ function Flow() {
         }
     }
 
-    const onHeaderAddCallback = (_wfIndex, _testIndex)=>{
+    const onHeaderAddCallback = (_wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -228,13 +230,13 @@ function Flow() {
                 if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
                     newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
                 }
-                newWorkflows[_wfIndex].Tests[_testIndex].Headers.push({key:'',value:''})
+                newWorkflows[_wfIndex].Tests[_testIndex].Headers.push({ key: '', value: '' })
                 return newWorkflows
             })
         }
     }
 
-    const onHeaderRemoveCallback = (index, _wfIndex, _testIndex)=>{
+    const onHeaderRemoveCallback = (index, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -244,7 +246,7 @@ function Flow() {
                 if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
                     newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
                 }
-                newWorkflows[_wfIndex].Tests[_testIndex].Headers.splice(index,1)
+                newWorkflows[_wfIndex].Tests[_testIndex].Headers.splice(index, 1)
                 return newWorkflows
             })
         }
@@ -264,7 +266,7 @@ function Flow() {
                     console.log(newWorkflows);
                 }
                 if (!newWorkflows[_wfIndex].Tests[_testIndex].Query[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Query[index] = {key:'',value:''}
+                    newWorkflows[_wfIndex].Tests[_testIndex].Query[index] = { key: '', value: '' }
                 }
                 newWorkflows[_wfIndex].Tests[_testIndex].Query[index].key = key
                 console.log(newWorkflows);
@@ -285,12 +287,61 @@ function Flow() {
                     newWorkflows[_wfIndex].Tests[_testIndex].Query = []
                 }
                 if (!newWorkflows[_wfIndex].Tests[_testIndex].Query[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Query[index] = {key:'',value:''}
+                    newWorkflows[_wfIndex].Tests[_testIndex].Query[index] = { key: '', value: '' }
                 }
                 newWorkflows[_wfIndex].Tests[_testIndex].Query[index].value = value
                 return newWorkflows
             })
         }
+    }
+
+    const onStressCountChangeCallback = (count, _wfIndex) => {
+
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows)
+
+            if (!newWorkflows[_wfIndex].Stress) {
+                newWorkflows[_wfIndex].Stress = {
+                    Count: -1,
+                    Threads: -1,
+                    Delay: -1
+                }
+            }
+            newWorkflows[_wfIndex].Stress.Count = count
+            return newWorkflows
+        })
+    }
+
+    const onStressThreadsChangeCallback = (threads, _wfIndex) => {
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows)
+
+            if (!newWorkflows[_wfIndex].Stress) {
+                newWorkflows[_wfIndex].Stress = {
+                    Count: -1,
+                    Threads: -1,
+                    Delay: -1
+                }
+            }
+            newWorkflows[_wfIndex].Stress.Threads = threads
+            return newWorkflows
+        })
+    }
+
+    const onStressDelayChangeCallback = (delay, _wfIndex) => {
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows)
+
+            if (!newWorkflows[_wfIndex].Stress) {
+                newWorkflows[_wfIndex].Stress = {
+                    Count: -1,
+                    Threads: -1,
+                    Delay: -1
+                }
+            }
+            newWorkflows[_wfIndex].Stress.Delay = delay
+            return newWorkflows
+        })
     }
 
     // #endregion
@@ -314,6 +365,7 @@ function Flow() {
             else if (sourceNode.type === "testID") {
                 onConnectTest(sourceNode, targetNode, connection)
             }
+            //TODO: else if stress test?
             else {
                 onConnectNormal(sourceNode, targetNode, connection)
             }
@@ -326,6 +378,7 @@ function Flow() {
             // this method is called if sourceNode is workflow node
 
             let sourceWorkflow = sourceNode.data.custom._wfIndex
+            console.log("srcWf" + sourceWorkflow);
 
             if (targetNode.type === "wf") {  //reject
                 alert("you cant do that")
@@ -334,18 +387,11 @@ function Flow() {
             else if (targetNode.type === "testID") {  //accept
                 // set test index to next one (in wf node)
 
-                console.log("wfs: ", workflows)
-                console.log("wfinex: ", sourceNode.data.custom._wfIndex)
-                console.log("polsf: ", workflows[sourceNode.data.custom._wfIndex])
                 let newTestIndex = workflows[sourceNode.data.custom._wfIndex].Tests.length //sourceNode.data.custom.Tests.length TODO:added +1 recently, check this better...nvm
-
 
 
                 targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow, _testIndex: newTestIndex } };   // set wfId of test node(tgt) to be the same as wf node(src)
 
-                console.log("targetNodeId");
-                console.log(typeof targetNode.id);
-                console.log(targetNode.id);
 
                 setNodes((nodes) =>
                     nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
@@ -356,12 +402,31 @@ function Flow() {
                 let newtest = targetNode.data.custom.test
                 newtest._testIndex = newTestIndex //it be a lil confusing but i think it work
 
+                // TODO: tf is this? this even used anymore?
                 setWorkflows(oldWorkflows => {
                     const newWorkflows = deepCopy(oldWorkflows);
                     newWorkflows[sourceWorkflow].Tests.push(newtest)
                     return newWorkflows;
                 });
 
+
+            }
+            else if (targetNode.type === "stress") {
+                console.log("target node stress"); //TODO: does this make sense here? idk
+
+                console.log("target nodeb4");
+                console.log(targetNode);
+
+                console.log(targetNode.data.custom_wfIndex);
+
+                targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow } };   // set wfId of test node(tgt) to be the same as wf node(src)
+
+                console.log("target node");
+                console.log(targetNode);
+
+                setNodes((nodes) =>
+                    nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
+                );
 
             }
             else {   //reject
@@ -476,13 +541,14 @@ function Flow() {
     // #endregion
 
 
-    
+
     // #region Create Nodes
 
-  const createWorkflowNode = (wfIndex, wfName) => {
+    const createWorkflowNode = (wfIndex = -1, wfName = "") => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
-
+        console.log("sffss");
+        console.log(wfIndex);
         const newNode = {
             id,
             position: {
@@ -503,22 +569,18 @@ function Flow() {
         return id;
     }
 
-    const createTestNode = (testName, initialServer = "", initialPath = "", initialMethod = "",_wfIndex = -1, _testIndex = -1) => {
+    const createTestNode = (testName="", initialServer = "", initialPath = "", initialMethod = "", _wfIndex = -1, _testIndex = -1) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
+        // only mandatory fields
         let newTest = {
             _testIndex: -1,
-            Server: "", //https://petstore3.swagger.io/api/v3    
+            Server: "",
             TestID: testName,
-            Path: "",//   /pet/1
+            Path: "",
             Method: "",
-            /* Headers: [{
-                keyItem: '',
-                valueItem: ''
-            }],//[{keyItem:'',valueItem: ''}]   OPTIONAL
-            Body: '',                           //OPTIONAL */
-            Verifications: [{ Code: 200, Schema: '' }]//Verifications: {     Code: 0,     Schema: ""   }    //ONLY CODE VERIFICATON IS MANDATORY
+            Verifications: [{ Code: -1 }]
         }
 
         const newNode = {
@@ -555,7 +617,7 @@ function Flow() {
         return id;
     }
 
-    const createHeadersNode = (initialHeadersArr = [], _wfIndex = -1, _testIndex = -1)=>{
+    const createHeadersNode = (initialHeadersArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -583,7 +645,7 @@ function Flow() {
         return id;
     }
 
-    const createQueryNode = (initialQueryArr = [], _wfIndex = -1, _testIndex = -1)=>{
+    const createQueryNode = (initialQueryArr = [], _wfIndex = -1, _testIndex = -1) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -609,7 +671,7 @@ function Flow() {
         return id;
     }
 
-    const createBodyNode = ()=>{
+    const createBodyNode = () => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -621,7 +683,7 @@ function Flow() {
             },
             data: {
                 custom: {
-                    
+
                 }
             },
             type: 'body'
@@ -631,7 +693,7 @@ function Flow() {
         return id;
     }
 
-    const createRetainNode = (initialRetainArr = [], _wfIndex = -1, _testIndex = -1)=>{
+    const createRetainNode = (initialRetainArr = [], _wfIndex = -1, _testIndex = -1) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -652,7 +714,34 @@ function Flow() {
 
         return id;
     }
-    
+
+    const createStressNode = (initialCount = -1, initialThreads = -1, initialDelay = -1, _wfIndex = -1) => {
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+                    Count: initialCount,
+                    Threads: initialThreads,
+                    Delay: initialDelay,
+                    _wfIndex: _wfIndex,
+                    countChangeCallback: onStressCountChangeCallback,
+                    threadsChangeCallback: onStressThreadsChangeCallback,
+                    delayChangeCallback: onStressDelayChangeCallback
+                }
+            },
+            type: 'stress'
+        };
+        reactFlowInstance.addNodes(newNode);
+
+        return id;
+    }
 
 
     const createStatusVerificationNode = (status = "", _wfIndex = -1, _testIndex = -1) => {
@@ -688,26 +777,26 @@ function Flow() {
         let listOfEdgesLists = []
 
         newstate.forEach(wf => {
-            
+
             let testNodeIdsList = []
             let edgesList = []
-            
+
             wf._wfIndex = yamlWfIndex
             maxWfIndex.current += 1
             const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID) //WorkflowID is wf name
 
-            
+
             if (wf.Stress) {
                 console.log("stress found");
             }
-            
+
 
             wf.Tests.forEach(test => {
-                
+
                 test._testIndex = currYamlTestIndex
 
                 // ------------ REQUEST ------------
-                
+
                 const testNodeServer = test.Server
                 const testNodePath = test.Path
                 const testNodeMethod = test.Method
@@ -725,8 +814,8 @@ function Flow() {
                 if (test.Headers) {
                     console.log("headers found");
 
-                    test.Headers.forEach( header=>{
-                        
+                    test.Headers.forEach(header => {
+
                     })
                 }
 
@@ -796,7 +885,7 @@ function Flow() {
 
     // #endregion
 
-    
+
     // #region onClick in Editor
 
     const onClickWorkflowNode = () => {
@@ -804,7 +893,9 @@ function Flow() {
         //create node with wf index equal to the max current index + 1
         //ex if there are 3 workflows currently, the maxWfIndex is 3 and will be 4 after creating wf (which will have wfIndex 4)
         maxWfIndex.current += 1
-        createWorkflowNode(maxWfIndex.current)
+        console.log("dsdfs");
+        console.log(maxWfIndex.current);
+        createWorkflowNode(maxWfIndex.current, "")
 
 
         //create the actual workflow
@@ -826,7 +917,7 @@ function Flow() {
 
         //create node with no wfIndex and no textIndex because that will be decided on connection
         //node is created with an empty test inside so that when connection to wfNode happens, test is put in correct position
-        createTestNode("new test name")
+        createTestNode()
 
 
         /*
@@ -867,22 +958,29 @@ function Flow() {
         reactFlowInstance.addNodes(newNode);
     }
 
-    const onClickBodyNode = () =>{
+    const onClickBodyNode = () => {
         console.log("[Editor] Adding Body node");
+        createBodyNode()
     }
 
-    const onClickHeadersNode = () =>{
+    const onClickHeadersNode = () => {
         console.log("[Editor] Adding Headers node");
         createHeadersNode()
     }
 
-    const onClickQueryNode = () =>{
+    const onClickQueryNode = () => {
         console.log("[Editor] Adding Query node");
         createQueryNode()
     }
 
-    const onClickRetainNode = () =>{
+    const onClickRetainNode = () => {
         console.log("[Editor] Adding Retain node");
+        createRetainNode()
+    }
+
+    const onClickStressTestNode = () => {
+        console.log('[Editor] Adding Stress test node');
+        createStressNode()
     }
 
     // #endregion
@@ -935,7 +1033,7 @@ function Flow() {
 
     }
 
-    
+
     //TODO: in the future check this as well as finishSetup()
     const saveWorkflow = () => {
 
@@ -944,35 +1042,38 @@ function Flow() {
 
             for (let wfIndex = 0; wfIndex < newWorkflows.length; wfIndex++) {
                 const workflow = newWorkflows[wfIndex];
-                delete workflow.Stress
+
+                //if(!workflow.Stress) delete workflow.Stress
                 delete workflow._wfIndex
 
                 for (let testIndex = 0; testIndex < workflow.Tests.length; testIndex++) {
                     const test = workflow.Tests[testIndex];
                     //delete test.Headers TODO: testing headers
 
-                    const transformedHeaders = test.Headers.map(({ key, value }) => `${key}:${value}`);
-                    test.Headers = transformedHeaders
+                    //if(!test.Headers) delete test.Headers
+
+                    //if(!test.Retain) delete test.Retain
+
+                    if (test.Headers) {
+                        /* const transformedHeaders = test.Headers.map(({ key, value }) => `${key}:${value}`);
+                    test.Headers = transformedHeaders */
+                    }
+
 
                     /* const transformedQuery = test.Query.map(({ key, value }) => `${key}:${value}`);
                     test.Query = transformedQuery */
 
-                    delete test.Body
+                    //if(!test.Body) delete test.Body
                     delete test._testIndex
+
                     for (let ver = 0; ver < test.Verifications.length; ver++) {
                         const verification = test.Verifications[ver];
-                        if (!verification.Schema) {
+                        /* if (!verification.Schema) {
                             delete verification.Schema
-                        }
+                        } */
                     }
                 }
             }
-            /*
-            delete newWorkflows[0].Stress
-            delete newWorkflows[0].Tests[0].Headers
-            delete newWorkflows[0].Tests[0].Body
-            delete newWorkflows[0].Tests[0].Verifications.Schema
-            */
 
             return newWorkflows
         })
@@ -1034,6 +1135,10 @@ function Flow() {
         console.log("Logging the state...")
         console.log("API file: ", apiFile);
 
+        console.log("Run Generated:", runGenerated);
+        console.log("Run Immediatly:", runImmediately);
+        console.log("Run Interval:", runInterval);
+
         console.log("----------------------------");
         console.log("Workflows: ");
         console.log(workflows);
@@ -1087,7 +1192,7 @@ function Flow() {
 
                         <label><b>Timer settings:</b></label>
 
-                        <div>
+                        {/* <div>
                             <div>
                                 <label>Run Generated?</label>
                                 <div>
@@ -1096,6 +1201,7 @@ function Flow() {
                                     <input className='node-radio' type="radio" id="runGeneratedNo" name="runGenerated" value="no" onChange={onRunGeneratedChange} />
                                     <label htmlFor="runGeneratedNo">No</label>
                                 </div>
+
                             </div>
                             <div>
                                 <label>Run Immediately?</label>
@@ -1121,7 +1227,11 @@ function Flow() {
                                     <label htmlFor="runInterval5">Never</label>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
+
+                        <TimerSettings onRunGeneratedChange={onRunGeneratedChange}
+                            onRunImmediatelyChange={onRunImmediatelyChange}
+                            onRunIntervalChange={onRunIntervalChange}></TimerSettings>
 
                         <p></p>
                         <b>Nodes</b>
@@ -1137,6 +1247,10 @@ function Flow() {
 
                         <button onClick={onClickTestNode} className="node-button">
                             Add Test
+                        </button>
+
+                        <button onClick={onClickStressTestNode} className="node-button">
+                            Add Stress test
                         </button>
 
                         <label>HTTP Requests</label>

@@ -1,0 +1,49 @@
+.node {
+    padding: 8px;
+    font-size: 10px;
+    width: 180px;
+    color: #222;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 15%), 0 2px 4px -1px rgb(0 0 0 / 8%);
+    border-radius: 4px;
+}
+
+
+.accordion-item {
+    border: none
+}
+
+.accordion-body {
+    padding: 8px;
+    box-shadow: none !important;
+}
+
+
+.accordion-button {
+    padding: 8px;
+    box-shadow: none !important;
+}
+
+.header .accordion-button {
+    background: inherit;
+    color: #222;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+.area{
+     background: inherit;
+     font-size: inherit;
+     box-shadow: none !important;
+}
+
+.node label {
+    display: block;
+    color: #777;
+    font-size: 12px;
+  }
+
+.form-control{
+    font-size: inherit;
+    padding: 4px 8px
+}
+

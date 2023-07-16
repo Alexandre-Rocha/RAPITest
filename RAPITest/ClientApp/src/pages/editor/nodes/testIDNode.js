@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
+import { Combobox } from 'react-widgets';
+import { Form } from 'react-bootstrap';
+import { Accordion } from 'react-bootstrap';
 
 import './css/testIDNode.css'
+import './css/generalNode.css'
 
 
 
 function TestIDNode({ data, isConnectable }) {
-  
+
   const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1) // Either id from pre-exisitng TSL or -1 (not assigned)
   const [testName, setTestName] = useState(data.custom.testName || ""); // Either name from pre-existing TSL or empty name 
 
-  const [httpMethods, setHttpMethods] = useState(["Get","Delete","Post","Put"]) //TODO: ideally this comes from parent
+  const [httpMethods, setHttpMethods] = useState(["Get", "Delete", "Post", "Put"]) //TODO: ideally this comes from parent
 
   const [serverURL, setServerURL] = useState(data.custom.initialServer);
   const [path, setPath] = useState(data.custom.initialPath);
@@ -19,23 +23,24 @@ function TestIDNode({ data, isConnectable }) {
 
 
   const onChangeServer = (event) => {
-    setServerURL(event.target.value)
-    console.log("[Test node] Selected server: ", event.target.value)
-    data.custom.serverChangeCallback(event.target.value, data.custom._wfIndex, data.custom._testIndex)
-    //data.custom.methodChangeCallback("Get", data.custom._wfIndex, data.custom._testIndex) //TODO: this is probably not necessary more than once
+    const _server = event
+    setServerURL(_server)
+    console.log("[Test node] Selected server: ", _server)
+    data.custom.serverChangeCallback(_server, data.custom._wfIndex, data.custom._testIndex)
   };
 
   const onChangePath = (event) => {
-    setPath(event.target.value)
-    console.log("[Test node] Selected path: ", event.target.value)
-    data.custom.pathChangeCallback(event.target.value, data.custom._wfIndex, data.custom._testIndex)
-    //data.custom.methodChangeCallback("Get", data.custom._wfIndex, data.custom._testIndex) //TODO: this is probably not necessary more than once
+    const _path = event
+    setPath(_path)
+    console.log("[Test node] Selected path: ", _path)
+    data.custom.pathChangeCallback(_path, data.custom._wfIndex, data.custom._testIndex)
   };
 
   const onChangeMethod = (event) => {
-    setMethod(event.target.value)
-    console.log("[Test node] Selected method: ", event.target.value)
-    data.custom.methodChangeCallback("Get", data.custom._wfIndex, data.custom._testIndex) //TODO: this is probably not necessary more than once
+    const _method = event
+    setMethod(_method)
+    console.log("[Test node] Selected method: ", _method)
+    data.custom.methodChangeCallback("Get", data.custom._wfIndex, data.custom._testIndex) //TODO: ONLY GET????
   };
 
 
@@ -49,99 +54,77 @@ function TestIDNode({ data, isConnectable }) {
   }, [data.custom._testIndex]); //we dont want testIndex here because it will lead to infinite rerender-> THIS IS WHY ESLINT IS DISABLED
   /* eslint-enable */
 
-  
-  console.log("[Test node] Workflow ID: ",data.custom._wfIndex)
+
+  console.log("[Test node] Workflow ID: ", data.custom._wfIndex)
   console.log("[Test node] Test ID: ", testIndex)
 
 
   const onTestNameChange = (evt) => {
-    console.log("[Test node] Test name: ", evt.target.value)
-    setTestName(evt.target.value)
-    data.custom.nameChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+    const _testName = evt.target.value
+    console.log("[Test node] Test name: ", _testName)
+    setTestName(_testName)
+    data.custom.nameChangeCallback(_testName, data.custom._wfIndex, data.custom._testIndex)
   };
 
   //TODO: Think better on how to implement changing Test order; for now this works
-  const onIncrement = ()=> {
+  const onIncrement = () => {
     setTestIndex(oldTestIndex => oldTestIndex + 1)
   }
-  const onDecrement = ()=> {
+  const onDecrement = () => {
     setTestIndex(oldTestIndex => oldTestIndex - 1)
   }
-  
+
 
   return (
-    <div className="text-updater-node">
+    <div className="test-node node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
 
-      <div>
-        <label htmlFor="text">Test name:</label>
-        <input value={testName} id="text" name="text" onChange={onTestNameChange} className="nodrag" />
-      </div>
+      <Accordion defaultActiveKey="0">
+        <Accordion.Item className='test-area area' eventKey="0">
+          <Accordion.Header className='test-header header'>Test</Accordion.Header>
+          <Accordion.Body className='nodrag'>
+
+            <label htmlFor="text">Test name</label>
+            <Form.Control value={testName} onChange={onTestNameChange} className="test-name" type="text" placeholder="Enter text" />
 
 
-      <div>
-        <label htmlFor="readonly">Server URL </label>
-        <input
-          type="text"
-          value={serverURL}
-          onChange={onChangeServer}
-        />
-        <select value={serverURL} onChange={onChangeServer}>
-          <option value="">Servers:</option>
-          {data.custom.servers.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
+            <label htmlFor="text">Server</label>
+            <Combobox className='nowheel'
+              data={data.custom.servers}
+              filter={false}
+              onChange={onChangeServer}
+              defaultValue={data.custom.initialServer || "Servers:"}
+            />
 
-      <div>
-        <label htmlFor="readonly">Path </label>
-        <input
-          type="text"
-          value={path}
-          onChange={onChangePath}
-        />
-        <select value={path} onChange={onChangePath}>
-          <option value="">Paths:</option>
-          {data.custom.paths.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
+<label htmlFor="text">Path</label>
+            <Combobox className='nowheel'
+              data={data.custom.paths}
+              filter={false}
+              onChange={onChangePath}
+              defaultValue={data.custom.initialPath || "Paths:"}
+            />
 
+<label htmlFor="text">Method</label>
+            <Combobox className='nowheel'
+              data={httpMethods}
+              filter={false}
+              onChange={onChangeMethod}
+              defaultValue={data.custom.initialMethod || "Methods:"}
+            />
 
-      <div>
-        <label htmlFor="readonly">Method </label>
-        <input
-          type="text"
-          value={method}
-          onChange={onChangeMethod}
-        />
-        <select value={method} onChange={onChangeMethod}>
-          <option value="">Method:</option>
-          {httpMethods.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
+            <div>
+              Wf: {data.custom._wfIndex}
+            </div>
+            <div>
+              Test: {testIndex}
+              <button onClick={onIncrement}>+1</button>
+              <button onClick={onDecrement}>-1</button>
+            </div>
 
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
 
-
-      <div>
-        Wf: {data.custom._wfIndex}
-      </div>
-      <div>
-        Test: {testIndex}
-        <button onClick={onIncrement}>+1</button>
-        <button onClick={onDecrement}>-1</button>
-      </div>
-     
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>
   );

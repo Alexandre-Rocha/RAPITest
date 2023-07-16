@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import './css/getRequestNode.css'
 
 function StatusVerificationNode({ data, isConnectable }) {
 
