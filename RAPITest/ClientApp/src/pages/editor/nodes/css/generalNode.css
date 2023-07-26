@@ -17,7 +17,7 @@
     box-shadow: none !important;
 }
 
-
+/*TODO: this broke setup test*/
 .accordion-button {
     padding: 8px;
     box-shadow: none !important;
@@ -38,7 +38,7 @@
 
 .node label {
     display: block;
-    color: #777;
+    color: #464545;
     font-size: 12px;
   }
 

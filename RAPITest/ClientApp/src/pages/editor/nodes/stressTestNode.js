@@ -4,6 +4,8 @@ import React from 'react';
 import { Accordion } from 'react-bootstrap';
 import { Form } from 'react-bootstrap';
 
+
+
 import './css/stressTestNode.css'
 import './css/generalNode.css'
 
@@ -11,11 +13,11 @@ import './css/generalNode.css'
 function StressTestNode({ data, isConnectable }) {
 
 
-  const [count, setCount] = useState(data.custom.wfName || "") // Either name from pre-existing TSL or empty name
+  const [count, setCount] = useState(data.custom.count || "") // Either name from pre-existing TSL or empty name
 
-  const [threads, setThreads] = useState(data.custom.wfName || "") // Either name from pre-existing TSL or empty name
+  const [threads, setThreads] = useState(data.custom.threads || "") // Either name from pre-existing TSL or empty name
 
-  const [delay, setDelay] = useState(data.custom.wfName || "") // Either name from pre-existing TSL or empty name
+  const [delay, setDelay] = useState(data.custom.delay || "") // Either name from pre-existing TSL or empty name
 
   console.log("[Stress test node] Workflow ID: ", data.custom._wfIndex)
 
@@ -37,7 +39,6 @@ function StressTestNode({ data, isConnectable }) {
     setDelay(evt.target.value)
     data.custom.delayChangeCallback(evt.target.value, data.custom._wfIndex)
   };
-
 
 
 

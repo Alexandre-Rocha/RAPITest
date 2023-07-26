@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
+import { Accordion } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
+
+
+import './css/statusVerificationNode.css'
+import './css/generalNode.css'
 
 function StatusVerificationNode({ data, isConnectable }) {
 
@@ -13,20 +19,36 @@ function StatusVerificationNode({ data, isConnectable }) {
   const onStatusCodeChange = (evt) => {
     console.log("[Status node] Status code: ", evt.target.value)
     setStatusCode(evt.target.value)
-    data.custom.onStatusCodeChange(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+    data.custom.statusChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
   };
 
 
   return (
-    <div className="text-updater-node">
+    <div className="statusVerif-node node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
 
-      <label htmlFor="readonly">Status code node</label>
+      <Accordion defaultActiveKey="0">
+        <Accordion.Item className='statusVerif-area area' eventKey="0">
+          <Accordion.Header className='statusVerif-header header'>Status Code</Accordion.Header>
+          <Accordion.Body className='nodrag'>
+
+
+          <label htmlFor="text">Status Code</label>
+              <Form.Control value={statusCode} onChange={onStatusCodeChange} className="test-name" type="text" placeholder="Enter text" />
+
+
+      {/* <label htmlFor="readonly">Status code node</label>
 
       <div>
         <label htmlFor="text">Status code:</label>
         <input value={statusCode} id="text" name="text" onChange={onStatusCodeChange} className="nodrag" />
-      </div>
+      </div> */}
+
+
+      </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
+
 
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>
