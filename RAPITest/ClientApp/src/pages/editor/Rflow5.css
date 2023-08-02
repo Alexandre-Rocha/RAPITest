@@ -6,6 +6,7 @@
   .sidebar {
     /* Add any additional styles for the sidebar */
     display: flex;
+    flex-direction: column;
     margin-right: 2px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -15,13 +16,14 @@
     padding: 0 4px;
   }
 
-  .sidebarDiv {
-    /* Add any additional styles for the sidebar */
+/*   .sidebarDiv {
     display: flex;
     flex-direction: column;
     margin-left: 1px;
     margin-right: 1px;
+    background-color: aqua;
   }
+   */
   .editor-outline{
     outline: 2px solid black;
     flex-grow: 4;

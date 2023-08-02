@@ -1,0 +1,27 @@
+.collapsible-sidebar {
+    width: 200px;
+    height: 100vh; 
+    background-color: #f0f0f0;
+    transition: width 0.3s ease;
+  }
+  
+  .collapsible-sidebar.collapsed {
+    width: 50px; 
+  }
+  
+  .toggle-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #ccc;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .sidebar-content {
+    display: block; 
+  }
+  
+  .collapsible-sidebar.collapsed .sidebar-content {
+    display: none ;
+  }
+  

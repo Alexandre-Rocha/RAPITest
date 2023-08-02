@@ -15,10 +15,13 @@ import HeadersNode from './nodes/headersNode';
 import RetainNode from './nodes/retainNode';
 import StressTestNode from './nodes/stressTestNode';
 
+import Sidebar from './other-components/Sidebar';
+
 import './Rflow5.css'
 
 import { SmallApiUpload } from './other-components/SmallApiUpload';
 import TimerSettings from './other-components/TimerSettings';
+import CollapsibleSidebar from './nodes/cS';
 
 const YAML = require('json-to-pretty-yaml');
 const jsYaml = require('js-yaml')
@@ -682,7 +685,7 @@ function Flow() {
         return id;
     }
 
-    const createTestNode = (testName="", initialServer = "", initialPath = "", initialMethod = "", _wfIndex = -1, _testIndex = -1) => {
+    const createTestNode = (testName = "", initialServer = "", initialPath = "", initialMethod = "", _wfIndex = -1, _testIndex = -1) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -1012,7 +1015,7 @@ function Flow() {
                     }
 
                     edgesList.push(newEdgeTestSchema)
-    
+
                 }
 
 
@@ -1221,7 +1224,7 @@ function Flow() {
 
                     if (test.Headers) {
                         const transformedHeaders = test.Headers.map(({ key, value }) => `${key}:${value}`);
-                    test.Headers = transformedHeaders //TODO: headers
+                        test.Headers = transformedHeaders //TODO: headers
                     }
 
 
@@ -1234,7 +1237,7 @@ function Flow() {
                     for (let ver = 0; ver < test.Verifications.length; ver++) {
                         const verification = test.Verifications[ver];
                         if (verification.Schema) {
-                            let schemaStr = "$ref/definitions/"+verification.Schema
+                            let schemaStr = "$ref/definitions/" + verification.Schema
                             verification.Schema = schemaStr
                         }
                         /* if (!verification.Schema) {
@@ -1348,53 +1351,35 @@ function Flow() {
         <div>
             <div className='editor-container'>
                 <aside className="sidebar">
-                    <div id="side-menu" className="sidebarDiv">
-                        <p></p>
-                        <label><b>Name of test configuration:</b></label>
-                        <input value={testConfName} id="text" name="text" onChange={onTestConfNameChange} className="nodrag" />
-
-                        <label><b>API Specification:</b></label>
-
-                        {(uploaded === false && location?.state?.APITitle === undefined) ?
-                            <SmallApiUpload handlerAPI={handlerAPI} apiTitle={testConfName} ></SmallApiUpload> : <div>API uploaded!</div>}
 
 
-                        {/* <div>
-                            <div>
-                                <label>Run Generated?</label>
-                                <div>
-                                    <input className='node-radio' type="radio" id="runGeneratedYes" name="runGenerated" value="yes" onChange={onRunGeneratedChange} />
-                                    <label htmlFor="runGeneratedYes">Yes</label>
-                                    <input className='node-radio' type="radio" id="runGeneratedNo" name="runGenerated" value="no" onChange={onRunGeneratedChange} />
-                                    <label htmlFor="runGeneratedNo">No</label>
-                                </div>
+                        <Sidebar className="sidebarDiv sidebar-content" onRunGeneratedChange={onRunGeneratedChange}
+                            onRunImmediatelyChange={onRunImmediatelyChange}
+                            onRunIntervalChange={onRunIntervalChange}
+                            apiTitle={testConfName}
+                            handlerAPI={handlerAPI}
+                            onTestConfNameChange={onTestConfNameChange}
+                            buttonsArray={[
+                                { section: "Flow-related", title: "Add Workflow", onClick: onClickWorkflowNode },
+                                { section: "Flow-related", title: "Add Test", onClick: onClickTestNode },
+                                { section: "Flow-related", title: "Add Stress test", onClick: onClickStressTestNode },
+                                { section: "HTTP Requests", title: "Add Body", onClick: onClickBodyNode },
+                                { section: "HTTP Requests", title: "Add Headers", onClick: onClickHeadersNode },
+                                { section: "HTTP Requests", title: "Add Query", onClick: onClickQueryNode },
+                                { section: "HTTP Requests", title: "Add Retain", onClick: onClickRetainNode },
+                                { section: "Verifications", title: "Add Status Code verification", onClick: onClickStatus },
+                                { section: "Verifications", title: "Add Schema verification", onClick: onClickSchema },
+                                { section: "Setup-related", title: "Save changes", onClick: saveWorkflow },
+                                { section: "Setup-related", title: "Finish Setup", onClick: finishSetup },
+                                { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf },
+                                { section: "Dev", title: "Dump state", onClick: dumpState },
+                            ]}>
+                        </Sidebar>
 
-                            </div>
-                            <div>
-                                <label>Run Immediately?</label>
-                                <div>
-                                    <input className='node-radio' type="radio" id="runImmediatelyYes" name="runImmediately" value="yes" onChange={onRunImmediatelyChange} />
-                                    <label htmlFor="runImmediatelyYes">Yes</label>
-                                    <input className='node-radio' type="radio" id="runImmediatelyNo" name="runImmediately" value="no" onChange={onRunImmediatelyChange} />
-                                    <label htmlFor="runImmediatelyNo">No</label>
-                                </div>
-                            </div>
-                            <div>
-                                <label>Select Run Interval:</label>
-                                <div>
-                                    <input className='node-radio' type="radio" id="runInterval1" name="runInterval" value="1 hour" onChange={onRunIntervalChange} />
-                                    <label htmlFor="runInterval1">1 hour</label>
-                                    <input className='node-radio' type="radio" id="runInterval2" name="runInterval" value="12 hours" onChange={onRunIntervalChange} />
-                                    <label htmlFor="runInterval2">12 hours</label>
-                                    <input className='node-radio' type="radio" id="runInterval3" name="runInterval" value="24 hours" onChange={onRunIntervalChange} />
-                                    <label htmlFor="runInterval3">24 hours</label>
-                                    <input className='node-radio' type="radio" id="runInterval4" name="runInterval" value="1 week" onChange={onRunIntervalChange} />
-                                    <label htmlFor="runInterval4">1 week</label>
-                                    <input className='node-radio' type="radio" id="runInterval5" name="runInterval" value="Never" onChange={onRunIntervalChange} />
-                                    <label htmlFor="runInterval5">Never</label>
-                                </div>
-                            </div>
-                        </div> */}
+
+
+                    {/* <div id="side-menu" className="sidebarDiv">
+                       
 
                         <TimerSettings onRunGeneratedChange={onRunGeneratedChange}
                             onRunImmediatelyChange={onRunImmediatelyChange}
@@ -1403,10 +1388,6 @@ function Flow() {
                         <p></p>
                         <b>Nodes</b>
                         <label>Flow-related</label>
-
-                        {/* <button onClick={onClickApi} className="node-button">
-                            Add API spec
-                        </button> */}
 
                         <button onClick={onClickWorkflowNode} className="node-button">
                             Add Workflow
@@ -1474,7 +1455,7 @@ function Flow() {
 
 
 
-                    </div>
+                    </div> */}
                 </aside>
 
                 <div className='editor-outline' style={{ height: 750, width: 1300 }}>
