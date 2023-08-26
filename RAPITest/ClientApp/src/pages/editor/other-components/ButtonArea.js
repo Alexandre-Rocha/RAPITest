@@ -1,4 +1,5 @@
 import React from 'react';
+import {AwesomeButton} from 'react-awesome-button';
 
 
 /* data should be an array in the form: 
@@ -16,16 +17,19 @@ const ButtonArea = (props) => {
     const sections = [...new Set(data.map((buttonData) => buttonData.section))];
 
   return (
-    <div>
+    <div className='button-area'>
       {sections.map((section, index) => (
-        <div key={index}>
-          <h3>{section}</h3>
+        <div className='single-button-area' key={index}>
+          <p></p>
+          <b>{section}</b>
           {data
             .filter((buttonData) => buttonData.section === section)
             .map((buttonData, buttonIndex) => (
-              <button key={buttonIndex} onClick={buttonData.onClick} className="node-button">
-                {buttonData.title}
-              </button>
+              
+              <AwesomeButton key={buttonIndex} onPress={buttonData.onClick} className={`node-button ${buttonData.class}`}
+              >
+              {buttonData.title}
+            </AwesomeButton>
             ))}
         </div>
       ))}
@@ -34,3 +38,8 @@ const ButtonArea = (props) => {
   };
 
 export default ButtonArea;
+
+
+/* <button key={buttonIndex} onClick={buttonData.onClick} className="node-button">
+                {buttonData.title}
+              </button> */

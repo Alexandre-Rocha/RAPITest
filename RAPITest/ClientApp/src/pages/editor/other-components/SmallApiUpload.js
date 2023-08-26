@@ -32,6 +32,7 @@ export class SmallApiUpload extends Component {
 
     //callback for dropzone
     onDrop(accept, reject) {
+        console.log("DropCallback");
         if (reject.length !== 0 || accept.length > 1) {
             this.setState({ showWarning: true, warningMessage: "Please upload only one yaml or json file" })
         }
@@ -41,8 +42,9 @@ export class SmallApiUpload extends Component {
                 let data = new FormData();
                 data.append('apiSpecification', accept[0]);
                 data.append('title', this.props.apiTitle);
+                console.log("gonna get auth token");
                 const token = await authService.getAccessToken();
-
+                console.log("gonna fetch");
                 fetch(`SetupTest/GetSpecificationDetails`, {
                     method: 'POST',
                     headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
@@ -50,10 +52,12 @@ export class SmallApiUpload extends Component {
                 }).then(async (res) => {
                     if (!res.ok) {
                         await delay(2000);
+                        console.log("Error uploading API");
                         this.setState({ showDanger: true, showInput: true })
                     }
                     else {
                         await delay(2500);
+                        console.log("API uploaded");
                         res.json().then(response => {
                             this.props.handlerAPI(response.Paths, response.Servers, response.Schemas, response.SchemasValues)
                         })
@@ -81,11 +85,13 @@ export class SmallApiUpload extends Component {
                 body: data
             }).then(async (res) => {
                 if (!res.ok) {
+                    console.log("Error uploading API");
                     await delay(2000);
                     this.setState({ showDanger: true, showInput: true })
                 }
                 else {
                     await delay(2500);
+                    console.log("API uploaded");
                     res.json().then(response => {
                         this.props.handlerAPI(response.Paths, response.Servers, response.Schemas, response.SchemasValues)
                     })

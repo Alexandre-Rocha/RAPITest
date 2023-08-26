@@ -23,6 +23,14 @@
     box-shadow: none !important;
 }
 
+.headerDiv{
+    overflow: hidden;
+}
+
+.header .accordion-button::after {
+    overflow:visible
+}
+
 .header .accordion-button {
     background: inherit;
     color: #222;

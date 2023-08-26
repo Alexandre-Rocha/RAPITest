@@ -1,11 +1,21 @@
 import React from 'react';
+import { useState } from "react"
+
 import { SmallApiUpload } from './SmallApiUpload';
 
 const ApiUploadArea = (props) => {
 
+
+    const [uploaded, setUploaded] = useState(props.uploaded)
+
     const { apiTitle, handlerAPI } = props
 
     const {onTestConfNameChange} = props
+
+    const newHandler = (paths, servers, schemas, schemasValues)=>{
+        handlerAPI(paths, servers, schemas, schemasValues)
+        setUploaded(true)
+    }
 
     return (
 
@@ -15,8 +25,8 @@ const ApiUploadArea = (props) => {
 
             <label><b>API Specification:</b></label>
 
-            {(props.uploaded === false ) ?
-                <SmallApiUpload handlerAPI={handlerAPI} apiTitle={apiTitle} ></SmallApiUpload> : <div>API uploaded!</div>}
+            {(uploaded === false ) ?
+                <SmallApiUpload handlerAPI={newHandler} apiTitle={apiTitle} ></SmallApiUpload> : <div>API uploaded!</div>}
         </div>
     );
 };

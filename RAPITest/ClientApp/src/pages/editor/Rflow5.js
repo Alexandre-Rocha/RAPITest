@@ -21,7 +21,6 @@ import './Rflow5.css'
 
 import { SmallApiUpload } from './other-components/SmallApiUpload';
 import TimerSettings from './other-components/TimerSettings';
-import CollapsibleSidebar from './nodes/cS';
 
 const YAML = require('json-to-pretty-yaml');
 const jsYaml = require('js-yaml')
@@ -29,6 +28,8 @@ const jsYaml = require('js-yaml')
 
 const initialNodes = []
 const initialEdges = []
+
+const proOptions = { hideAttribution: true };
 
 const nodeTypes = { status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode, stress: StressTestNode }
 
@@ -660,7 +661,7 @@ function Flow() {
 
     // #region Create Nodes
 
-    const createWorkflowNode = (wfIndex = -1, wfName = "") => {
+    const createWorkflowNode = (wfIndex = -1, wfName = "", x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         console.log("sffss");
@@ -668,8 +669,8 @@ function Flow() {
         const newNode = {
             id,
             position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
+                x: x,
+                y: y,
             },
             data: {
                 custom: {
@@ -685,7 +686,7 @@ function Flow() {
         return id;
     }
 
-    const createTestNode = (testName = "", initialServer = "", initialPath = "", initialMethod = "", _wfIndex = -1, _testIndex = -1) => {
+    const createTestNode = (testName = "", initialServer = "", initialPath = "", initialMethod = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -733,7 +734,7 @@ function Flow() {
         return id;
     }
 
-    const createHeadersNode = (initialHeadersArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1) => {
+    const createHeadersNode = (initialHeadersArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -761,7 +762,7 @@ function Flow() {
         return id;
     }
 
-    const createQueryNode = (initialQueryArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1) => {
+    const createQueryNode = (initialQueryArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -789,7 +790,7 @@ function Flow() {
         return id;
     }
 
-    const createBodyNode = () => {
+    const createBodyNode = (x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -811,7 +812,7 @@ function Flow() {
         return id;
     }
 
-    const createRetainNode = (initialRetainArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1) => {
+    const createRetainNode = (initialRetainArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -839,7 +840,7 @@ function Flow() {
         return id;
     }
 
-    const createStressNode = (initialCount = -1, initialThreads = -1, initialDelay = -1, _wfIndex = -1) => {
+    const createStressNode = (initialCount = -1, initialThreads = -1, initialDelay = -1, _wfIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
@@ -868,7 +869,7 @@ function Flow() {
     }
 
 
-    const createStatusVerificationNode = (initialStatus = "", _wfIndex = -1, _testIndex = -1) => {
+    const createStatusVerificationNode = (initialStatus = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -892,7 +893,7 @@ function Flow() {
         return id;
     }
 
-    const createSchemaVerificationNode = (initialSchema = "", _wfIndex = -1, _testIndex = -1) => {
+    const createSchemaVerificationNode = (initialSchema = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -924,6 +925,9 @@ function Flow() {
         let currYamlTestIndex = 0;
 
         let listOfEdgesLists = []
+
+        let startingX = 0.1
+        let startingY = 0.1
 
         newstate.forEach(wf => {
 
@@ -1324,6 +1328,33 @@ function Flow() {
         console.log(edges);
     }
 
+    const collapseNodes = () =>{
+        let nodesArr = reactFlowInstance.getNodes();
+        nodesArr.forEach(
+            e=>{
+                if(e.data.custom.collapseAccordion){
+                    console.log("collapse");
+                    e.data.custom.collapseAccordion()
+                }
+                console.log("no collapse");
+                console.log(e);
+            }
+        )
+    }
+
+    const openNodes = () =>{
+        let nodesArr = reactFlowInstance.getNodes();
+        nodesArr.forEach(
+            e=>{
+                if(e.data.custom.openAccordion){
+                    console.log("open");
+                    e.data.custom.openAccordion()
+                }
+                console.log("no open");
+                console.log(e);
+            }
+        )
+    }
 
 
     //TODO: maybe I can analyse this to see how the schemasvalues are passed to do same in MonitorTests
@@ -1350,115 +1381,36 @@ function Flow() {
     return (
         <div>
             <div className='editor-container'>
-                <aside className="sidebar">
 
 
-                        <Sidebar className="sidebarDiv sidebar-content" onRunGeneratedChange={onRunGeneratedChange}
-                            onRunImmediatelyChange={onRunImmediatelyChange}
-                            onRunIntervalChange={onRunIntervalChange}
-                            apiTitle={testConfName}
-                            handlerAPI={handlerAPI}
-                            onTestConfNameChange={onTestConfNameChange}
-                            buttonsArray={[
-                                { section: "Flow-related", title: "Add Workflow", onClick: onClickWorkflowNode },
-                                { section: "Flow-related", title: "Add Test", onClick: onClickTestNode },
-                                { section: "Flow-related", title: "Add Stress test", onClick: onClickStressTestNode },
-                                { section: "HTTP Requests", title: "Add Body", onClick: onClickBodyNode },
-                                { section: "HTTP Requests", title: "Add Headers", onClick: onClickHeadersNode },
-                                { section: "HTTP Requests", title: "Add Query", onClick: onClickQueryNode },
-                                { section: "HTTP Requests", title: "Add Retain", onClick: onClickRetainNode },
-                                { section: "Verifications", title: "Add Status Code verification", onClick: onClickStatus },
-                                { section: "Verifications", title: "Add Schema verification", onClick: onClickSchema },
-                                { section: "Setup-related", title: "Save changes", onClick: saveWorkflow },
-                                { section: "Setup-related", title: "Finish Setup", onClick: finishSetup },
-                                { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf },
-                                { section: "Dev", title: "Dump state", onClick: dumpState },
-                            ]}>
-                        </Sidebar>
-
-
-
-                    {/* <div id="side-menu" className="sidebarDiv">
-                       
-
-                        <TimerSettings onRunGeneratedChange={onRunGeneratedChange}
-                            onRunImmediatelyChange={onRunImmediatelyChange}
-                            onRunIntervalChange={onRunIntervalChange}></TimerSettings>
-
-                        <p></p>
-                        <b>Nodes</b>
-                        <label>Flow-related</label>
-
-                        <button onClick={onClickWorkflowNode} className="node-button">
-                            Add Workflow
-                        </button>
-
-                        <button onClick={onClickTestNode} className="node-button">
-                            Add Test
-                        </button>
-
-                        <button onClick={onClickStressTestNode} className="node-button">
-                            Add Stress test
-                        </button>
-
-                        <label>HTTP Requests</label>
-
-                        <button onClick={onClickBodyNode} className="node-button">
-                            Add Body
-                        </button>
-
-                        <button onClick={onClickHeadersNode} className="node-button">
-                            Add Headers
-                        </button>
-
-                        <button onClick={onClickQueryNode} className="node-button">
-                            Add Query
-                        </button>
-
-                        <button onClick={onClickRetainNode} className="node-button">
-                            Add Retain
-                        </button>
-
-                        <label>Verifications</label>
-
-                        <button onClick={onClickStatus} className="node-button">
-                            Add Status Code verification
-                        </button>
-
-                        <button onClick={onClickSchema} className="node-button">
-                            Add Schema verification
-                        </button>
-
-                        <label>Setup-related</label>
+                <Sidebar className='sidebar' onRunGeneratedChange={onRunGeneratedChange}
+                    onRunImmediatelyChange={onRunImmediatelyChange}
+                    onRunIntervalChange={onRunIntervalChange}
+                    apiTitle={testConfName}
+                    handlerAPI={handlerAPI}
+                    onTestConfNameChange={onTestConfNameChange}
+                    buttonsArray={[
+                        { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class:"wf" },
+                        { section: "Flow-related", title: "Test", onClick: onClickTestNode, class:"test" },
+                        { section: "Flow-related", title: "Stress Test", onClick: onClickStressTestNode , class:"stress"},
+                        { section: "HTTP Requests", title: "Body", onClick: onClickBodyNode , class:"http"},
+                        { section: "HTTP Requests", title: "Headers", onClick: onClickHeadersNode, class:"http" },
+                        { section: "HTTP Requests", title: "Query", onClick: onClickQueryNode, class:"http" },
+                        { section: "HTTP Requests", title: "Retain", onClick: onClickRetainNode, class:"http" },
+                        { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class:"verif" },
+                        { section: "Verifications", title: "Schema", onClick: onClickSchema, class:"verif" },
+                        { section: "Setup-related", title: "Save changes", onClick: saveWorkflow , class:"setup"},
+                        { section: "Setup-related", title: "Finish Setup", onClick: finishSetup , class:"setup"},
+                        { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf , class:"setup"},
+                        { section: "Dev", title: "Dump state", onClick: dumpState , class:"setup"},
+                        { section: "Dev", title: "Collapse nodes", onClick: collapseNodes , class:"setup"},
+                        { section: "Dev", title: "Open nodes", onClick: openNodes , class:"setup"},
+                    ]}>
+                </Sidebar>
 
 
 
-                        <button onClick={saveWorkflow} className="node-button">
-                            Save changes
-                        </button>
-
-                        <button onClick={finishSetup} className="node-button">
-                            Finish Setup
-                        </button>
-
-
-                        <p></p>
-                        <label>Dev </label>
-
-                        <button onClick={onClickChangeWf} className="node-button">
-                            Change entire Workflow
-                        </button>
-
-                        <button onClick={dumpState} className="node-button">
-                            Dump state
-                        </button>
-
-
-
-                    </div> */}
-                </aside>
-
-                <div className='editor-outline' style={{ height: 750, width: 1300 }}>
+                <div className='editor-outline'>
                     <ReactFlow
                         nodes={nodes}
                         edges={edges}
@@ -1466,6 +1418,7 @@ function Flow() {
                         onNodesChange={onNodesChange}
                         onEdgesChange={onEdgesChange}
                         onConnect={onConnect}
+                        proOptions={proOptions}
                     >
                         <Background color='#000000' variant={'dots'} />
                         <Controls />
