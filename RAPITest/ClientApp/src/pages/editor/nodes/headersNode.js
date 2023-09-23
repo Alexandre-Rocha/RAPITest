@@ -11,7 +11,7 @@ import { Accordion } from 'react-bootstrap';
 import './css/generalNode.css'
 import './css/headersNode.css'
 
-function HeadersNode({ data, isConnectable }) {
+function HeadersNode({ data, isConnectable, xPos, yPos }) {
 
 
   const [headers, setHeaders] = useState(data.custom.headers || [{ key: '', value: '' }]);
@@ -46,6 +46,10 @@ function HeadersNode({ data, isConnectable }) {
     console.log("log state");
     console.log(headers);
   };
+
+
+  console.log("[Headers node] X pos: ", xPos)
+  console.log("[Headers node] Y pos: ", yPos)
 
   //TODO: n tem nada aver aqui mas no save changes remover headers vazios
 

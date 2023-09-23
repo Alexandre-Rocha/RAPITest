@@ -12,7 +12,7 @@ import { Accordion } from 'react-bootstrap';
 import './css/generalNode.css'
 import './css/retainNode.css'
 
-function RetainNode({ data, isConnectable }) {
+function RetainNode({ data, isConnectable, xPos, yPos }) {
 
   const [retains, setRetains] = useState(data.custom.retains || [{ key: '', value: '' }]);
 
@@ -48,6 +48,8 @@ function RetainNode({ data, isConnectable }) {
   };
 
 
+  console.log("[Retain node] X pos: ", xPos)
+  console.log("[Retain node] Y pos: ", yPos)
 
   return (
     <div className="retain-node node">

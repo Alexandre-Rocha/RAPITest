@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
@@ -9,12 +9,44 @@ import { Form } from 'react-bootstrap';
 import './css/statusVerificationNode.css'
 import './css/generalNode.css'
 
-function StatusVerificationNode({ data, isConnectable }) {
+function StatusVerificationNode({ data, isConnectable, xPos, yPos }) {
 
   const [statusCode, setStatusCode] = useState(data.custom.initialStatusCode);
 
   console.log("[Status node] Workflow ID: ", data.custom._wfIndex)
   console.log("[Status node] Test ID: ", data.custom._testIndex)
+
+  console.log("[Status node] X pos: ", xPos)
+  console.log("[Status node] Y pos: ", yPos)
+
+  const accordionRef = useRef(null);
+
+  /* function toggleAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement) {
+      childElement.click();
+    }
+  } */
+
+  function collapseAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement && !childElement.classList.contains('collapsed')) {
+      childElement.click();
+    }
+  }
+
+  function openAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement && childElement.classList.contains('collapsed')) {
+      childElement.click();
+    }
+  }
+
+  data.custom.collapseAccordion = collapseAccordion
+  data.custom.openAccordion = openAccordion
 
   const onStatusCodeChange = (evt) => {
     console.log("[Status node] Status code: ", evt.target.value)
@@ -29,7 +61,7 @@ function StatusVerificationNode({ data, isConnectable }) {
 
       <Accordion defaultActiveKey="0">
         <Accordion.Item className='statusVerif-area area' eventKey="0">
-          <Accordion.Header className='statusVerif-header header'>Status Code</Accordion.Header>
+          <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Status Code</Accordion.Header>
           <Accordion.Body className='nodrag'>
 
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
@@ -11,12 +11,15 @@ import { Form } from 'react-bootstrap';
 import './css/generalNode.css'
 
 //TODO: this whole node needs to be updated
-function SchemaVerificationNode({ data, isConnectable }) {
+function SchemaVerificationNode({ data, isConnectable, xPos, yPos }) {
 
   const [schema, setSchema] = useState(data.custom.initialSchema)
 
   console.log("[Schema node] Workflow ID: ", data.custom._wfIndex)
   console.log("[Schema node] Test ID: ", data.custom._testIndex)
+
+  console.log("[Schema node] X pos: ", xPos)
+  console.log("[Schema node] Y pos: ", yPos)
 
 
   const onSchemaChange = (evt) => {
@@ -26,6 +29,35 @@ function SchemaVerificationNode({ data, isConnectable }) {
 
   };
 
+  const accordionRef = useRef(null);
+
+  /* function toggleAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement) {
+      childElement.click();
+    }
+  } */
+
+  function collapseAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement && !childElement.classList.contains('collapsed')) {
+      childElement.click();
+    }
+  }
+
+  function openAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement && childElement.classList.contains('collapsed')) {
+      childElement.click();
+    }
+  }
+
+  data.custom.collapseAccordion = collapseAccordion
+  data.custom.openAccordion = openAccordion
+
 
   return (
     <div className="schemaVerif-node node">
@@ -33,7 +65,7 @@ function SchemaVerificationNode({ data, isConnectable }) {
 
       <Accordion defaultActiveKey="0">
         <Accordion.Item className='schemaVerif-area area' eventKey="0">
-          <Accordion.Header className='schemaVerif-header header'>Schema</Accordion.Header>
+          <Accordion.Header ref={accordionRef} className='schemaVerif-header header'>Schema</Accordion.Header>
           <Accordion.Body className='nodrag'>
 
 

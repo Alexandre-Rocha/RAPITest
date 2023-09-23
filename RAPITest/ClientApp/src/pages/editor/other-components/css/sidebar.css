@@ -1,6 +1,7 @@
 .collapsible-sidebar {
   width: 300px;
-  height: 754px; /*100vh*/
+  height: 754px;
+  /*100vh*/
   background-color: #f0f0f0;
   transition: width 0.3s ease;
   border: 2px solid #ccc;
@@ -11,7 +12,8 @@
 .collapsible-sidebar.collapsed {
   width: 50px;
   height: 754px;
-  background-color: #f0f0f0;;
+  background-color: #f0f0f0;
+  ;
 }
 
 .toggle-button {
@@ -23,12 +25,12 @@
 }
 
 
-.collapsible-sidebar.collapsed .sidebar{
+.collapsible-sidebar.collapsed .sidebar {
   display: none;
 }
 
 .sidebar {
-  
+
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -40,7 +42,7 @@
 }
 
 
-.single-button-area{
+.single-button-area {
   display: flex;
   flex-direction: column;
   margin-right: 1px;
@@ -60,10 +62,12 @@
   background: #ffdda9 !important;
   color: #222;
 }
+
 .node-button.wf .aws-btn__wrapper::before {
   background: #ffd18d !important;
   color: #222;
 }
+
 .node-button.wf .aws-btn__content:hover {
   background: #ffd18d !important;
   color: #222;
@@ -75,10 +79,12 @@
   background: #e0f0ff !important;
   color: #222;
 }
+
 .node-button.test .aws-btn__wrapper::before {
   background: #cbe6ff !important;
   color: #222;
 }
+
 .node-button.test .aws-btn__content:hover {
   background: #cbe6ff !important;
   color: #222;
@@ -89,10 +95,12 @@
   background: #ffa792 !important;
   color: #222;
 }
+
 .node-button.stress .aws-btn__wrapper::before {
   background: #ff9379 !important;
   color: #222;
 }
+
 .node-button.stress .aws-btn__content:hover {
   background: #ff9379 !important;
   color: #222;
@@ -104,10 +112,12 @@
   background: #fff7ad !important;
   color: #222;
 }
+
 .node-button.http .aws-btn__wrapper::before {
   background: #f9ed81 !important;
   color: #222;
 }
+
 .node-button.http .aws-btn__content:hover {
   background: #f9ed81 !important;
   color: #222;
@@ -118,18 +128,29 @@
   background: #d5ffae !important;
   color: #222;
 }
+
 .node-button.verif .aws-btn__wrapper::before {
   background: #befa85 !important;
   color: #222;
 }
+
 .node-button.verif .aws-btn__content:hover {
   background: #befa85 !important;
   color: #222;
 }
 
 
-.node-button.aws-btn::before{
+.node-button.aws-btn::before {
   background: transparent
+}
+
+.node-button {
+  width: 100%;
+}
+
+.sidebar-tooltip>.tooltip-inner {
+  background-color: #f0f0f0;
+  color: #222;;
 }
 
 /* .node-button.setup .aws-btn__content {

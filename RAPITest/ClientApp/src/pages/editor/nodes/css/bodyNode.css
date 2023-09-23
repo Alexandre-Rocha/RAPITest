@@ -1,4 +1,8 @@
 .body-node {
     background: #fff7ad;
   }
-  
+
+  .custom-tooltip > .tooltip-inner {
+    background-color: #f0f0f0;
+  color: #222;;
+  }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 import { Accordion } from 'react-bootstrap';
@@ -10,7 +10,7 @@ import './css/stressTestNode.css'
 import './css/generalNode.css'
 
 
-function StressTestNode({ data, isConnectable }) {
+function StressTestNode({ data, isConnectable, xPos, yPos }) {
 
 
   const [count, setCount] = useState(data.custom.count || "") // Either name from pre-existing TSL or empty name
@@ -21,6 +21,38 @@ function StressTestNode({ data, isConnectable }) {
 
   console.log("[Stress test node] Workflow ID: ", data.custom._wfIndex)
 
+  console.log("[Stress test node] X pos: ", xPos)
+  console.log("[Stress test node] Y pos: ", yPos)
+
+
+  const accordionRef = useRef(null);
+
+  /* function toggleAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement) {
+      childElement.click();
+    }
+  } */
+
+  function collapseAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement && !childElement.classList.contains('collapsed')) {
+      childElement.click();
+    }
+  }
+
+  function openAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement && childElement.classList.contains('collapsed')) {
+      childElement.click();
+    }
+  }
+
+  data.custom.collapseAccordion = collapseAccordion
+  data.custom.openAccordion = openAccordion
 
   const onCountChange = (evt) => {
     console.log("[Stress test node] Count: ", evt.target.value);
@@ -49,7 +81,7 @@ function StressTestNode({ data, isConnectable }) {
 
       <Accordion defaultActiveKey="0">
         <Accordion.Item className='stress-area area' eventKey="0">
-          <Accordion.Header className='stress-header header'>Stress Test</Accordion.Header>
+          <Accordion.Header ref={accordionRef} className='stress-header header'>Stress Test</Accordion.Header>
           <Accordion.Body className='nodrag'>
 
               <label htmlFor="text">Count</label>

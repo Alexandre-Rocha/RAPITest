@@ -11,7 +11,7 @@ import { Accordion } from 'react-bootstrap';
 import './css/generalNode.css'
 import './css/queryNode.css'
 
-function QueryNode({ data, isConnectable }) {
+function QueryNode({ data, isConnectable, xPos, yPos }) {
 
 
   const [query, setQuery] = useState(data.custom.query || [{ key: '', value: '' }]);
@@ -46,6 +46,9 @@ function QueryNode({ data, isConnectable }) {
     console.log("log state");
     console.log(query);
   };
+
+  console.log("[Query node] X pos: ", xPos)
+  console.log("[Query node] Y pos: ", yPos)
 
   return (
     <div className="query-node node">

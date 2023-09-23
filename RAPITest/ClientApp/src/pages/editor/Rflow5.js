@@ -79,6 +79,8 @@ function Flow() {
     // Comes pre-set if from old config, otherwise empty
     const [workflows, setWorkflows] = useState(location?.state?.tslState || []);
 
+    const [canCollapse, setCanCollapse] = useState(false)
+
     // #endregion
 
 
@@ -152,7 +154,7 @@ function Flow() {
             return newWorkflows
         })
     }
-
+    
     const onWfNameChange = (newWfId) => {
 
         console.log("New workflow: ", newWfId);
@@ -410,6 +412,22 @@ function Flow() {
     }
 
 
+    const onBodyRefChangeCallback = (newBodyRef, _wfIndex, _testIndex)=>{
+        //TODO: get body text from reference
+        // alternatively put another bodyref prop and trim it and get text at the end
+        onBodyTextChangeCallback("new body", _wfIndex, _testIndex)
+    }
+    
+
+    const onBodyTextChangeCallback = (newBodyText, _wfIndex, _testIndex)=>{
+        //TODO:
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows);
+            newWorkflows[_wfIndex].Tests[_testIndex].Body = newBodyText;
+            return newWorkflows;
+        });
+    }
+    
 
 
     const onStressCountChangeCallback = (count, _wfIndex) => {
@@ -790,19 +808,22 @@ function Flow() {
         return id;
     }
 
-    const createBodyNode = (x = Math.random() * 500, y = Math.random() * 500) => {
+    const createBodyNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
 
         const newNode = {
             id,
             position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
+                x: x,
+                y: y
             },
             data: {
                 custom: {
-
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex,
+                    bodyTextChangeCallback: onBodyTextChangeCallback,
+                    bodyRefChangeCallback: onBodyRefChangeCallback, //TODO: initials
                 }
             },
             type: 'body'
@@ -926,8 +947,11 @@ function Flow() {
 
         let listOfEdgesLists = []
 
-        let startingX = 0.1
-        let startingY = 0.1
+        let currX = 0
+        let currY = 0
+
+        const offsetX = 200
+        const offsetY = 100
 
         newstate.forEach(wf => {
 
@@ -936,15 +960,16 @@ function Flow() {
 
             wf._wfIndex = yamlWfIndex
             maxWfIndex.current += 1
-            const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID) //WorkflowID is wf name
-
+            const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID, currX, currY) //WorkflowID is wf name
+            
+            currX = currX + offsetX
 
             if (wf.Stress) {
                 console.log("stress found");
                 const initialCount = wf.Stress.Count
                 const initialThreads = wf.Stress.Threads
                 const initialDelay = wf.Stress.Delay
-                const stressTestId = createStressNode(initialCount, initialThreads, initialDelay, yamlWfIndex)
+                const stressTestId = createStressNode(initialCount, initialThreads, initialDelay, yamlWfIndex, currX, currY)
 
                 const newEdgeWfStress = {
                     id: "wf:" + wfNodeID.toString() + "-stress:" + stressTestId.toString(),
@@ -954,6 +979,7 @@ function Flow() {
 
                 edgesList.push(newEdgeWfStress)
 
+                currY = currY + offsetY //TODO: pensar melhor nos layputs mais complexos
             }
 
 
@@ -967,7 +993,7 @@ function Flow() {
                 const testNodePath = test.Path
                 const testNodeMethod = test.Method
 
-                const testNodeId = createTestNode(test.TestID, testNodeServer, testNodePath, testNodeMethod, yamlWfIndex, currYamlTestIndex) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
+                const testNodeId = createTestNode(test.TestID, testNodeServer, testNodePath, testNodeMethod, yamlWfIndex, currYamlTestIndex, currX, currY) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
 
                 testNodeIdsList.push(testNodeId)
 
@@ -975,11 +1001,12 @@ function Flow() {
 
                 if (test.Body) {
                     console.log("body found");
+                    currY = currY + offsetY 
                 }
 
                 if (test.Headers) {
                     console.log("headers found");
-
+                    currY = currY + offsetY 
                     test.Headers.forEach(header => {
 
                     })
@@ -987,10 +1014,12 @@ function Flow() {
 
                 if (test.Query) {
                     console.log("query found");
+                    currY = currY + offsetY 
                 }
 
                 if (test.Retain) {
                     console.log("retain found");
+                    currY = currY + offsetY 
                 }
 
 
@@ -1000,16 +1029,21 @@ function Flow() {
 
 
                 const statusNodeCode = test.Verifications[0].Code   //Verifications is an array for some reason but always 1 element
+                currY = currY + offsetY 
 
-                const statusVerifNodeId = createStatusVerificationNode(statusNodeCode, yamlWfIndex, currYamlTestIndex)
+                const statusVerifNodeId = createStatusVerificationNode(statusNodeCode, yamlWfIndex, currYamlTestIndex, currX, currY)
 
 
-                //check optional stuff
+
+
+                //check optional stuff TODO:falta cenas
 
                 if (test.Verifications[0].Schema) {
                     console.log("schema found");
+                    currY = currY + offsetY 
+
                     const schema = test.Verifications[0].Schema.split("$ref/definitions/")[1] //TODO: kinda hardcoded
-                    const schemaVerifId = createSchemaVerificationNode(schema, yamlWfIndex, currYamlTestIndex)
+                    const schemaVerifId = createSchemaVerificationNode(schema, yamlWfIndex, currYamlTestIndex, currX, currY)
 
 
                     const newEdgeTestSchema = {
@@ -1065,10 +1099,20 @@ function Flow() {
             return newEdges
         })
 
-
+        setCanCollapse(true)
 
         console.log("edges set");
     }
+
+    useEffect(() => {
+        console.log("can collapse");
+        if (canCollapse) {
+            setTimeout(() => {
+                collapseNodes(); // Call collapseNodes after 1 second
+                setCanCollapse(false)
+              }, 100); //this is not optimal...
+        }
+      }, [canCollapse]);
 
     // #endregion
 
@@ -1329,6 +1373,7 @@ function Flow() {
     }
 
     const collapseNodes = () =>{
+        console.log("collapsing nodes");
         let nodesArr = reactFlowInstance.getNodes();
         nodesArr.forEach(
             e=>{
@@ -1336,10 +1381,12 @@ function Flow() {
                     console.log("collapse");
                     e.data.custom.collapseAccordion()
                 }
-                console.log("no collapse");
-                console.log(e);
+                else{console.log("no collapse");
+                console.log(e);}
             }
         )
+        console.log("nodes collapsed");
+
     }
 
     const openNodes = () =>{
@@ -1390,7 +1437,7 @@ function Flow() {
                     handlerAPI={handlerAPI}
                     onTestConfNameChange={onTestConfNameChange}
                     buttonsArray={[
-                        { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class:"wf" },
+                        { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class:"wf", tooltip:"Workflow tooltip" },
                         { section: "Flow-related", title: "Test", onClick: onClickTestNode, class:"test" },
                         { section: "Flow-related", title: "Stress Test", onClick: onClickStressTestNode , class:"stress"},
                         { section: "HTTP Requests", title: "Body", onClick: onClickBodyNode , class:"http"},
@@ -1419,6 +1466,7 @@ function Flow() {
                         onEdgesChange={onEdgesChange}
                         onConnect={onConnect}
                         proOptions={proOptions}
+                        deleteKeyCode={'Delete'}
                     >
                         <Background color='#000000' variant={'dots'} />
                         <Controls />

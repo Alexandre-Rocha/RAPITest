@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 import { Combobox } from 'react-widgets';
@@ -10,7 +10,7 @@ import './css/generalNode.css'
 
 
 
-function TestIDNode({ data, isConnectable }) {
+function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
   const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1) // Either id from pre-exisitng TSL or -1 (not assigned)
   const [testName, setTestName] = useState(data.custom.testName || ""); // Either name from pre-existing TSL or empty name 
@@ -44,6 +44,35 @@ function TestIDNode({ data, isConnectable }) {
   };
 
 
+  const accordionRef = useRef(null);
+
+  /* function toggleAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement) {
+      childElement.click();
+    }
+  } */
+
+  function collapseAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement && !childElement.classList.contains('collapsed')) {
+      childElement.click();
+    }
+  }
+
+  function openAccordion () {
+    //accordionRef.current.click();
+    const childElement = accordionRef.current.querySelector('.accordion-button');
+    if (childElement && childElement.classList.contains('collapsed')) {
+      childElement.click();
+    }
+  }
+
+  data.custom.collapseAccordion = collapseAccordion
+  data.custom.openAccordion = openAccordion
+
 
   /* eslint-disable */
   useEffect(() => {
@@ -57,6 +86,9 @@ function TestIDNode({ data, isConnectable }) {
 
   console.log("[Test node] Workflow ID: ", data.custom._wfIndex)
   console.log("[Test node] Test ID: ", testIndex)
+
+  console.log("[Test node] X pos: ", xPos)
+  console.log("[Test node] Y pos: ", yPos)
 
 
   const onTestNameChange = (evt) => {
@@ -81,7 +113,7 @@ function TestIDNode({ data, isConnectable }) {
 
       <Accordion defaultActiveKey="0">
         <Accordion.Item className='test-area area' eventKey="0">
-          <Accordion.Header className='test-header header'>Test</Accordion.Header>
+          <Accordion.Header ref={accordionRef} className='test-header header'>Test</Accordion.Header>
           <Accordion.Body className='nodrag'>
 
             <label htmlFor="text">Test name</label>
