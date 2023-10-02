@@ -6,3 +6,18 @@
     background-color: #f0f0f0;
   color: #222;;
   }
+
+
+  .bodyRefDiv{
+
+  }
+
+  .seeMoreBody{
+    display: inline;
+    margin-left: 5%;
+  }
+
+  .bodyRef{
+    display: inline;
+    width: 80%;
+  }

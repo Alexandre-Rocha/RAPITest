@@ -9,6 +9,11 @@ import TestIDNode from './nodes/testIDNode';
 import WorkflowNode from './nodes/workflowNode';
 import SchemaVerificationNode from './nodes/schemaVerificationNode';
 
+import CustomVerificationNode from './nodes/customVerificationNode';
+import CountVerificationNode from './nodes/countVerificationNode';
+import MatchVerificationNode from './nodes/matchVerificationNode';
+import ContainsVerificationNode from './nodes/containsVerificationNode';
+
 import QueryNode from './nodes/queryNode';
 import BodyNode from './nodes/bodyNode';
 import HeadersNode from './nodes/headersNode';
@@ -31,7 +36,7 @@ const initialEdges = []
 
 const proOptions = { hideAttribution: true };
 
-const nodeTypes = { status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode, stress: StressTestNode }
+const nodeTypes = { status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode, stress: StressTestNode, match: MatchVerificationNode, custom: CustomVerificationNode, contains: ContainsVerificationNode, count: CountVerificationNode }
 
 function deepCopy(obj) {
     if (typeof obj !== "object" || obj === null) {
@@ -914,6 +919,104 @@ function Flow() {
         return id;
     }
 
+
+    const createContainsVerificationNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+    
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex
+                }
+            },
+            type: 'contains'
+        };
+        reactFlowInstance.addNodes(newNode);
+
+        return id;
+    }
+
+
+    const createCountVerificationNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+                  
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex
+                }
+            },
+            type: 'count'
+        };
+        reactFlowInstance.addNodes(newNode);
+
+        return id;
+    }
+
+
+    const createMatchVerificationNode = ( _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex
+                }
+            },
+            type: 'match'
+        };
+        reactFlowInstance.addNodes(newNode);
+
+        return id;
+    }
+
+
+
+    const createCustomVerificationNode = ( _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+        const newNode = {
+            id,
+            position: {
+                x: Math.random() * 500,
+                y: Math.random() * 500,
+            },
+            data: {
+                custom: {
+                    
+                    _wfIndex: _wfIndex,
+                    _testIndex: _testIndex
+                }
+            },
+            type: 'custom'
+        };
+        reactFlowInstance.addNodes(newNode);
+
+        return id;
+    }
+
+
     const createSchemaVerificationNode = (initialSchema = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
@@ -1167,6 +1270,35 @@ function Flow() {
         console.log("[Editor] Adding Status Verification node");
         createStatusVerificationNode()
     }
+
+    const onClickWip = () =>{
+        console.log("Work in progress");
+        
+    }
+
+    const onClickCount = () => {
+        console.log("[Editor] Adding Count Verification node");
+        createCountVerificationNode()
+    }
+
+    const onClickContains = () => {
+        console.log("[Editor] Adding Contains Verification node");
+        createContainsVerificationNode()
+    }
+
+    const onClickMatch = () => {
+        console.log("[Editor] Adding Match Verification node");
+        createMatchVerificationNode()
+    }
+
+    const onClickCustom = () => {
+        console.log("[Editor] Adding Custom Verification node");
+        createCustomVerificationNode()
+    }
+
+
+
+
 
     //TODO:
     const onClickSchema = () => {
@@ -1446,6 +1578,10 @@ function Flow() {
                         { section: "HTTP Requests", title: "Retain", onClick: onClickRetainNode, class:"http" },
                         { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class:"verif" },
                         { section: "Verifications", title: "Schema", onClick: onClickSchema, class:"verif" },
+                        { section: "Verifications", title: "Contains ", onClick: onClickContains, class:"verif" },
+                        { section: "Verifications", title: "Count ", onClick: onClickCount, class:"verif" },
+                        { section: "Verifications", title: "Match ", onClick: onClickMatch, class:"verif" },
+                        { section: "Verifications", title: "Custom ", onClick: onClickCustom, class:"verif" },
                         { section: "Setup-related", title: "Save changes", onClick: saveWorkflow , class:"setup"},
                         { section: "Setup-related", title: "Finish Setup", onClick: finishSetup , class:"setup"},
                         { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf , class:"setup"},

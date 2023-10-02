@@ -40,7 +40,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
     const _method = event
     setMethod(_method)
     console.log("[Test node] Selected method: ", _method)
-    data.custom.methodChangeCallback("Get", data.custom._wfIndex, data.custom._testIndex) //TODO: ONLY GET????
+    data.custom.methodChangeCallback(_method, data.custom._wfIndex, data.custom._testIndex) //TODO: ONLY GET????
   };
 
 
