@@ -11,13 +11,15 @@ import './css/generalNode.css'
 
 function CountVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-  const [statusCode, setStatusCode] = useState();
 
-  console.log("[Status node] Workflow ID: ", data.custom._wfIndex)
-  console.log("[Status node] Test ID: ", data.custom._testIndex)
+  const [key, setKey] = useState("")
+  const [value, setValue] = useState("")
 
-  console.log("[Status node] X pos: ", xPos)
-  console.log("[Status node] Y pos: ", yPos)
+  console.log("[Count node] Workflow ID: ", data.custom._wfIndex)
+  console.log("[Count node] Test ID: ", data.custom._testIndex)
+
+  console.log("[Count node] X pos: ", xPos)
+  console.log("[Count node] Y pos: ", yPos)
 
   const accordionRef = useRef(null);
 
@@ -48,9 +50,15 @@ function CountVerificationNode({ data, isConnectable, xPos, yPos }) {
   data.custom.collapseAccordion = collapseAccordion
   data.custom.openAccordion = openAccordion
 
-  const onStatusCodeChange = (evt) => {
-    
-    
+
+  const handleKeyChange = (key) => {
+    setKey(key)
+    data.custom.keyChangeCallback(key,data.custom._wfIndex, data.custom._testIndex)
+  };
+
+  const handleValueChange = (value) => {
+    setValue(value)
+    data.custom.valueChangeCallback(value,data.custom._wfIndex, data.custom._testIndex)
   };
 
 
@@ -65,7 +73,10 @@ function CountVerificationNode({ data, isConnectable, xPos, yPos }) {
 
 
           <label htmlFor="text">Count wip</label>
-              <Form.Control value={statusCode} onChange={onStatusCodeChange} className="test-name" type="text" placeholder="Enter text" />
+
+              <Form.Control  value={key} onChange={(e) => handleKeyChange(e.target.value)} className="key-field" type="text" placeholder="Key" />
+
+                <Form.Control value={value} onChange={(e) => handleValueChange(e.target.value)} className="value-field" type="text" placeholder="Value" />
 
 
       {/* <label htmlFor="readonly">Status code node</label>

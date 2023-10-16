@@ -11,13 +11,14 @@ import './css/generalNode.css'
 
 function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-  const [statusCode, setStatusCode] = useState();
+  const [key, setKey] = useState("")
+  const [value, setValue] = useState("")
 
-  console.log("[Status node] Workflow ID: ", data.custom._wfIndex)
-  console.log("[Status node] Test ID: ", data.custom._testIndex)
+  console.log("[Match node] Workflow ID: ", data.custom._wfIndex)
+  console.log("[Match node] Test ID: ", data.custom._testIndex)
 
-  console.log("[Status node] X pos: ", xPos)
-  console.log("[Status node] Y pos: ", yPos)
+  console.log("[Match node] X pos: ", xPos)
+  console.log("[Match node] Y pos: ", yPos)
 
   const accordionRef = useRef(null);
 
@@ -29,7 +30,7 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
     }
   } */
 
-  function collapseAccordion () {
+  function collapseAccordion() {
     //accordionRef.current.click();
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && !childElement.classList.contains('collapsed')) {
@@ -37,7 +38,7 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
     }
   }
 
-  function openAccordion () {
+  function openAccordion() {
     //accordionRef.current.click();
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && childElement.classList.contains('collapsed')) {
@@ -48,9 +49,14 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
   data.custom.collapseAccordion = collapseAccordion
   data.custom.openAccordion = openAccordion
 
-  const onStatusCodeChange = (evt) => {
+  const handleKeyChange = (key) => {
+    setKey(key)
+    data.custom.keyChangeCallback(key, data.custom._wfIndex, data.custom._testIndex)
+  };
 
-    
+  const handleValueChange = (value) => {
+    setValue(value)
+    data.custom.valueChangeCallback(value, data.custom._wfIndex, data.custom._testIndex)
   };
 
 
@@ -64,11 +70,14 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
           <Accordion.Body className='nodrag'>
 
 
-          <label htmlFor="text">Match wip</label>
-              <Form.Control value={statusCode} onChange={onStatusCodeChange} className="test-name" type="text" placeholder="Enter text" />
+            <label htmlFor="text">Match wip</label>
 
 
-      {/* <label htmlFor="readonly">Status code node</label>
+            <Form.Control value={key} onChange={(e) => handleKeyChange(e.target.value)} className="key-field" type="text" placeholder="Key" />
+
+            <Form.Control value={value} onChange={(e) => handleValueChange(e.target.value)} className="value-field" type="text" placeholder="Value" />
+
+            {/* <label htmlFor="readonly">Status code node</label>
 
       <div>
         <label htmlFor="text">Status code:</label>
@@ -76,7 +85,7 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
       </div> */}
 
 
-      </Accordion.Body>
+          </Accordion.Body>
         </Accordion.Item>
       </Accordion>
 

@@ -159,7 +159,7 @@ function Flow() {
             return newWorkflows
         })
     }
-    
+
     const onWfNameChange = (newWfId) => {
 
         console.log("New workflow: ", newWfId);
@@ -186,6 +186,58 @@ function Flow() {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Schema = newStatus    //TODO: hardcoded 0
+            return newWorkflows
+        })
+    }
+
+    const onCountKeyChangeCallback = (newCountKey, _wfIndex, _testIndex) =>{
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows)
+            if(!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count){
+                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count = {key:'',value:''}
+            }
+            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count.key = newCountKey
+            return newWorkflows
+        })
+    }
+
+    const onCountValueChangeCallback = (newCountValue, _wfIndex, _testIndex) =>{
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows)
+            if(!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count){
+                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count = {key:'',value:''}
+            }
+            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count.value = newCountValue
+            return newWorkflows
+        })
+    }
+
+    const onMatchKeyChangeCallback = (newMatchKey, _wfIndex, _testIndex) =>{
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows)
+            if(!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match){
+                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match = {key:'',value:''}
+            }
+            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match.key = newMatchKey
+            return newWorkflows
+        })
+    }
+
+    const onMatchValueChangeCallback = (newMatchValue, _wfIndex, _testIndex) =>{
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows)
+            if(!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match){
+                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match = {key:'',value:''}
+            }
+            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match.value = newMatchValue
+            return newWorkflows
+        })
+    }
+
+    const onContainsChangeCallback = (newContains, _wfIndex, _testIndex) =>{
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows)
+            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Contains = newContains
             return newWorkflows
         })
     }
@@ -417,14 +469,14 @@ function Flow() {
     }
 
 
-    const onBodyRefChangeCallback = (newBodyRef, _wfIndex, _testIndex)=>{
+    const onBodyRefChangeCallback = (newBodyRef, _wfIndex, _testIndex) => {
         //TODO: get body text from reference
         // alternatively put another bodyref prop and trim it and get text at the end
         onBodyTextChangeCallback("new body", _wfIndex, _testIndex)
     }
-    
 
-    const onBodyTextChangeCallback = (newBodyText, _wfIndex, _testIndex)=>{
+
+    const onBodyTextChangeCallback = (newBodyText, _wfIndex, _testIndex) => {
         //TODO:
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows);
@@ -432,7 +484,7 @@ function Flow() {
             return newWorkflows;
         });
     }
-    
+
 
 
     const onStressCountChangeCallback = (count, _wfIndex) => {
@@ -931,7 +983,7 @@ function Flow() {
             },
             data: {
                 custom: {
-    
+                    containsChangeCallback: onContainsChangeCallback,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
@@ -955,7 +1007,8 @@ function Flow() {
             },
             data: {
                 custom: {
-                  
+                    valueChangeCallback: onCountValueChangeCallback,
+                    keyChangeCallback: onCountKeyChangeCallback,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
@@ -968,7 +1021,7 @@ function Flow() {
     }
 
 
-    const createMatchVerificationNode = ( _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+    const createMatchVerificationNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -979,7 +1032,8 @@ function Flow() {
             },
             data: {
                 custom: {
-
+                    valueChangeCallback: onMatchValueChangeCallback,
+                    keyChangeCallback: onMatchKeyChangeCallback,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
@@ -993,7 +1047,7 @@ function Flow() {
 
 
 
-    const createCustomVerificationNode = ( _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+    const createCustomVerificationNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -1004,7 +1058,7 @@ function Flow() {
             },
             data: {
                 custom: {
-                    
+
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
@@ -1064,7 +1118,7 @@ function Flow() {
             wf._wfIndex = yamlWfIndex
             maxWfIndex.current += 1
             const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID, currX, currY) //WorkflowID is wf name
-            
+
             currX = currX + offsetX
 
             if (wf.Stress) {
@@ -1104,12 +1158,12 @@ function Flow() {
 
                 if (test.Body) {
                     console.log("body found");
-                    currY = currY + offsetY 
+                    currY = currY + offsetY
                 }
 
                 if (test.Headers) {
                     console.log("headers found");
-                    currY = currY + offsetY 
+                    currY = currY + offsetY
                     test.Headers.forEach(header => {
 
                     })
@@ -1117,12 +1171,12 @@ function Flow() {
 
                 if (test.Query) {
                     console.log("query found");
-                    currY = currY + offsetY 
+                    currY = currY + offsetY
                 }
 
                 if (test.Retain) {
                     console.log("retain found");
-                    currY = currY + offsetY 
+                    currY = currY + offsetY
                 }
 
 
@@ -1132,7 +1186,7 @@ function Flow() {
 
 
                 const statusNodeCode = test.Verifications[0].Code   //Verifications is an array for some reason but always 1 element
-                currY = currY + offsetY 
+                currY = currY + offsetY
 
                 const statusVerifNodeId = createStatusVerificationNode(statusNodeCode, yamlWfIndex, currYamlTestIndex, currX, currY)
 
@@ -1143,7 +1197,7 @@ function Flow() {
 
                 if (test.Verifications[0].Schema) {
                     console.log("schema found");
-                    currY = currY + offsetY 
+                    currY = currY + offsetY
 
                     const schema = test.Verifications[0].Schema.split("$ref/definitions/")[1] //TODO: kinda hardcoded
                     const schemaVerifId = createSchemaVerificationNode(schema, yamlWfIndex, currYamlTestIndex, currX, currY)
@@ -1213,9 +1267,9 @@ function Flow() {
             setTimeout(() => {
                 collapseNodes(); // Call collapseNodes after 1 second
                 setCanCollapse(false)
-              }, 100); //this is not optimal...
+            }, 100); //this is not optimal...
         }
-      }, [canCollapse]);
+    }, [canCollapse]);
 
     // #endregion
 
@@ -1271,9 +1325,9 @@ function Flow() {
         createStatusVerificationNode()
     }
 
-    const onClickWip = () =>{
+    const onClickWip = () => {
         console.log("Work in progress");
-        
+
     }
 
     const onClickCount = () => {
@@ -1388,41 +1442,76 @@ function Flow() {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
 
+            // process each workflow
             for (let wfIndex = 0; wfIndex < newWorkflows.length; wfIndex++) {
-                const workflow = newWorkflows[wfIndex];
 
-                //if(!workflow.Stress) delete workflow.Stress
+                const workflow = newWorkflows[wfIndex];
                 delete workflow._wfIndex
 
+                // process Stress Test
+                // TODO: No processing required?
+
+                // process each test for this workflow
                 for (let testIndex = 0; testIndex < workflow.Tests.length; testIndex++) {
+
                     const test = workflow.Tests[testIndex];
-                    //delete test.Headers TODO: testing headers
+                    delete test._testIndex
 
-                    //if(!test.Headers) delete test.Headers
-
-                    //if(!test.Retain) delete test.Retain
-
+                    // process Headers
                     if (test.Headers) {
                         const transformedHeaders = test.Headers.map(({ key, value }) => `${key}:${value}`);
-                        test.Headers = transformedHeaders //TODO: headers
+                        test.Headers = transformedHeaders
+                    }
+
+                    // process Query
+                    if (test.Query) {
+                        const transformedQuery = test.Query.map(({ key, value }) => `${key}=${value}`);
+                        test.Query = transformedQuery
+                    }
+
+                    // process Retain
+                    if (test.Retain) {
+                        const transformedRetain = test.Retain.map(({ key, value }) => `${key}#$.${value}`);
+                        test.Retain = transformedRetain
+                    }
+
+                    // process Body
+                    if (test.Body) {
+                        //TODO: check if is body text or reference, grab text if it is reference
                     }
 
 
-                    /* const transformedQuery = test.Query.map(({ key, value }) => `${key}:${value}`);
-                    test.Query = transformedQuery */
 
-                    //if(!test.Body) delete test.Body
-                    delete test._testIndex
-
-                    for (let ver = 0; ver < test.Verifications.length; ver++) {
+                    // process Verifications
+                    for (let ver = 0; ver < test.Verifications.length; ver++) { // this loop should only be executed once, i think
                         const verification = test.Verifications[ver];
+
+                        // process Status
+                        // TODO: No processing required?
+
+                        // process Schema
                         if (verification.Schema) {
                             let schemaStr = "$ref/definitions/" + verification.Schema
                             verification.Schema = schemaStr
                         }
-                        /* if (!verification.Schema) {
-                            delete verification.Schema
-                        } */
+
+                        // process Count
+                        if (verification.Count) {
+                            const transformedCount = `${verification.Count.key}#${verification.Count.value}`;
+                            verification.Count = transformedCount
+                        }
+
+                        // process Match
+                        if (verification.Match) {
+                            const transformedMatch = `$.${verification.Match.key}#${verification.Match.value}`;
+                            verification.Match = transformedMatch
+                        }
+
+                        // process Contains
+                        // TODO: No processing required?
+
+                        // process Custom
+                        // TODO:
                     }
                 }
             }
@@ -1504,28 +1593,30 @@ function Flow() {
         console.log(edges);
     }
 
-    const collapseNodes = () =>{
+    const collapseNodes = () => {
         console.log("collapsing nodes");
         let nodesArr = reactFlowInstance.getNodes();
         nodesArr.forEach(
-            e=>{
-                if(e.data.custom.collapseAccordion){
+            e => {
+                if (e.data.custom.collapseAccordion) {
                     console.log("collapse");
                     e.data.custom.collapseAccordion()
                 }
-                else{console.log("no collapse");
-                console.log(e);}
+                else {
+                    console.log("no collapse");
+                    console.log(e);
+                }
             }
         )
         console.log("nodes collapsed");
 
     }
 
-    const openNodes = () =>{
+    const openNodes = () => {
         let nodesArr = reactFlowInstance.getNodes();
         nodesArr.forEach(
-            e=>{
-                if(e.data.custom.openAccordion){
+            e => {
+                if (e.data.custom.openAccordion) {
                     console.log("open");
                     e.data.custom.openAccordion()
                 }
@@ -1569,25 +1660,25 @@ function Flow() {
                     handlerAPI={handlerAPI}
                     onTestConfNameChange={onTestConfNameChange}
                     buttonsArray={[
-                        { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class:"wf", tooltip:"Workflow tooltip" },
-                        { section: "Flow-related", title: "Test", onClick: onClickTestNode, class:"test" },
-                        { section: "Flow-related", title: "Stress Test", onClick: onClickStressTestNode , class:"stress"},
-                        { section: "HTTP Requests", title: "Body", onClick: onClickBodyNode , class:"http"},
-                        { section: "HTTP Requests", title: "Headers", onClick: onClickHeadersNode, class:"http" },
-                        { section: "HTTP Requests", title: "Query", onClick: onClickQueryNode, class:"http" },
-                        { section: "HTTP Requests", title: "Retain", onClick: onClickRetainNode, class:"http" },
-                        { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class:"verif" },
-                        { section: "Verifications", title: "Schema", onClick: onClickSchema, class:"verif" },
-                        { section: "Verifications", title: "Contains ", onClick: onClickContains, class:"verif" },
-                        { section: "Verifications", title: "Count ", onClick: onClickCount, class:"verif" },
-                        { section: "Verifications", title: "Match ", onClick: onClickMatch, class:"verif" },
-                        { section: "Verifications", title: "Custom ", onClick: onClickCustom, class:"verif" },
-                        { section: "Setup-related", title: "Save changes", onClick: saveWorkflow , class:"setup"},
-                        { section: "Setup-related", title: "Finish Setup", onClick: finishSetup , class:"setup"},
-                        { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf , class:"setup"},
-                        { section: "Dev", title: "Dump state", onClick: dumpState , class:"setup"},
-                        { section: "Dev", title: "Collapse nodes", onClick: collapseNodes , class:"setup"},
-                        { section: "Dev", title: "Open nodes", onClick: openNodes , class:"setup"},
+                        { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: "Workflow tooltip" },
+                        { section: "Flow-related", title: "Test", onClick: onClickTestNode, class: "test" },
+                        { section: "Flow-related", title: "Stress Test", onClick: onClickStressTestNode, class: "stress" },
+                        { section: "HTTP Requests", title: "Body", onClick: onClickBodyNode, class: "http" },
+                        { section: "HTTP Requests", title: "Headers", onClick: onClickHeadersNode, class: "http" },
+                        { section: "HTTP Requests", title: "Query", onClick: onClickQueryNode, class: "http" },
+                        { section: "HTTP Requests", title: "Retain", onClick: onClickRetainNode, class: "http" },
+                        { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class: "verif" },
+                        { section: "Verifications", title: "Schema", onClick: onClickSchema, class: "verif" },
+                        { section: "Verifications", title: "Contains ", onClick: onClickContains, class: "verif" },
+                        { section: "Verifications", title: "Count ", onClick: onClickCount, class: "verif" },
+                        { section: "Verifications", title: "Match ", onClick: onClickMatch, class: "verif" },
+                        { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif" },
+                        { section: "Setup-related", title: "Save changes", onClick: saveWorkflow, class: "setup" },
+                        { section: "Setup-related", title: "Finish Setup", onClick: finishSetup, class: "setup" },
+                        { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf, class: "setup" },
+                        { section: "Dev", title: "Dump state", onClick: dumpState, class: "setup" },
+                        { section: "Dev", title: "Collapse nodes", onClick: collapseNodes, class: "setup" },
+                        { section: "Dev", title: "Open nodes", onClick: openNodes, class: "setup" },
                     ]}>
                 </Sidebar>
 

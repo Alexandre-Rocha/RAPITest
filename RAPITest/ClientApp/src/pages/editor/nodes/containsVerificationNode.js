@@ -11,13 +11,13 @@ import './css/generalNode.css'
 
 function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-  const [statusCode, setStatusCode] = useState();
+  const [contains, setContains] = useState("");
 
-  console.log("[Status node] Workflow ID: ", data.custom._wfIndex)
-  console.log("[Status node] Test ID: ", data.custom._testIndex)
+  console.log("[Contains node] Workflow ID: ", data.custom._wfIndex)
+  console.log("[Contains node] Test ID: ", data.custom._testIndex)
 
-  console.log("[Status node] X pos: ", xPos)
-  console.log("[Status node] Y pos: ", yPos)
+  console.log("[Contains node] X pos: ", xPos)
+  console.log("[Contains node] Y pos: ", yPos)
 
   const accordionRef = useRef(null);
 
@@ -48,9 +48,11 @@ function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
   data.custom.collapseAccordion = collapseAccordion
   data.custom.openAccordion = openAccordion
 
-  const onStatusCodeChange = (evt) => {
+  const onContainsChange = (evt) => {
 
-    
+    console.log("[Contains node] Status code: ", evt.target.value)
+    setContains(evt.target.value)
+    data.custom.containsChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
   };
 
 
@@ -65,7 +67,7 @@ function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
 
 
           <label htmlFor="text">Contains wip</label>
-              <Form.Control value={statusCode} onChange={onStatusCodeChange} className="test-name" type="text" placeholder="Enter text" />
+              <Form.Control value={contains} onChange={onContainsChange} className="test-name" type="text" placeholder="Enter text" />
 
 
       {/* <label htmlFor="readonly">Status code node</label>

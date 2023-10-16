@@ -52,18 +52,18 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
       /* if (data.custom.refList) {
         
       } e */
-      return "body wip"
+      return "body placeholder wip"
     }
 
     const renderSchemaList = ()=>{
       if (data.custom.refList) {
         
       } else
-      return ["asa","oeo"]
+      return ["placeholder1","placeholder2"]
     }
 
     const onChangeSchemaList = ()=>{
-        console.log("changed boy");
+        console.log("changed");
     }
 
 //&#9432;
@@ -97,8 +97,8 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
               defaultValue={"wip list:"}
             /> */}
 
-            <Form.Select className='bodyRef' aria-label="Default select example" value={"ssf"} onChange={onChangeSchemaList} >
-              <option value="dg"></option>
+            <Form.Select className='bodyRef' aria-label="Default select example"  onChange={onChangeSchemaList} >
+              <option>Choose available body:</option>
               {renderSchemaList().map((item, index) => {
                 return (
                   <option key={index} value={item}>{item}</option>
@@ -121,7 +121,7 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
 
       <SimpleModalComp
                     title={"card Schema wip"}
-                    body={renderSchemaData}
+                    body={renderSchemaData()}
                     cancelButtonFunc={()=>{setShowSchema(false)}}
                     visible={showSchema}
                 />
