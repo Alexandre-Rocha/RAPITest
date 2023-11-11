@@ -3,6 +3,10 @@ import { useState } from "react"
 
 import { SmallApiUpload } from './SmallApiUpload';
 
+import SimpleAccordion from './SimpleAccordion';
+
+import { Form } from 'react-bootstrap';
+
 const ApiUploadArea = (props) => {
 
 
@@ -16,17 +20,27 @@ const ApiUploadArea = (props) => {
         handlerAPI(paths, servers, schemas, schemasValues)
         setUploaded(true)
     }
-
+//TODO: label css class instead of inline
     return (
 
         <div>
-            <label><b>Name of test configuration:</b></label>
-            <input  id="text" name="text" onChange={onTestConfNameChange} value={apiTitle} className="nodrag" />
 
-            <label><b>API Specification:</b></label>
+            <Form.Label style={{ fontWeight: 'bold' }}>Name of test configuration:</Form.Label>
+            <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter text" />
+
+            {/* <input  id="text" name="text" onChange={onTestConfNameChange} value={apiTitle} className="nodrag" /> */}
+
+{/*             <label><b>API Specification:</b></label>
+ */}
+            <SimpleAccordion header={"API Upload"}>
+
+
 
             {(uploaded === false ) ?
-                <SmallApiUpload handlerAPI={newHandler} apiTitle={apiTitle} ></SmallApiUpload> : <div>API uploaded!</div>}
+                <SmallApiUpload handlerAPI={newHandler} apiTitle={apiTitle} ></SmallApiUpload> : <div>API uploaded! (WIP)</div>}
+
+</SimpleAccordion>
+
         </div>
     );
 };

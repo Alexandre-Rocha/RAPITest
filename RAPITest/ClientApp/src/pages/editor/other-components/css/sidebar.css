@@ -169,3 +169,12 @@
 /* .aws-btn__content{
   background: aqua !important;
 } */
+
+.sidebar-simple-header .accordion-button{
+  font-size: medium;
+}
+
+.sidebar-dropzone{
+  margin-bottom: 4px;
+  margin-top: 4px;
+}

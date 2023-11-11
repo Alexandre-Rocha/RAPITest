@@ -2,9 +2,7 @@ import { useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import { Accordion } from 'react-bootstrap';
-import { Form } from 'react-bootstrap';
-
+import { Accordion, Form } from 'react-bootstrap';
 
 import './css/statusVerificationNode.css'
 import './css/generalNode.css'
@@ -22,16 +20,7 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
 
   const accordionRef = useRef(null);
 
-  /* function toggleAccordion () {
-    //accordionRef.current.click();
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement) {
-      childElement.click();
-    }
-  } */
-
   function collapseAccordion() {
-    //accordionRef.current.click();
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && !childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -39,7 +28,6 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
   }
 
   function openAccordion() {
-    //accordionRef.current.click();
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -66,29 +54,18 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
 
       <Accordion defaultActiveKey="0">
         <Accordion.Item className='statusVerif-area area' eventKey="0">
-          <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Match wip</Accordion.Header>
+          <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Match </Accordion.Header>
           <Accordion.Body className='nodrag'>
 
 
-            <label htmlFor="text">Match wip</label>
-
-
+            <label htmlFor="text">Match </label>
             <Form.Control value={key} onChange={(e) => handleKeyChange(e.target.value)} className="key-field" type="text" placeholder="Key" />
-
             <Form.Control value={value} onChange={(e) => handleValueChange(e.target.value)} className="value-field" type="text" placeholder="Value" />
-
-            {/* <label htmlFor="readonly">Status code node</label>
-
-      <div>
-        <label htmlFor="text">Status code:</label>
-        <input value={statusCode} id="text" name="text" onChange={onStatusCodeChange} className="nodrag" />
-      </div> */}
 
 
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-
 
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>

@@ -27,8 +27,8 @@ function TimerSettings(props) {
     
     return (
         <div>
-            <label><b>Timer settings:</b></label>
-
+{/*             <label><b>Timer settings:</b></label>
+ */}
             <div>
                 <div>
                     <label>Run Generated?</label>

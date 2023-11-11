@@ -11,7 +11,12 @@ import './css/generalNode.css'
 
 function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-  const [statusCode, setStatusCode] = useState();
+  const [selectedDll, setSelectedDll] = useState();
+
+  const [dllNames, setDllNames] = useState([]); //TODO: add default
+
+  console.log("data");
+  console.log(data);
 
   console.log("[Status node] Workflow ID: ", data.custom._wfIndex)
   console.log("[Status node] Test ID: ", data.custom._testIndex)
@@ -48,10 +53,21 @@ function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
   data.custom.collapseAccordion = collapseAccordion
   data.custom.openAccordion = openAccordion
 
-  const onStatusCodeChange = (evt) => {
+  const onSelectedDllChange = (evt) => {
 
-    
+    const newSelectedDll = evt.target.value
+    setSelectedDll(newSelectedDll)
+
+    data.custom.customVerifChangeCallback(newSelectedDll, data.custom._wfIndex, data.custom._testIndex)
   };
+
+
+  const getDllNames = ()=>{
+    if (data.custom.dllNames) {
+      return data.custom.dllNames
+    }
+    else return []
+  }
 
 
   return (
@@ -64,8 +80,14 @@ function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
           <Accordion.Body className='nodrag'>
 
 
-          <label htmlFor="text">Custom wip</label>
-              <Form.Control value={statusCode} onChange={onStatusCodeChange} className="test-name" type="text" placeholder="Enter text" />
+          <Form.Select aria-label="Default select example" value={selectedDll} onChange={onSelectedDllChange} >
+              <option value=""></option>
+              {getDllNames().map((item, index) => {
+                return (
+                  <option key={index} value={item}>{item}</option>
+                )
+              })}
+            </Form.Select>
 
 
       {/* <label htmlFor="readonly">Status code node</label>

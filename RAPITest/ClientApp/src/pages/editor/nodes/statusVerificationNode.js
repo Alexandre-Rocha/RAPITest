@@ -2,9 +2,7 @@ import { useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import { Accordion } from 'react-bootstrap';
-import { Form } from 'react-bootstrap';
-
+import { Accordion, Form } from 'react-bootstrap';
 
 import './css/statusVerificationNode.css'
 import './css/generalNode.css'
@@ -21,24 +19,15 @@ function StatusVerificationNode({ data, isConnectable, xPos, yPos }) {
 
   const accordionRef = useRef(null);
 
-  /* function toggleAccordion () {
-    //accordionRef.current.click();
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement) {
-      childElement.click();
-    }
-  } */
 
-  function collapseAccordion () {
-    //accordionRef.current.click();
+  function collapseAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && !childElement.classList.contains('collapsed')) {
       childElement.click();
     }
   }
 
-  function openAccordion () {
-    //accordionRef.current.click();
+  function openAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -64,23 +53,13 @@ function StatusVerificationNode({ data, isConnectable, xPos, yPos }) {
           <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Status Code</Accordion.Header>
           <Accordion.Body className='nodrag'>
 
-
-          <label htmlFor="text">Status Code</label>
-              <Form.Control value={statusCode} onChange={onStatusCodeChange} className="test-name" type="text" placeholder="Enter text" />
-
-
-      {/* <label htmlFor="readonly">Status code node</label>
-
-      <div>
-        <label htmlFor="text">Status code:</label>
-        <input value={statusCode} id="text" name="text" onChange={onStatusCodeChange} className="nodrag" />
-      </div> */}
+            <label htmlFor="text">Status Code</label>
+            <Form.Control value={statusCode} onChange={onStatusCodeChange} className="test-name" type="text" placeholder="Enter text" />
 
 
-      </Accordion.Body>
+          </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-
 
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>

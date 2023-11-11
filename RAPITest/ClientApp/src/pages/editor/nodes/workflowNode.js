@@ -11,32 +11,12 @@ import './css/generalNode.css'
 
 function WorkflowNode({ data, isConnectable, xPos, yPos }) {
 
-  const [wfIndex, setWfIndex] = useState(data.custom._wfIndex) // Either id from pre-exisitng TSL or -1 (not assigned) //TODO: in the future this will likely change as it doesnt make sense for it to start at -1; Rflow should start it at a value that makes sense (prob number of existing workflows +1). ACTUALLY CANT DO THAT CUZ 0 IS FALSY I THINK TRULY SAD
-  const [wfName, setWfName] = useState(data.custom.wfName || "") // Either name from pre-existing TSL or empty name
-
-
-
-
-  /* const [activeKey, setActiveKey] = useState('0'); // Initialize activeKey to the default expanded section
-
-  const handleCollapse = (event, key) => {
-    event.preventDefault();
-    setActiveKey(activeKey === key ? null : key);
-  };
- */
+  const [wfIndex, setWfIndex] = useState(data.custom._wfIndex)
+  const [wfName, setWfName] = useState(data.custom.wfName || "")
 
   const accordionRef = useRef(null);
 
-  /* function toggleAccordion () {
-    //accordionRef.current.click();
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement) {
-      childElement.click();
-    }
-  } */
-
   function collapseAccordion () {
-    //accordionRef.current.click();
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && !childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -44,7 +24,6 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
   }
 
   function openAccordion () {
-    //accordionRef.current.click();
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -91,14 +70,8 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
            <div className='headerDiv'>{renderWfTitle()}</div> </Accordion.Header>
           <Accordion.Body className='nodrag'>
 
-
             <label htmlFor="text">Workflow name</label>
             <Form.Control value={wfName} onChange={onWfNameChange} className="test-name" type="text" placeholder="Enter text" />
-
-            {/* <div>
-              <label htmlFor="text">Workflow name:</label>
-              <input value={wfName} id="text" name="text" onChange={onWfNameChange} className="nodrag" />
-            </div> */}
 
             <div>
               Wf: {wfIndex}
@@ -109,11 +82,6 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-
-   {/* {   <button onClick={toggleAccordion}>
-        Toggle Section 0
-      </button>} */}
-
 
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>

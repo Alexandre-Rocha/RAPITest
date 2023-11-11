@@ -16,119 +16,127 @@ import './css/bodyNode.css'
 
 function BodyNode({ data, isConnectable, xPos, yPos }) {
 
-  const [bodyText, setBodyText] = useState(data.custom.bodyText || "")
-  const [bodyRef, setBodyRef] = useState(data.custom.bodyRef || "")
+    const [bodyText, setBodyText] = useState(data.custom.bodyText || "")
+    const [bodyRef, setBodyRef] = useState(data.custom.bodyRef || "")
 
-  const [showSchema, setShowSchema] = useState(false)
+    const [showSchema, setShowSchema] = useState(false)
 
 
-  const [] = useState()
+    const [] = useState()
 
-  //data.custom.refList
+    //data.custom.refList
 
-  console.log("[Body node] X pos: ", xPos)
-  console.log("[Body node] Y pos: ", yPos)
-//<img className="seeMoreBody" onClick={this.showFullSchema} width="25" height="25" src={searchIcon} alt="Logo" />
-  const onBodyTextChange = (evt) => {
-    console.log("[Body node] Body text: ", evt.target.value);
-    setBodyText(evt.target.value)
-    data.custom.bodyTextChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+    console.log("[Body node] X pos: ", xPos)
+    console.log("[Body node] Y pos: ", yPos)
+    //<img className="seeMoreBody" onClick={this.showFullSchema} width="25" height="25" src={searchIcon} alt="Logo" />
+    const onBodyTextChange = (evt) => {
+        console.log("[Body node] Body text: ", evt.target.value);
+        setBodyText(evt.target.value)
+        data.custom.bodyTextChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
 
-  };
+    };
 
-  const onBodyRefChange = (evt) => {
-    console.log("[Body node] Body ref: ", evt.target.value);
-    setBodyRef(evt.target.value)
-    data.custom.bodyRefChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
-  };
+    const onBodyRefChange = (evt) => {
+        console.log("[Body node] Body ref: ", evt.target.value);
+        setBodyRef(evt.target.value)
+        /* data.custom.bodyRefChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex) */
+        /* let bodyVal = data.custom.dictObj[evt.target.value]
+        console.log("bodyVak");
+        console.log(bodyVal); */
+        data.custom.bodyRefChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+    };
 
-  const tooltip = (
-    <Tooltip className="custom-tooltip" id="tooltip">
-      <strong>WIP</strong> Body tooltip.
-    </Tooltip>
-  );
+    const tooltip = (
+        <Tooltip className="custom-tooltip" id="tooltip">
+            <strong>WIP</strong> Body tooltip.
+        </Tooltip>
+    );
 
-    const renderSchemaData = ()=>{
-      /* if (data.custom.refList) {
-        
-      } e */
-      return "body placeholder wip"
+    const renderSchemaData = () => {
+        if (data.custom.dictObj) {
+            return data.custom.dictObj[bodyRef]
+        } 
+        return "body placeholder wip"
     }
 
-    const renderSchemaList = ()=>{
-      if (data.custom.refList) {
-        
-      } else
-      return ["placeholder1","placeholder2"]
+    const renderSchemaList = () => {
+        if (data.custom.dictObj) {
+            return Object.keys(data.custom.dictObj)
+        } else
+            return []
     }
 
-    const onChangeSchemaList = ()=>{
+    const onChangeSchemaList = (evt) => {
         console.log("changed");
+        console.log(evt);
+        console.log(evt.target.value);
+        onBodyRefChange(evt)
+        //setBodyRef(evt.target.value)
     }
 
-//&#9432;
-//&#x1F6C8;
-  return (
-    <div className="body-node node">
-      <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
+    //&#9432;
+    //&#x1F6C8;
+    return (
+        <div className="body-node node">
+            <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
 
-      <Accordion defaultActiveKey="0">
-        <Accordion.Item className='body-area area' eventKey="0">
-          <Accordion.Header className='body-header header'>Body</Accordion.Header>
-          <Accordion.Body>
-
-
-            <label htmlFor="text">Body text WIP<OverlayTrigger placement="right" overlay={tooltip}>
-            <span>  🛈</span> 
-            </OverlayTrigger></label>
+            <Accordion defaultActiveKey="0">
+                <Accordion.Item className='body-area area' eventKey="0">
+                    <Accordion.Header className='body-header header'>Body</Accordion.Header>
+                    <Accordion.Body>
 
 
-            <Form.Control value={bodyText} onChange={onBodyTextChange} className="test-name" type="text" placeholder="Enter text" />
+                        <label htmlFor="text">Body text WIP<OverlayTrigger placement="right" overlay={tooltip}>
+                            <span>  🛈</span>
+                        </OverlayTrigger></label>
 
-            <label htmlFor="text">Body ref WIP</label>
 
-            <div className='bodyRefDiv'>
-            {/* <Form.Control value={bodyRef} onChange={onBodyRefChange} className="bodyRef" type="text" placeholder="Enter text" /> */}
+                        <Form.Control value={bodyText} onChange={onBodyTextChange} className="test-name" type="text" placeholder="Enter text" />
 
-            {/* <Combobox className='nowheel bodyRefDiv'
+                        <label htmlFor="text">Body ref WIP</label>
+
+                        <div className='bodyRefDiv'>
+                            {/* <Form.Control value={bodyRef} onChange={onBodyRefChange} className="bodyRef" type="text" placeholder="Enter text" /> */}
+
+                            {/* <Combobox className='nowheel bodyRefDiv'
               data={renderSchemaList()}
               filter={false}
               onChange={onChangeSchemaList}
               defaultValue={"wip list:"}
             /> */}
 
-            <Form.Select className='bodyRef' aria-label="Default select example"  onChange={onChangeSchemaList} >
-              <option>Choose available body:</option>
-              {renderSchemaList().map((item, index) => {
-                return (
-                  <option key={index} value={item}>{item}</option>
-                )
-              })}
-            </Form.Select>
+                            <Form.Select className='bodyRef' aria-label="Default select example" onChange={onChangeSchemaList} >
+                                <option></option>
+                                {renderSchemaList().map((item, index) => {
+                                    return (
+                                        <option key={index} value={item}>{item}</option>
+                                    )
+                                })}
+                            </Form.Select>
 
-            <img className="seeMoreBody" onClick={()=>setShowSchema(true)} width="20" height="20" src={searchIcon} alt="Logo" />
-            </div>
-            
-
-            <div>
-              <label htmlFor="text">Body node</label>
-            </div>
-
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
+                            <img className="seeMoreBody" onClick={() => setShowSchema(true)} width="24" height="24" src={searchIcon} alt="Logo" />
+                        </div>
 
 
-      <SimpleModalComp
-                    title={"card Schema wip"}
-                    body={renderSchemaData()}
-                    cancelButtonFunc={()=>{setShowSchema(false)}}
-                    visible={showSchema}
-                />
+                        <div>
+                            <label htmlFor="text">Body node</label>
+                        </div>
 
-      <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
-    </div>
-  );
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
+
+
+            <SimpleModalComp
+                title={"Body preview"}
+                body={renderSchemaData()}
+                cancelButtonFunc={() => { setShowSchema(false) }}
+                visible={showSchema}
+            />
+
+            <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
+        </div>
+    );
 }
 
 

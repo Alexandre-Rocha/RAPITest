@@ -1,9 +1,32 @@
+import React from "react"
+import { SmallApiUpload } from "./SmallApiUpload"
+import NodeArea from "./ButtonArea"
+import TimerSettings from "./TimerSettings"
+import ApiUploadArea from "./ApiUploadArea"
+import ButtonArea from "./ButtonArea"
+
+import { Form, Accordion, Tooltip, OverlayTrigger } from 'react-bootstrap';
+
+import Dropzone from "../../../components/Dropzone"
+
+
+import { useState } from "react"
 
 
 
-function AuxFilesArea(){
+import '../nodes/css/workflowNode.css'
+import '../nodes/css/generalNode.css'
+
+import './css/sidebar.css'; // Create this CSS file for styling
+
+function AuxFilesArea(props) {
+
+    const { onDictionaryDrop, onDllDrop } = props
+
 
     const [uploadedDic, setUploadedDic] = useState(false)
+
+    const [uploadedDLL, setUploadedDLL] = useState(false)
 
     const [dic, setDic] = useState()
 
@@ -14,93 +37,108 @@ function AuxFilesArea(){
 
     const onDropDic = (accept, reject) => {
         if (reject.length !== 0 || accept.length > 1) {
-            //this.setState({ showWarning: true, warningMessage: "Please upload only one .txt file" })
             alert("WIP- one txt file only!")
         }
 
-        /*else {
+        const txtFile = accept[0];
 
-            if (this.findDuplicate(accept, this.state.acceptDIC)) {
-                this.setState({ showWarning: true, warningMessage: "One or more of the uploaded files was already uploaded" })
-                return
-            }
-
-            this.setState({ acceptDIC: accept, transitionDIC: true  })
-        } */
-
-        const txtFile = accept[0]; // Assuming you're only allowing one file to be dropped
-
+        onDictionaryDrop(txtFile)
         setDic(txtFile)
-
-
-        if (txtFile) {
-            const reader = new FileReader();
-
-            reader.onload = (event) => {
-                const fileContents = event.target.result;
-                // Do something with fileContents, like displaying it in your component
-                console.log(fileContents);
-            };
-
-            reader.readAsText(txtFile);
-        }
+        setUploadedDic(true)
     }
 
     const onDropDll = (accept, reject) => {
         if (reject.length !== 0) {
-            //this.setState({ showWarning: true, warningMessage: "Please upload only one .txt file" })
             alert("WIP- dll files only!")
+            return
         }
-        /* else {
-
-            if (this.findDuplicate(accept, this.state.acceptDIC)) {
-                this.setState({ showWarning: true, warningMessage: "One or more of the uploaded files was already uploaded" })
-                return
-            }
-
-            this.setState({ acceptDIC: accept, transitionDIC: true  })
-        } */
 
         const dllFile = accept[0]
+        let fileName = dllFile.name
 
-        setDllArr([...dllArr, dllFile]);
+        if (dllArr.some(file => file.name === fileName)) {
+            alert("already exists!")
+            return
+        }
 
-        console.log("dll dropped");
+        let newDllArr = [...dllArr, dllFile]
+
+        onDllDrop(newDllArr)
+        setDllArr(newDllArr);
+        setUploadedDLL(true)
     }
 
 
     return (
         <div>
-            <div className="root-dropzone">
-                    <Dropzone accept=".txt" onDrop={onDropDic}>
+            <div className="root-dropzone sidebar-dropzone">
+                {(uploadedDic === false)?
+                <Dropzone className="sidebar-dropzone"
+                    accept=".txt"
+                    onDrop={onDropDic}
+                    text={
+                        <div align="center">
+                            <p>Upload Dictionary (.txt)</p>
+                        </div>}
+                />
+                        :<div>Dictionary uploaded! (WIP)</div>
+                    }
+                {/* <Dropzone accept=".txt" onDrop={onDropDic}>
                         {({ getRootProps, getInputProps }) => (
-                                <div
+                                <div align="center"
                                     {...getRootProps({
-                                        className: 'dropzone'
+                                        className: 'aux-dropzone'
                                     })}
                                 >
                                     <input {...getInputProps()} />
                                     <p>WIP TXT </p>
                                 </div>
                         )}
-                    </Dropzone>
-                </div>
+                    </Dropzone> */}
+            </div>
+            
+            <p></p>
 
+            <div className="root-dropzone">
 
-                <div className="root-dropzone">
-                    <Dropzone accept=".dll" onDrop={onDropDll}>
+                {(uploadedDLL === false)?
+                <Dropzone className="sidebar-dropzone"
+                    accept=".dll"
+                    onDrop={onDropDll}
+                    text={
+                        <div align="center">
+                            <p>Upload Custom Verification (.dll)</p>
+                        </div>}
+                />
+                        : <div>
+                            Dll uploaded! (WIP)
+                            Upload another: (WIP)
+                            <Dropzone className="sidebar-dropzone"
+                    accept=".dll"
+                    onDrop={onDropDll}
+                    text={
+                        <div align="center">
+                            <p>Upload Custom Verification (.dll)</p>
+                        </div>}
+                />
+
+                        </div>
+                    }
+                {/* <Dropzone accept=".dll" onDrop={onDropDll}>
                         {({ getRootProps, getInputProps }) => (
-                                <div
+                                <div align="center"
                                     {...getRootProps({
-                                        className: 'dropzone'
+                                        className: 'dropzone aux-dropzone'
                                     })}
                                 >
                                     <input {...getInputProps()} />
                                     <p>WIP DLL</p>
                                 </div>
                         )}
-                    </Dropzone>
-                </div>
+                    </Dropzone> */}
+            </div>
         </div>
     )
 }
+
+export default AuxFilesArea

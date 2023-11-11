@@ -1,18 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import {Button} from 'react-bootstrap';
-
-import { Form } from 'react-bootstrap';
-
-import { Accordion } from 'react-bootstrap';
+import { Button, Form, Accordion } from 'react-bootstrap';
 
 import './css/generalNode.css'
 import './css/headersNode.css'
 
 function HeadersNode({ data, isConnectable, xPos, yPos }) {
-
 
   const [headers, setHeaders] = useState(data.custom.headers || [{ key: '', value: '' }]);
 
@@ -42,11 +37,6 @@ function HeadersNode({ data, isConnectable, xPos, yPos }) {
     data.custom.removeHeaderCallback(index, data.custom._wfIndex, data.custom._testIndex)
   };
 
-  const logState = () => {
-    console.log("log state");
-    console.log(headers);
-  };
-
 
   console.log("[Headers node] X pos: ", xPos)
   console.log("[Headers node] Y pos: ", yPos)
@@ -56,8 +46,6 @@ function HeadersNode({ data, isConnectable, xPos, yPos }) {
   return (
     <div className="headers-node node">
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
-
-
 
       <Accordion defaultActiveKey="0">
         <Accordion.Item className='headers-area area' eventKey="0">
@@ -71,41 +59,23 @@ function HeadersNode({ data, isConnectable, xPos, yPos }) {
             {headers.map((header, index) => (
               <div className='header-line' key={index}>
 
-                <Form.Control  value={header.key} onChange={(e) => handleKeyChange(index, e.target.value)} className="key-field" type="text" placeholder="Key" />
-
+                <Form.Control value={header.key} onChange={(e) => handleKeyChange(index, e.target.value)} className="key-field" type="text" placeholder="Key" />
                 <Form.Control value={header.value} onChange={(e) => handleValueChange(index, e.target.value)} className="value-field" type="text" placeholder="Value" />
-
-                {/* <input
-                  type="text"
-                  placeholder="Key"
-                  value={header.key}
-                  onChange={(e) => handleKeyChange(index, e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Value"
-                  value={header.value}
-                  onChange={(e) => handleValueChange(index, e.target.value)}
-                /> */}
                 <Button className='remove-header' variant="light" size="sm" onClick={() => removeHeader(index)}>-</Button>
+
               </div>
             ))}
 
             <button onClick={addHeader}>Add Header</button>
-            <button onClick={logState}>Log State</button> {/* HERE */}
-
 
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
 
-
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>
   );
 };
-
-
 
 
 export default HeadersNode;

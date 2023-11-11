@@ -12,8 +12,8 @@ import './css/generalNode.css'
 
 function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
-  const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1) // Either id from pre-exisitng TSL or -1 (not assigned)
-  const [testName, setTestName] = useState(data.custom.testName || ""); // Either name from pre-existing TSL or empty name 
+  const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1) 
+  const [testName, setTestName] = useState(data.custom.testName || ""); 
 
   const [httpMethods, setHttpMethods] = useState(["Get", "Delete", "Post", "Put"]) //TODO: ideally this comes from parent
 
@@ -40,30 +40,21 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
     const _method = event
     setMethod(_method)
     console.log("[Test node] Selected method: ", _method)
-    data.custom.methodChangeCallback(_method, data.custom._wfIndex, data.custom._testIndex) //TODO: ONLY GET????
+    data.custom.methodChangeCallback(_method, data.custom._wfIndex, data.custom._testIndex)
   };
 
 
   const accordionRef = useRef(null);
 
-  /* function toggleAccordion () {
-    //accordionRef.current.click();
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement) {
-      childElement.click();
-    }
-  } */
 
-  function collapseAccordion () {
-    //accordionRef.current.click();
+  function collapseAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && !childElement.classList.contains('collapsed')) {
       childElement.click();
     }
   }
 
-  function openAccordion () {
-    //accordionRef.current.click();
+  function openAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -128,7 +119,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
               defaultValue={data.custom.initialServer || "Servers:"}
             />
 
-<label htmlFor="text">Path</label>
+            <label htmlFor="text">Path</label>
             <Combobox className='nowheel'
               data={data.custom.paths}
               filter={false}
@@ -136,7 +127,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
               defaultValue={data.custom.initialPath || "Paths:"}
             />
 
-<label htmlFor="text">Method</label>
+            <label htmlFor="text">Method</label>
             <Combobox className='nowheel'
               data={httpMethods}
               filter={false}

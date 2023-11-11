@@ -1,7 +1,7 @@
 .node {
     padding: 8px;
-    font-size: 10px;
-    width: 180px;
+    font-size: 14px;
+    width: 200px;
     color: #222;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 15%), 0 2px 4px -1px rgb(0 0 0 / 8%);
     border-radius: 4px;
@@ -35,7 +35,7 @@
     background: inherit;
     color: #222;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px;
   }
 
 .area{
@@ -47,7 +47,7 @@
 .node label {
     display: block;
     color: #464545;
-    font-size: 12px;
+    font-size: 14px;
   }
 
 .form-control{
@@ -55,3 +55,6 @@
     padding: 4px 8px
 }
 
+.form-select{
+    font-size: 14px;
+}

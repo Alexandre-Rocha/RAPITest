@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom';
 import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -61,6 +61,8 @@ function Flow() {
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
+    const prevCallbackRef = useRef();
+
     const location = useLocation();
     const reactFlowInstance = useReactFlow()
 
@@ -85,6 +87,11 @@ function Flow() {
     const [workflows, setWorkflows] = useState(location?.state?.tslState || []);
 
     const [canCollapse, setCanCollapse] = useState(false)
+
+    const [dict, setDict] = useState({})
+
+    const [dictFile, setDictFile] = useState()
+    const [dllFileArr, setDllFileArr] = useState([])
 
     // #endregion
 
@@ -182,6 +189,16 @@ function Flow() {
     }
 
 
+
+    const onCustomVerificationChange = (selectedCustomVerif, _wfIndex, _testIndex) => {
+        setWorkflows(oldWorkflows => {
+            const newWorkflows = deepCopy(oldWorkflows)
+            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Custom = selectedCustomVerif    //TODO:  need to grab custom verif
+            return newWorkflows
+        })
+    }
+
+
     const onVerificationSchemaChange = (newStatus, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
@@ -190,51 +207,51 @@ function Flow() {
         })
     }
 
-    const onCountKeyChangeCallback = (newCountKey, _wfIndex, _testIndex) =>{
+    const onCountKeyChangeCallback = (newCountKey, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
-            if(!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count){
-                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count = {key:'',value:''}
+            if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count) {
+                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count = { key: '', value: '' }
             }
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count.key = newCountKey
             return newWorkflows
         })
     }
 
-    const onCountValueChangeCallback = (newCountValue, _wfIndex, _testIndex) =>{
+    const onCountValueChangeCallback = (newCountValue, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
-            if(!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count){
-                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count = {key:'',value:''}
+            if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count) {
+                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count = { key: '', value: '' }
             }
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count.value = newCountValue
             return newWorkflows
         })
     }
 
-    const onMatchKeyChangeCallback = (newMatchKey, _wfIndex, _testIndex) =>{
+    const onMatchKeyChangeCallback = (newMatchKey, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
-            if(!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match){
-                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match = {key:'',value:''}
+            if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match) {
+                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match = { key: '', value: '' }
             }
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match.key = newMatchKey
             return newWorkflows
         })
     }
 
-    const onMatchValueChangeCallback = (newMatchValue, _wfIndex, _testIndex) =>{
+    const onMatchValueChangeCallback = (newMatchValue, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
-            if(!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match){
-                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match = {key:'',value:''}
+            if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match) {
+                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match = { key: '', value: '' }
             }
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match.value = newMatchValue
             return newWorkflows
         })
     }
 
-    const onContainsChangeCallback = (newContains, _wfIndex, _testIndex) =>{
+    const onContainsChangeCallback = (newContains, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Contains = newContains
@@ -470,10 +487,11 @@ function Flow() {
 
 
     const onBodyRefChangeCallback = (newBodyRef, _wfIndex, _testIndex) => {
-        //TODO: get body text from reference
-        // alternatively put another bodyref prop and trim it and get text at the end
-        onBodyTextChangeCallback("new body", _wfIndex, _testIndex)
+        let bodyRef = `$ref/dictionary/${newBodyRef}`
+        console.log(bodyRef);
+        onBodyTextChangeCallback(bodyRef, _wfIndex, _testIndex);
     }
+
 
 
     const onBodyTextChangeCallback = (newBodyText, _wfIndex, _testIndex) => {
@@ -485,7 +503,12 @@ function Flow() {
         });
     }
 
-
+    useEffect(() => {//TODO:removt thsi
+        if (prevCallbackRef.current !== onBodyRefChangeCallback) {
+            console.log('onBodyRefChangeCallback has been recreated');
+        }
+        prevCallbackRef.current = onBodyRefChangeCallback;
+    }, [onBodyRefChangeCallback]);
 
     const onStressCountChangeCallback = (count, _wfIndex) => {
 
@@ -1058,7 +1081,7 @@ function Flow() {
             },
             data: {
                 custom: {
-
+                    customVerifChangeCallback: onCustomVerificationChange,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
@@ -1477,7 +1500,7 @@ function Flow() {
 
                     // process Body
                     if (test.Body) {
-                        //TODO: check if is body text or reference, grab text if it is reference
+                        //TODO: nothing needed?
                     }
 
 
@@ -1512,6 +1535,10 @@ function Flow() {
 
                         // process Custom
                         // TODO:
+                        if (verification.Custom) {
+                            const transformedCustom = `[${verification.Custom}]`;
+                            verification.Custom = transformedCustom
+                        }
                     }
                 }
             }
@@ -1538,9 +1565,14 @@ function Flow() {
         let testSpecification = [file]
 
         let data = new FormData();
-        /* if (dictionary !== null) {
-          data.append('dictionary.txt', dictionary);
-        } */
+
+
+        if (dictFile) {
+            console.log("appending dictionary...");
+            data.append('dictionary.txt', dictFile); //TODO: this is file or json?
+        }
+
+
         let i = 1
         if (testSpecification !== null) {
             for (const file of testSpecification) {
@@ -1548,11 +1580,17 @@ function Flow() {
                 i++
             }
         }
-        /* if (dllFiles !== null) {
-          for (const file of dllFiles) {
-            data.append(file.name, file)
-          }
-        } */
+
+
+        if (dllFileArr) {
+            for (const file of dllFileArr) {
+                console.log("appending dll file...");
+                data.append(file.name, file)
+            }
+        }
+
+
+
         data.append('runimmediately', runImmediately);
         data.append('interval', runInterval);
         data.append('rungenerated', runGenerated);
@@ -1591,6 +1629,10 @@ function Flow() {
         console.log("----------------------------");
         console.log("Edges: ");
         console.log(edges);
+
+        console.log("----------------------------");
+        console.log("Dictionary file:");
+        console.log(dict);
     }
 
     const collapseNodes = () => {
@@ -1648,6 +1690,121 @@ function Flow() {
     // #endregion
 
 
+    function parseDictionary(dictString) {
+        const lines = dictString.split('\n');
+        const dictionary = {};
+        let currentKey = '';
+        let currentExample = '';
+
+        lines.forEach((line) => {
+            if (line.startsWith('dictionaryID:')) {
+                if (currentKey && currentExample) {
+                    dictionary[currentKey] = currentExample.trim();
+                }
+                currentKey = line.split('dictionaryID:')[1].trim();
+                currentExample = '';
+            } else {
+                currentExample += line + '\n';
+            }
+        });
+
+        if (currentKey && currentExample) {
+            dictionary[currentKey] = currentExample.trim();
+        }
+
+        return dictionary;
+    }
+
+    const onDictionaryDrop = (txtFile) => {
+        //somehow relay info to bodyNode
+        console.log("dic drop received, now need to relay");
+        let nodesArr = reactFlowInstance.getNodes();
+
+        if (txtFile) {
+
+            setDictFile(txtFile)
+
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+                const fileContents = event.target.result;
+
+                console.log(fileContents);
+                //here i have file contents. what do?
+                //gotta send all info to body node
+
+                let dictObj = parseDictionary(fileContents)
+
+                console.log("setting dicitonary");
+                console.log(dictObj);
+                setDict(dictObj)
+
+                nodesArr.forEach(
+                    node => {
+                        if (node.type === "body") {
+                            console.log("found body node with id:", node.id);
+                            node.data = {
+                                ...node.data,
+                                custom: {
+                                    ...node.data.custom,
+                                    dictObj: dictObj
+                                }
+
+                            }
+
+                            console.log("new node data:");
+                            console.log(node.data);
+                        }
+                    }
+                )
+
+                setNodes(nodesArr)
+
+            };
+
+            reader.readAsText(txtFile);
+        }
+    }
+
+    const onDllDrop = (dllArr) => {
+        //somehow relay info to customVerifNode
+        console.log("dll drop receivd, now need to relay");
+
+        console.log("fll");
+        console.log(dllArr);
+
+        setDllFileArr(dllArr)
+
+        let namesArr = []
+
+        dllArr.forEach((ddlFile) => { console.log(namesArr.push(ddlFile.name)); })
+        console.log(namesArr);
+
+        let nodesArr = reactFlowInstance.getNodes();
+
+        nodesArr.forEach(
+            node => {
+                if (node.type === "custom") {
+                    console.log("found node with id:", node.id);
+                    node.data = {
+                        ...node.data,
+                        custom: {
+                            ...node.data.custom,
+                            dllNames: namesArr
+                        }
+
+                    }
+
+                    console.log("new node data:");
+                    console.log(node.data);
+                }
+            }
+        )
+
+        setNodes(nodesArr)
+    }
+
+
     return (
         <div>
             <div className='editor-container'>
@@ -1659,6 +1816,8 @@ function Flow() {
                     apiTitle={testConfName}
                     handlerAPI={handlerAPI}
                     onTestConfNameChange={onTestConfNameChange}
+                    onDictionaryDrop={onDictionaryDrop}
+                    onDllDrop={onDllDrop}
                     buttonsArray={[
                         { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: "Workflow tooltip" },
                         { section: "Flow-related", title: "Test", onClick: onClickTestNode, class: "test" },

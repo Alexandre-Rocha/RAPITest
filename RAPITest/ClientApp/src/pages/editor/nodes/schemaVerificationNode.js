@@ -2,15 +2,11 @@ import { useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
+import { Accordion, Form } from 'react-bootstrap';
+
 import './css/schemaVerificationNode.css'
-
-import { Accordion } from 'react-bootstrap';
-import { Form } from 'react-bootstrap';
-
-
 import './css/generalNode.css'
 
-//TODO: this whole node needs to be updated
 function SchemaVerificationNode({ data, isConnectable, xPos, yPos }) {
 
   const [schema, setSchema] = useState(data.custom.initialSchema)
@@ -31,16 +27,7 @@ function SchemaVerificationNode({ data, isConnectable, xPos, yPos }) {
 
   const accordionRef = useRef(null);
 
-  /* function toggleAccordion () {
-    //accordionRef.current.click();
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement) {
-      childElement.click();
-    }
-  } */
-
   function collapseAccordion () {
-    //accordionRef.current.click();
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && !childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -48,7 +35,6 @@ function SchemaVerificationNode({ data, isConnectable, xPos, yPos }) {
   }
 
   function openAccordion () {
-    //accordionRef.current.click();
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -68,7 +54,6 @@ function SchemaVerificationNode({ data, isConnectable, xPos, yPos }) {
           <Accordion.Header ref={accordionRef} className='schemaVerif-header header'>Schema</Accordion.Header>
           <Accordion.Body className='nodrag'>
 
-
             <Form.Select aria-label="Default select example" value={schema} onChange={onSchemaChange} >
               <option value=""></option>
               {data.custom.schemas.map((item, index) => {
@@ -78,17 +63,9 @@ function SchemaVerificationNode({ data, isConnectable, xPos, yPos }) {
               })}
             </Form.Select>
 
-            {/* <label htmlFor="readonly">Schema node</label>
-
-      <div>
-        <label htmlFor="text">Paste the schema:</label>
-        <input value={schema} id="text" name="text" onChange={onSchemaChange} className="nodrag" />
-      </div> */}
-
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-
 
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>

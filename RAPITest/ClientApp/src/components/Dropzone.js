@@ -7,6 +7,7 @@ import uploadIcon from '../assets/uploadSmall.png'
         let onDrop = this.props.onDrop
         let accept = this.props.accept
         let text = this.props.text
+        let className = this.props.className
 
         return (
             <div className="root-dropzone">
@@ -15,7 +16,7 @@ import uploadIcon from '../assets/uploadSmall.png'
                     onDrop={onDrop}
                 >
                     {({ getRootProps, getInputProps }) => (
-                        <div {...getRootProps()} style={{ backgroundColor: this.props.transition ? '#42ba9e' : '' }} className="dropzone">
+                        <div {...getRootProps()} style={{ backgroundColor: this.props.transition ? '#42ba9e' : '' }} className={`dropzone ${className}`}>
                             <input {...getInputProps()} />
                             <div className="column" style={{ marginLeft: 'auto', marginRight: 'auto' }}>
                                 <div className="row">

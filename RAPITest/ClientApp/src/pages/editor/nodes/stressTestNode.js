@@ -13,11 +13,10 @@ import './css/generalNode.css'
 function StressTestNode({ data, isConnectable, xPos, yPos }) {
 
 
-  const [count, setCount] = useState(data.custom.count || "") // Either name from pre-existing TSL or empty name
+  const [count, setCount] = useState(data.custom.count || "")
+  const [threads, setThreads] = useState(data.custom.threads || "")
+  const [delay, setDelay] = useState(data.custom.delay || "")
 
-  const [threads, setThreads] = useState(data.custom.threads || "") // Either name from pre-existing TSL or empty name
-
-  const [delay, setDelay] = useState(data.custom.delay || "") // Either name from pre-existing TSL or empty name
 
   console.log("[Stress test node] Workflow ID: ", data.custom._wfIndex)
 
@@ -27,24 +26,15 @@ function StressTestNode({ data, isConnectable, xPos, yPos }) {
 
   const accordionRef = useRef(null);
 
-  /* function toggleAccordion () {
-    //accordionRef.current.click();
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement) {
-      childElement.click();
-    }
-  } */
 
-  function collapseAccordion () {
-    //accordionRef.current.click();
+  function collapseAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && !childElement.classList.contains('collapsed')) {
       childElement.click();
     }
   }
 
-  function openAccordion () {
-    //accordionRef.current.click();
+  function openAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -84,40 +74,20 @@ function StressTestNode({ data, isConnectable, xPos, yPos }) {
           <Accordion.Header ref={accordionRef} className='stress-header header'>Stress Test</Accordion.Header>
           <Accordion.Body className='nodrag'>
 
-              <label htmlFor="text">Count</label>
-              <Form.Control value={count} onChange={onCountChange} className="test-name" type="text" placeholder="Enter text" />
 
+            <label htmlFor="text">Count</label>
+            <Form.Control value={count} onChange={onCountChange} className="test-name" type="text" placeholder="Enter text" />
 
-              <label htmlFor="text">Threads</label>
-              <Form.Control value={threads} onChange={onThreadsChange} className="test-name" type="text" placeholder="Enter text" />
+            <label htmlFor="text">Threads</label>
+            <Form.Control value={threads} onChange={onThreadsChange} className="test-name" type="text" placeholder="Enter text" />
 
+            <label htmlFor="text">Delay</label>
+            <Form.Control value={delay} onChange={onDelayChange} className="test-name" type="text" placeholder="Enter text" />
 
-              <label htmlFor="text">Delay</label>
-              <Form.Control value={delay} onChange={onDelayChange} className="test-name" type="text" placeholder="Enter text" />
-
-
-
-
-
-            {/* <div>
-        <label htmlFor="text">Count:</label>
-        <input value={count} id="text" name="text" onChange={onCountChange} className="nodrag" />
-      </div>
-
-      <div>
-        <label htmlFor="text">Threads:</label>
-        <input value={threads} id="text" name="text" onChange={onThreadsChange} className="nodrag" />
-      </div>
-
-      <div>
-        <label htmlFor="text">Delay:</label>
-        <input value={delay} id="text" name="text" onChange={onDelayChange} className="nodrag" />
-      </div> */}
 
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-
 
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>

@@ -2,15 +2,12 @@ import { useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import { Accordion } from 'react-bootstrap';
-import { Form } from 'react-bootstrap';
-
+import { Accordion, Form } from 'react-bootstrap';
 
 import './css/statusVerificationNode.css'
 import './css/generalNode.css'
 
 function CountVerificationNode({ data, isConnectable, xPos, yPos }) {
-
 
   const [key, setKey] = useState("")
   const [value, setValue] = useState("")
@@ -23,24 +20,14 @@ function CountVerificationNode({ data, isConnectable, xPos, yPos }) {
 
   const accordionRef = useRef(null);
 
-  /* function toggleAccordion () {
-    //accordionRef.current.click();
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement) {
-      childElement.click();
-    }
-  } */
-
-  function collapseAccordion () {
-    //accordionRef.current.click();
+  function collapseAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && !childElement.classList.contains('collapsed')) {
       childElement.click();
     }
   }
 
-  function openAccordion () {
-    //accordionRef.current.click();
+  function openAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -53,12 +40,12 @@ function CountVerificationNode({ data, isConnectable, xPos, yPos }) {
 
   const handleKeyChange = (key) => {
     setKey(key)
-    data.custom.keyChangeCallback(key,data.custom._wfIndex, data.custom._testIndex)
+    data.custom.keyChangeCallback(key, data.custom._wfIndex, data.custom._testIndex)
   };
 
   const handleValueChange = (value) => {
     setValue(value)
-    data.custom.valueChangeCallback(value,data.custom._wfIndex, data.custom._testIndex)
+    data.custom.valueChangeCallback(value, data.custom._wfIndex, data.custom._testIndex)
   };
 
 
@@ -68,26 +55,15 @@ function CountVerificationNode({ data, isConnectable, xPos, yPos }) {
 
       <Accordion defaultActiveKey="0">
         <Accordion.Item className='statusVerif-area area' eventKey="0">
-          <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Count wip</Accordion.Header>
+          <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Count </Accordion.Header>
           <Accordion.Body className='nodrag'>
 
-
-          <label htmlFor="text">Count wip</label>
-
-              <Form.Control  value={key} onChange={(e) => handleKeyChange(e.target.value)} className="key-field" type="text" placeholder="Key" />
-
-                <Form.Control value={value} onChange={(e) => handleValueChange(e.target.value)} className="value-field" type="text" placeholder="Value" />
+            <label htmlFor="text">Count </label>
+            <Form.Control value={key} onChange={(e) => handleKeyChange(e.target.value)} className="key-field" type="text" placeholder="Key" />
+            <Form.Control value={value} onChange={(e) => handleValueChange(e.target.value)} className="value-field" type="text" placeholder="Value" />
 
 
-      {/* <label htmlFor="readonly">Status code node</label>
-
-      <div>
-        <label htmlFor="text">Status code:</label>
-        <input value={statusCode} id="text" name="text" onChange={onStatusCodeChange} className="nodrag" />
-      </div> */}
-
-
-      </Accordion.Body>
+          </Accordion.Body>
         </Accordion.Item>
       </Accordion>
 

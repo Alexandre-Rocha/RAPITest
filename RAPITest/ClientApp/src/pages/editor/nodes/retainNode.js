@@ -1,13 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-
-import {Button} from 'react-bootstrap';
-
-import { Form } from 'react-bootstrap';
-
-import { Accordion } from 'react-bootstrap';
+import { Button, Form, Accordion } from 'react-bootstrap';
 
 import './css/generalNode.css'
 import './css/retainNode.css'
@@ -42,11 +37,6 @@ function RetainNode({ data, isConnectable, xPos, yPos }) {
     data.custom.removeRetainCallback(index, data.custom._wfIndex, data.custom._testIndex)
   };
 
-  const logState = () => {
-    console.log("log state");
-    console.log(retains);
-  };
-
 
   console.log("[Retain node] X pos: ", xPos)
   console.log("[Retain node] Y pos: ", yPos)
@@ -67,34 +57,18 @@ function RetainNode({ data, isConnectable, xPos, yPos }) {
             {retains.map((retain, index) => (
               <div className='header-line' key={index}>
 
-                <Form.Control  value={retain.key} onChange={(e) => handleKeyChange(index, e.target.value)} className="key-field" type="text" placeholder="Key" />
-
+                <Form.Control value={retain.key} onChange={(e) => handleKeyChange(index, e.target.value)} className="key-field" type="text" placeholder="Key" />
                 <Form.Control value={retain.value} onChange={(e) => handleValueChange(index, e.target.value)} className="value-field" type="text" placeholder="Value" />
-
-                {/* <input
-                  type="text"
-                  placeholder="Key"
-                  value={header.key}
-                  onChange={(e) => handleKeyChange(index, e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Value"
-                  value={header.value}
-                  onChange={(e) => handleValueChange(index, e.target.value)}
-                /> */}
                 <Button className='remove-header' variant="light" size="sm" onClick={() => removeRetain(index)}>-</Button>
+
               </div>
             ))}
 
             <button onClick={addRetain}>Add Retain</button>
-            <button onClick={logState}>Log State</button> {/* HERE */}
-
 
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-
 
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>

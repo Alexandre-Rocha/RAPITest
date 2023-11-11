@@ -1,12 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import { Button } from 'react-bootstrap';
-
-import { Form } from 'react-bootstrap';
-
-import { Accordion } from 'react-bootstrap';
+import { Button, Form, Accordion } from 'react-bootstrap';
 
 import './css/generalNode.css'
 import './css/queryNode.css'
@@ -42,10 +38,6 @@ function QueryNode({ data, isConnectable, xPos, yPos }) {
     data.custom.removeQueryCallback(index, data.custom._wfIndex, data.custom._testIndex)
   };
 
-  const logState = () => {
-    console.log("log state");
-    console.log(query);
-  };
 
   console.log("[Query node] X pos: ", xPos)
   console.log("[Query node] Y pos: ", yPos)
@@ -59,7 +51,6 @@ function QueryNode({ data, isConnectable, xPos, yPos }) {
           <Accordion.Header className='query-header header'>Query</Accordion.Header>
           <Accordion.Body>
 
-
             <div>
               <label htmlFor="text">Query</label>
             </div>
@@ -68,29 +59,13 @@ function QueryNode({ data, isConnectable, xPos, yPos }) {
               <div className='header-line' key={index}>
 
                 <Form.Control value={queryItem.key} onChange={(e) => handleKeyChange(index, e.target.value)} className="key-field" type="text" placeholder="Key" />
-
                 <Form.Control value={queryItem.value} onChange={(e) => handleValueChange(index, e.target.value)} className="value-field" type="text" placeholder="Value" />
-
-
-                {/* <input
-                  type="text"
-                  placeholder="Key"
-                  value={queryItem.key}
-                  onChange={(e) => handleKeyChange(index, e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Value"
-                  value={queryItem.value}
-                  onChange={(e) => handleValueChange(index, e.target.value)}
-                /> */}
                 <Button className='remove-header' variant="light" size="sm" onClick={() => removeQuery(index)}>-</Button>
+
               </div>
             ))}
 
             <button onClick={addQuery}>Add Query</button>
-            <button onClick={logState}>Log State</button>
-
 
           </Accordion.Body>
         </Accordion.Item>
@@ -99,7 +74,6 @@ function QueryNode({ data, isConnectable, xPos, yPos }) {
       <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
     </div>
   );
-
 }
 
 

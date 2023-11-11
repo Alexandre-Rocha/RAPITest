@@ -11,6 +11,7 @@ import Dropzone from "react-dropzone"
 
 import { useState } from "react"
 
+import AuxFilesArea from "./AuxFilesArea"
 
 
 import '../nodes/css/workflowNode.css'
@@ -19,6 +20,7 @@ import '../nodes/css/generalNode.css'
 import './css/sidebar.css'; // Create this CSS file for styling
 
 import menu from '../../../assets/burger-menu-svgrepo-com.svg'
+import SimpleAccordion from "./SimpleAccordion"
 
 function Sidebar(props) {
 
@@ -38,56 +40,12 @@ function Sidebar(props) {
     const { buttonsArray } = props
 
     const { className } = props
-    //TODO: maybe eventualmentepor accordions nas sectoes p serem colapsibles
 
 
-    const onDropDic = (accept, reject) => {
-        if (reject.length !== 0 || accept.length > 1) {
-            //this.setState({ showWarning: true, warningMessage: "Please upload only one .txt file" })
-            alert("WIP- one txt file only!")
-        }
-        /*else {
+    const { onDictionaryDrop, onDllDrop } = props
 
-            if (this.findDuplicate(accept, this.state.acceptDIC)) {
-                this.setState({ showWarning: true, warningMessage: "One or more of the uploaded files was already uploaded" })
-                return
-            }
 
-            this.setState({ acceptDIC: accept, transitionDIC: true  })
-        } */
 
-        const txtFile = accept[0]; // Assuming you're only allowing one file to be dropped
-
-        if (txtFile) {
-            const reader = new FileReader();
-
-            reader.onload = (event) => {
-                const fileContents = event.target.result;
-                // Do something with fileContents, like displaying it in your component
-                console.log(fileContents);
-            };
-
-            reader.readAsText(txtFile);
-        }
-    }
-
-    const onDropDll = (accept, reject) => {
-        if (reject.length !== 0) {
-            //this.setState({ showWarning: true, warningMessage: "Please upload only one .txt file" })
-            alert("WIP- dll files only!")
-        }
-        /* else {
-
-            if (this.findDuplicate(accept, this.state.acceptDIC)) {
-                this.setState({ showWarning: true, warningMessage: "One or more of the uploaded files was already uploaded" })
-                return
-            }
-
-            this.setState({ acceptDIC: accept, transitionDIC: true  })
-        } */
-
-        console.log("dll dropped");
-    }
 
     return (
         <div className={`collapsible-sidebar ${isCollapsed ? 'collapsed' : ''} `}>
@@ -101,65 +59,32 @@ function Sidebar(props) {
 
 
 
+                    <ApiUploadArea
+                        uploaded={false}
+                        apiTitle={apiTitle}
+                        handlerAPI={handlerAPI}
+                        onTestConfNameChange={onTestConfNameChange}>
+                    </ApiUploadArea>
 
-                <ApiUploadArea
-                    uploaded={false}
-                    apiTitle={apiTitle}
-                    handlerAPI={handlerAPI}
-                    onTestConfNameChange={onTestConfNameChange}>
-                </ApiUploadArea>
+                <p></p>
 
+                <SimpleAccordion header={"Auxiliary Files"}>
 
-                <Accordion defaultActiveKey="0">
-                    <Accordion.Item className='body-area area' eventKey="0">
-                        <Accordion.Header className='body-header header'>wip aux</Accordion.Header>
-                        <Accordion.Body>
+                    <AuxFilesArea onDictionaryDrop={onDictionaryDrop} onDllDrop={onDllDrop}></AuxFilesArea>
 
-
-
-
-                            <div className="root-dropzone">
-                                <Dropzone accept=".txt" onDrop={onDropDic}>
-                                    {({ getRootProps, getInputProps }) => (
-                                        <div
-                                            {...getRootProps({
-                                                className: 'dropzone'
-                                            })}
-                                        >
-                                            <input {...getInputProps()} />
-                                            <p>WIP TXT </p>
-                                        </div>
-                                    )}
-                                </Dropzone>
-                            </div>
+                </SimpleAccordion>
 
 
-                            <div className="root-dropzone">
-                                <Dropzone accept=".dll" onDrop={onDropDll}>
-                                    {({ getRootProps, getInputProps }) => (
-                                        <div
-                                            {...getRootProps({
-                                                className: 'dropzone'
-                                            })}
-                                        >
-                                            <input {...getInputProps()} />
-                                            <p>WIP DLL</p>
-                                        </div>
-                                    )}
-                                </Dropzone>
-                            </div>
+                <p></p>
 
+                <SimpleAccordion header={"Timer Settings"}>
 
-
-                        </Accordion.Body>
-                    </Accordion.Item>
-                </Accordion>
-
-                <TimerSettings
-                    onRunGeneratedChange={onRunGeneratedChange}
-                    onRunImmediatelyChange={onRunImmediatelyChange}
-                    onRunIntervalChange={onRunIntervalChange}>
-                </TimerSettings>
+                    <TimerSettings
+                        onRunGeneratedChange={onRunGeneratedChange}
+                        onRunImmediatelyChange={onRunImmediatelyChange}
+                        onRunIntervalChange={onRunIntervalChange}>
+                    </TimerSettings>
+                </SimpleAccordion>
 
 
 
@@ -170,5 +95,7 @@ function Sidebar(props) {
         </div>
     )
 }
+
+//TODO: check class names in all acordions from everywhere!
 
 export default Sidebar

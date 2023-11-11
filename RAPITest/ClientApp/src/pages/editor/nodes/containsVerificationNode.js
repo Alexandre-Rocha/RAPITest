@@ -2,8 +2,7 @@ import { useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import { Accordion } from 'react-bootstrap';
-import { Form } from 'react-bootstrap';
+import { Accordion, Form } from 'react-bootstrap';
 
 
 import './css/statusVerificationNode.css'
@@ -21,24 +20,14 @@ function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
 
   const accordionRef = useRef(null);
 
-  /* function toggleAccordion () {
-    //accordionRef.current.click();
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement) {
-      childElement.click();
-    }
-  } */
-
-  function collapseAccordion () {
-    //accordionRef.current.click();
+  function collapseAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && !childElement.classList.contains('collapsed')) {
       childElement.click();
     }
   }
 
-  function openAccordion () {
-    //accordionRef.current.click();
+  function openAccordion() {
     const childElement = accordionRef.current.querySelector('.accordion-button');
     if (childElement && childElement.classList.contains('collapsed')) {
       childElement.click();
@@ -49,8 +38,7 @@ function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
   data.custom.openAccordion = openAccordion
 
   const onContainsChange = (evt) => {
-
-    console.log("[Contains node] Status code: ", evt.target.value)
+    console.log("[Contains node] Contains: ", evt.target.value)
     setContains(evt.target.value)
     data.custom.containsChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
   };
@@ -62,23 +50,15 @@ function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
 
       <Accordion defaultActiveKey="0">
         <Accordion.Item className='statusVerif-area area' eventKey="0">
-          <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Contains wip</Accordion.Header>
+          <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Contains</Accordion.Header>
           <Accordion.Body className='nodrag'>
 
 
-          <label htmlFor="text">Contains wip</label>
-              <Form.Control value={contains} onChange={onContainsChange} className="test-name" type="text" placeholder="Enter text" />
+            <label htmlFor="text">Contains</label>
+            <Form.Control value={contains} onChange={onContainsChange} className="test-name" type="text" placeholder="Enter text" />
 
 
-      {/* <label htmlFor="readonly">Status code node</label>
-
-      <div>
-        <label htmlFor="text">Status code:</label>
-        <input value={statusCode} id="text" name="text" onChange={onStatusCodeChange} className="nodrag" />
-      </div> */}
-
-
-      </Accordion.Body>
+          </Accordion.Body>
         </Accordion.Item>
       </Accordion>
 

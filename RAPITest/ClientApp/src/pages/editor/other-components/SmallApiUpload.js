@@ -116,14 +116,14 @@ export class SmallApiUpload extends Component {
                 {this.state.showInput && <div>
                     <Row>
                         <div className="root-dropzone">
-                            <Dropzone
+                            <Dropzone className="sidebar-dropzone"
                                 accept=".yaml, .json"
                                 onDrop={this.onDrop}
                                 history={this.props.history}
                                 text={
                                     <div align="center">
                                         <p>Upload API specification</p>
-                                        <p>(.yaml or .json only)</p>
+                                        <p>(.yaml or .json)</p>
                                     </div>}
                                 />
                         </div>
