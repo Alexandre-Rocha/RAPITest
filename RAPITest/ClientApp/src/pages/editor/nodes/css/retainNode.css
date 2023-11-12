@@ -1,27 +1,34 @@
 .retain-node {
     background: #fff7ad;
-  }
+}
 
-  .header-line {
-    display: flex; /* Use flexbox to arrange inputs in a row */
-    align-items: center; /* Center align items vertically within the container */
-    
-  }
-  
-  .value-field{
+/* .retain-item {
+
+}
+
+.retain-header {
+
+} */
+
+.retain-line {
+    display: flex;
+    align-items: center;
+}
+
+.value-field {
     border-top-left-radius: 0px;
     border-bottom-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
-  }
+}
 
-  .key-field{
+.key-field {
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
-  }
+}
 
-  
-  .remove-header{
+
+.remove-retain {
     background-color: white;
     padding: 1px 6px;
     border-top-left-radius: 0px;
@@ -29,4 +36,4 @@
     border: 1px solid #ced4da;
     border-top-right-radius: 0.25rem;
     border-bottom-right-radius: 0.25rem;
-  }
+}

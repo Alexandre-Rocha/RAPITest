@@ -11,7 +11,7 @@ import SimpleAccordion from './SimpleAccordion';
     {...},
     ...
 ]
-Sections must be: "Flow" OR "HTTP" OR "Verifications" OR "Setup" OR "Others" OR "Dev" - nvm everything works now
+Sections must be: "Flow" OR "HTTP" OR "Verifications" OR "Setup" OR "Others" OR "Dev" - nvm everything works now TODO:remove this comment?
 */
 const ButtonArea = (props) => {
 
@@ -24,7 +24,7 @@ const ButtonArea = (props) => {
             {sections.map((section, index) => (
                 <div className='single-button-area' key={index} >
                     <p></p>
-                    <SimpleAccordion header={section}>
+                    <SimpleAccordion header={section}accHeaderClass={"sidebar-simple-header"}>
                     {data
                         .filter((buttonData) => buttonData.section === section)
                         .map((buttonData, buttonIndex) => (

@@ -68,7 +68,7 @@ function Sidebar(props) {
 
                 <p></p>
 
-                <SimpleAccordion header={"Auxiliary Files"}>
+                <SimpleAccordion header={"Auxiliary Files"} accHeaderClass={"sidebar-simple-header"}>
 
                     <AuxFilesArea onDictionaryDrop={onDictionaryDrop} onDllDrop={onDllDrop}></AuxFilesArea>
 
@@ -77,7 +77,7 @@ function Sidebar(props) {
 
                 <p></p>
 
-                <SimpleAccordion header={"Timer Settings"}>
+                <SimpleAccordion header={"Timer Settings"}accHeaderClass={"sidebar-simple-header"}>
 
                     <TimerSettings
                         onRunGeneratedChange={onRunGeneratedChange}

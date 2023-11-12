@@ -1,23 +1,31 @@
 .body-node {
-    background: #fff7ad;
-  }
+  background: #fff7ad;
+}
 
-  .custom-tooltip > .tooltip-inner {
-    background-color: #f0f0f0;
-  color: #222;;
-  }
+/* .body-item {
+
+}
+
+.body-header {
+
+} */
+
+.custom-tooltip>.tooltip-inner {
+  background-color: #f0f0f0;
+  color: #222;
+}
 
 
-  .bodyRefDiv{
+/* .body-ref-div {
 
-  }
+} */
 
-  .seeMoreBody{
-    display: inline;
-    margin-left: 5%;
-  }
+.see-more-body {
+  display: inline;
+  margin-left: 5%;
+}
 
-  .bodyRef{
-    display: inline;
-    width: 80%;
-  }
+.body-ref {
+  display: inline;
+  width: 80%;
+}

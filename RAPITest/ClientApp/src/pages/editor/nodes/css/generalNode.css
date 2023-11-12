@@ -23,22 +23,22 @@
     box-shadow: none !important;
 }
 
-.headerDiv{
+.acc-header-text{
     overflow: hidden;
 }
 
-.header .accordion-button::after {
+.acc-header .accordion-button::after {
     overflow:visible
 }
 
-.header .accordion-button {
+.acc-header .accordion-button {
     background: inherit;
     color: #222;
     font-weight: bold;
     font-size: 16px;
   }
 
-.area{
+.acc-item{
      background: inherit;
      font-size: inherit;
      box-shadow: none !important;

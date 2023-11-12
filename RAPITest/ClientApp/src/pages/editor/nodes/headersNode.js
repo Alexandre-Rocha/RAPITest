@@ -1,80 +1,80 @@
 import { useState } from 'react';
-import { Handle, Position } from 'reactflow';
 import React from 'react';
 
-import { Button, Form, Accordion } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 
-import './css/generalNode.css'
+import { LOG_LEVELS as level, rapiLog } from '../utils';
+
 import './css/headersNode.css'
+import GeneralNode from './generalNode';
 
 function HeadersNode({ data, isConnectable, xPos, yPos }) {
 
-  const [headers, setHeaders] = useState(data.custom.headers || [{ key: '', value: '' }]);
+    const [headers, setHeaders] = useState(data.custom.headers || [{ key: '', value: '' }]);
 
-  const handleKeyChange = (index, value) => {
-    const updatedHeaders = [...headers];
-    updatedHeaders[index].key = value;
-    setHeaders(updatedHeaders);
-    data.custom.keyChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex)
-  };
+    const handleKeyChange = (index, value) => {
+        const updatedHeaders = [...headers];
+        updatedHeaders[index].key = value;
+        setHeaders(updatedHeaders);
+        data.custom.keyChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex)
+    };
 
-  const handleValueChange = (index, value) => {
-    const updatedHeaders = [...headers];
-    updatedHeaders[index].value = value;
-    setHeaders(updatedHeaders);
-    data.custom.valueChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex)
-  };
+    const handleValueChange = (index, value) => {
+        const updatedHeaders = [...headers];
+        updatedHeaders[index].value = value;
+        setHeaders(updatedHeaders);
+        data.custom.valueChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex)
+    };
 
-  const addHeader = () => {
-    setHeaders([...headers, { key: '', value: '' }]);
-    data.custom.addHeaderCallback(data.custom._wfIndex, data.custom._testIndex)
-  };
+    const addHeader = () => {
+        setHeaders([...headers, { key: '', value: '' }]);
+        data.custom.addHeaderCallback(data.custom._wfIndex, data.custom._testIndex)
+    };
 
-  const removeHeader = (index) => {
-    const updatedHeaders = [...headers];
-    updatedHeaders.splice(index, 1);
-    setHeaders(updatedHeaders);
-    data.custom.removeHeaderCallback(index, data.custom._wfIndex, data.custom._testIndex)
-  };
+    const removeHeader = (index) => {
+        const updatedHeaders = [...headers];
+        updatedHeaders.splice(index, 1);
+        setHeaders(updatedHeaders);
+        data.custom.removeHeaderCallback(index, data.custom._wfIndex, data.custom._testIndex)
+    };
 
+    rapiLog(level.DEBUG, "[Headers node] Workflow ID: ", data.custom._wfIndex)
+    rapiLog(level.DEBUG, "[Headers node] X pos: ", xPos)
+    rapiLog(level.DEBUG, "[Headers node] Y pos: ", yPos)
 
-  console.log("[Headers node] X pos: ", xPos)
-  console.log("[Headers node] Y pos: ", yPos)
+    //TODO: n tem nada aver aqui mas no save changes remover headers vazios
 
-  //TODO: n tem nada aver aqui mas no save changes remover headers vazios
+    const generalNodeProps = {
+        data: data,
+        isConnectable: isConnectable,
+        nodeClass: 'headers-node',
+        accItemClass: 'headers-item',
+        accHeaderClass: 'headers-header',
+        accBodyClass: 'nodrag',
+        header: 'Headers'
+    };
 
-  return (
-    <div className="headers-node node">
-      <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
+    return (
+        <div>
+            <GeneralNode {...generalNodeProps}>
 
-      <Accordion defaultActiveKey="0">
-        <Accordion.Item className='headers-area area' eventKey="0">
-          <Accordion.Header className='headers-header header'>Headers</Accordion.Header>
-          <Accordion.Body>
+                <label>Headers</label>
 
-            <div>
-              <label htmlFor="text">Headers</label>
-            </div>
+                {headers.map((header, index) => (
+                    <div className='header-line' key={index}>
 
-            {headers.map((header, index) => (
-              <div className='header-line' key={index}>
+                        <Form.Control value={header.key} onChange={(e) => handleKeyChange(index, e.target.value)} className="key-field" type="text" placeholder="Key" />
+                        <Form.Control value={header.value} onChange={(e) => handleValueChange(index, e.target.value)} className="value-field" type="text" placeholder="Value" />
+                        <Button className='remove-header' variant="light" size="sm" onClick={() => removeHeader(index)}>-</Button>
 
-                <Form.Control value={header.key} onChange={(e) => handleKeyChange(index, e.target.value)} className="key-field" type="text" placeholder="Key" />
-                <Form.Control value={header.value} onChange={(e) => handleValueChange(index, e.target.value)} className="value-field" type="text" placeholder="Value" />
-                <Button className='remove-header' variant="light" size="sm" onClick={() => removeHeader(index)}>-</Button>
+                    </div>
+                ))}
 
-              </div>
-            ))}
+                <button onClick={addHeader}>Add Header</button>
 
-            <button onClick={addHeader}>Add Header</button>
-
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
-
-      <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
-    </div>
-  );
+            </GeneralNode>
+        </div>
+    );
 };
 
 

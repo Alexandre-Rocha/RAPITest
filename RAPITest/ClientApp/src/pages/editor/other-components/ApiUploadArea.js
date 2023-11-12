@@ -32,7 +32,7 @@ const ApiUploadArea = (props) => {
 
 {/*             <label><b>API Specification:</b></label>
  */}
-            <SimpleAccordion header={"API Upload"}>
+            <SimpleAccordion header={"API Upload"} accHeaderClass={"sidebar-simple-header"}>
 
 
 

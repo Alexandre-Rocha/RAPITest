@@ -1,156 +1,132 @@
-import { useEffect, useState, useRef } from 'react';
-import { Handle, Position } from 'reactflow';
+import { useEffect, useState } from 'react';
 import React from 'react';
 import { Combobox } from 'react-widgets';
 import { Form } from 'react-bootstrap';
-import { Accordion } from 'react-bootstrap';
 
 import './css/testIDNode.css'
-import './css/generalNode.css'
+import GeneralNode from './generalNode';
+import { LOG_LEVELS as level, rapiLog } from '../utils';
 
 
 
 function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
-  const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1) 
-  const [testName, setTestName] = useState(data.custom.testName || ""); 
+    const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1)
+    const [testName, setTestName] = useState(data.custom.testName || "");
 
-  const [httpMethods, setHttpMethods] = useState(["Get", "Delete", "Post", "Put"]) //TODO: ideally this comes from parent
-
-  const [serverURL, setServerURL] = useState(data.custom.initialServer);
-  const [path, setPath] = useState(data.custom.initialPath);
-  const [method, setMethod] = useState(data.custom.initialMethod)
+    const [httpMethods, setHttpMethods] = useState(["Get", "Delete", "Post", "Put"]) //TODO: ideally this comes from parent
 
 
-  const onChangeServer = (event) => {
-    const _server = event
-    setServerURL(_server)
-    console.log("[Test node] Selected server: ", _server)
-    data.custom.serverChangeCallback(_server, data.custom._wfIndex, data.custom._testIndex)
-  };
-
-  const onChangePath = (event) => {
-    const _path = event
-    setPath(_path)
-    console.log("[Test node] Selected path: ", _path)
-    data.custom.pathChangeCallback(_path, data.custom._wfIndex, data.custom._testIndex)
-  };
-
-  const onChangeMethod = (event) => {
-    const _method = event
-    setMethod(_method)
-    console.log("[Test node] Selected method: ", _method)
-    data.custom.methodChangeCallback(_method, data.custom._wfIndex, data.custom._testIndex)
-  };
+    rapiLog(level.DEBUG, "[Test node] Workflow ID: ", data.custom._wfIndex)
+    rapiLog(level.DEBUG, "[Test node] Test ID: ", testIndex)
+    rapiLog(level.DEBUG, "[Test node] X pos: ", xPos)
+    rapiLog(level.DEBUG, "[Test node] Y pos: ", yPos)
 
 
-  const accordionRef = useRef(null);
+    const onTestNameChange = (evt) => {
+        const _testName = evt.target.value
+        rapiLog(level.INFO, "[Test node] Test name: ", _testName)
+        setTestName(_testName)
+        data.custom.nameChangeCallback(_testName, data.custom._wfIndex, data.custom._testIndex)
+    };
+
+    const onChangeServer = (event) => {
+        const _server = event
+        rapiLog(level.INFO, "[Test node] Selected server: ", _server)
+        data.custom.serverChangeCallback(_server, data.custom._wfIndex, data.custom._testIndex)
+    };
+
+    const onChangePath = (event) => {
+        const _path = event
+        rapiLog(level.INFO, "[Test node] Selected path: ", _path)
+        data.custom.pathChangeCallback(_path, data.custom._wfIndex, data.custom._testIndex)
+    };
+
+    const onChangeMethod = (event) => {
+        const _method = event
+        rapiLog(level.INFO, "[Test node] Selected method: ", _method)
+        data.custom.methodChangeCallback(_method, data.custom._wfIndex, data.custom._testIndex)
+    };
 
 
-  function collapseAccordion() {
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement && !childElement.classList.contains('collapsed')) {
-      childElement.click();
+    /* eslint-disable */
+    useEffect(() => {
+        // If text index from props change, reflect onto own state
+        if (data.custom._testIndex !== testIndex) {
+            setTestIndex(data.custom._testIndex);
+        }
+    }, [data.custom._testIndex]); //we dont want testIndex here because it will lead to infinite rerender-> THIS IS WHY ESLINT IS DISABLED
+    /* eslint-enable */
+
+
+    const renderTestTitle = () => {
+        let str = (testName == false ? "Test" : testName)
+        return str
     }
-  }
 
-  function openAccordion() {
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement && childElement.classList.contains('collapsed')) {
-      childElement.click();
+
+    //TODO: Think better on how to implement changing Test order; for now this works
+    const onIncrement = () => {
+        setTestIndex(oldTestIndex => oldTestIndex + 1)
     }
-  }
-
-  data.custom.collapseAccordion = collapseAccordion
-  data.custom.openAccordion = openAccordion
-
-
-  /* eslint-disable */
-  useEffect(() => {
-    // If text index from props change, reflect onto own state
-    if (data.custom._testIndex !== testIndex) {
-      setTestIndex(data.custom._testIndex);
+    const onDecrement = () => {
+        setTestIndex(oldTestIndex => oldTestIndex - 1)
     }
-  }, [data.custom._testIndex]); //we dont want testIndex here because it will lead to infinite rerender-> THIS IS WHY ESLINT IS DISABLED
-  /* eslint-enable */
+
+    const generalNodeProps = {
+        data: data,
+        isConnectable: isConnectable,
+        nodeClass: 'test-node',
+        accItemClass: 'test-item',
+        accHeaderClass: 'test-header',
+        accBodyClass: 'nodrag',
+        header: renderTestTitle()
+    };
+
+    return (
+        <div>
+            <GeneralNode {...generalNodeProps}>
+
+                <label htmlFor='testName'>Test name</label>
+                <Form.Control id='testName' value={testName} onChange={onTestNameChange} className="test-name" type="text" placeholder="Enter text" />
 
 
-  console.log("[Test node] Workflow ID: ", data.custom._wfIndex)
-  console.log("[Test node] Test ID: ", testIndex)
+                <label htmlFor="servers">Server</label>
+                <Combobox id='servers' className='nowheel'
+                    data={data.custom.servers}
+                    filter={false}
+                    onChange={onChangeServer}
+                    defaultValue={data.custom.initialServer || "Servers:"}
+                />
 
-  console.log("[Test node] X pos: ", xPos)
-  console.log("[Test node] Y pos: ", yPos)
+                <label htmlFor="paths">Path</label>
+                <Combobox id='paths' className='nowheel'
+                    data={data.custom.paths}
+                    filter={false}
+                    onChange={onChangePath}
+                    defaultValue={data.custom.initialPath || "Paths:"}
+                />
 
+                <label htmlFor="methods">Method</label>
+                <Combobox id='methods' className='nowheel'
+                    data={httpMethods}
+                    filter={false}
+                    onChange={onChangeMethod}
+                    defaultValue={data.custom.initialMethod || "Methods:"}
+                />
 
-  const onTestNameChange = (evt) => {
-    const _testName = evt.target.value
-    console.log("[Test node] Test name: ", _testName)
-    setTestName(_testName)
-    data.custom.nameChangeCallback(_testName, data.custom._wfIndex, data.custom._testIndex)
-  };
+                <div>
+                    Wf: {data.custom._wfIndex}
+                </div>
+                <div>
+                    Test: {testIndex}
+                    <button onClick={onIncrement}>+1</button>
+                    <button onClick={onDecrement}>-1</button>
+                </div>
 
-  //TODO: Think better on how to implement changing Test order; for now this works
-  const onIncrement = () => {
-    setTestIndex(oldTestIndex => oldTestIndex + 1)
-  }
-  const onDecrement = () => {
-    setTestIndex(oldTestIndex => oldTestIndex - 1)
-  }
-
-
-  return (
-    <div className="test-node node">
-      <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
-
-      <Accordion defaultActiveKey="0">
-        <Accordion.Item className='test-area area' eventKey="0">
-          <Accordion.Header ref={accordionRef} className='test-header header'>Test</Accordion.Header>
-          <Accordion.Body className='nodrag'>
-
-            <label htmlFor="text">Test name</label>
-            <Form.Control value={testName} onChange={onTestNameChange} className="test-name" type="text" placeholder="Enter text" />
-
-
-            <label htmlFor="text">Server</label>
-            <Combobox className='nowheel'
-              data={data.custom.servers}
-              filter={false}
-              onChange={onChangeServer}
-              defaultValue={data.custom.initialServer || "Servers:"}
-            />
-
-            <label htmlFor="text">Path</label>
-            <Combobox className='nowheel'
-              data={data.custom.paths}
-              filter={false}
-              onChange={onChangePath}
-              defaultValue={data.custom.initialPath || "Paths:"}
-            />
-
-            <label htmlFor="text">Method</label>
-            <Combobox className='nowheel'
-              data={httpMethods}
-              filter={false}
-              onChange={onChangeMethod}
-              defaultValue={data.custom.initialMethod || "Methods:"}
-            />
-
-            <div>
-              Wf: {data.custom._wfIndex}
-            </div>
-            <div>
-              Test: {testIndex}
-              <button onClick={onIncrement}>+1</button>
-              <button onClick={onDecrement}>-1</button>
-            </div>
-
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
-
-      <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
-    </div>
-  );
+            </GeneralNode>
+        </div>
+    );
 }
 
 

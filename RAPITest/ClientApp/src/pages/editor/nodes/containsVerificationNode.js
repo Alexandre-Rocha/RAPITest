@@ -1,71 +1,51 @@
-import { useState, useRef } from 'react';
-import { Handle, Position } from 'reactflow';
+import { useState } from 'react';
 import React from 'react';
 
-import { Accordion, Form } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
+import { LOG_LEVELS as level, rapiLog } from '../utils';
 
-import './css/statusVerificationNode.css'
-import './css/generalNode.css'
+import './css/containsVerificationNode.css'
+import GeneralNode from './generalNode';
 
 function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-  const [contains, setContains] = useState("");
-
-  console.log("[Contains node] Workflow ID: ", data.custom._wfIndex)
-  console.log("[Contains node] Test ID: ", data.custom._testIndex)
-
-  console.log("[Contains node] X pos: ", xPos)
-  console.log("[Contains node] Y pos: ", yPos)
-
-  const accordionRef = useRef(null);
-
-  function collapseAccordion() {
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement && !childElement.classList.contains('collapsed')) {
-      childElement.click();
-    }
-  }
-
-  function openAccordion() {
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement && childElement.classList.contains('collapsed')) {
-      childElement.click();
-    }
-  }
-
-  data.custom.collapseAccordion = collapseAccordion
-  data.custom.openAccordion = openAccordion
-
-  const onContainsChange = (evt) => {
-    console.log("[Contains node] Contains: ", evt.target.value)
-    setContains(evt.target.value)
-    data.custom.containsChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
-  };
+    const [contains, setContains] = useState("");
 
 
-  return (
-    <div className="statusVerif-node node">
-      <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
-
-      <Accordion defaultActiveKey="0">
-        <Accordion.Item className='statusVerif-area area' eventKey="0">
-          <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Contains</Accordion.Header>
-          <Accordion.Body className='nodrag'>
+    rapiLog(level.DEBUG, "[Contains node] Workflow ID: ", data.custom._wfIndex)
+    rapiLog(level.DEBUG, "[Contains node] Test ID: ", data.custom._testIndex)
+    rapiLog(level.DEBUG, "[Contains node] X pos: ", xPos)
+    rapiLog(level.DEBUG, "[Contains node] Y pos: ", yPos)
 
 
-            <label htmlFor="text">Contains</label>
-            <Form.Control value={contains} onChange={onContainsChange} className="test-name" type="text" placeholder="Enter text" />
+    const onContainsChange = (evt) => {
+        rapiLog(level.INFO, "[Contains node] Contains: ", evt.target.value)
+        setContains(evt.target.value)
+        data.custom.containsChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+    };
 
 
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
+    const generalNodeProps = {
+        data: data,
+        isConnectable: isConnectable,
+        nodeClass: 'contains-node',
+        accItemClass: 'contains-item',
+        accHeaderClass: 'contains-header',
+        accBodyClass: 'nodrag',
+        header: 'Contains'
+    };
 
+    return (
+        <div >
+            <GeneralNode {...generalNodeProps}>
 
-      <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
-    </div>
-  );
+                <label htmlFor="contains">Contains</label>
+                <Form.Control id='contains' value={contains} onChange={onContainsChange} className="contains-name" type="text" placeholder="Enter text" />
+
+            </GeneralNode>
+        </div>
+    );
 }
 
 

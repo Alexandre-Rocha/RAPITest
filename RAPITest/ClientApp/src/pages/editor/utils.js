@@ -16,6 +16,45 @@
 
     workflows[currWorkflow].Tests[currTest].Path
     */
+
+
+    export const LOG_LEVELS = {
+      TRACE: 0,
+      DEBUG: 1,
+      INFO: 2,
+      WARN: 3,
+      ERROR: 4
+    };
+
+
+    export function rapiLog(level, ...message){
+
+    
+      switch (level) {
+        case LOG_LEVELS.TRACE:
+          console.debug("TRACE logging level not currently supported. Using DEBUG instead.")
+          console.debug(...message);
+          break;
+        case LOG_LEVELS.DEBUG:
+          console.debug(...message);
+          break;
+        case LOG_LEVELS.INFO:
+          console.info(...message);
+          break;
+        case LOG_LEVELS.WARN:
+          console.warn(...message);
+          break;
+        case LOG_LEVELS.ERROR:
+          console.error(...message);
+          break;
+        default:
+          console.log("Unrecognized logging level. Using default log instead.")
+          console.log(...message);
+      }
+
+    }
+
+    
     
 
 
@@ -212,9 +251,9 @@ let test = {
       return false;
     }
   
-    if (!isValidVerifications(obj.Verifications)) {
+    /* if (!isValidVerifications(obj.Verifications)) {
       return false;
-    }
+    } */
   
     return true;
   }

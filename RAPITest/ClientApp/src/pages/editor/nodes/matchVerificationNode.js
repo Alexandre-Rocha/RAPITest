@@ -1,75 +1,55 @@
-import { useState, useRef } from 'react';
-import { Handle, Position } from 'reactflow';
+import { useState } from 'react';
 import React from 'react';
 
-import { Accordion, Form } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
-import './css/statusVerificationNode.css'
-import './css/generalNode.css'
+import { LOG_LEVELS as level, rapiLog } from '../utils';
+
+import './css/matchVerificationNode.css'
+import GeneralNode from './generalNode';
 
 function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-  const [key, setKey] = useState("")
-  const [value, setValue] = useState("")
+    const [key, setKey] = useState("")
+    const [value, setValue] = useState("")
 
-  console.log("[Match node] Workflow ID: ", data.custom._wfIndex)
-  console.log("[Match node] Test ID: ", data.custom._testIndex)
-
-  console.log("[Match node] X pos: ", xPos)
-  console.log("[Match node] Y pos: ", yPos)
-
-  const accordionRef = useRef(null);
-
-  function collapseAccordion() {
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement && !childElement.classList.contains('collapsed')) {
-      childElement.click();
-    }
-  }
-
-  function openAccordion() {
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement && childElement.classList.contains('collapsed')) {
-      childElement.click();
-    }
-  }
-
-  data.custom.collapseAccordion = collapseAccordion
-  data.custom.openAccordion = openAccordion
-
-  const handleKeyChange = (key) => {
-    setKey(key)
-    data.custom.keyChangeCallback(key, data.custom._wfIndex, data.custom._testIndex)
-  };
-
-  const handleValueChange = (value) => {
-    setValue(value)
-    data.custom.valueChangeCallback(value, data.custom._wfIndex, data.custom._testIndex)
-  };
+    rapiLog(level.DEBUG, "[Match node] Workflow ID: ", data.custom._wfIndex)
+    rapiLog(level.DEBUG, "[Match node] Test ID: ", data.custom._testIndex)
+    rapiLog(level.DEBUG, "[Match node] X pos: ", xPos)
+    rapiLog(level.DEBUG, "[Match node] Y pos: ", yPos)
 
 
-  return (
-    <div className="statusVerif-node node">
-      <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
+    const handleKeyChange = (key) => {
+        setKey(key)
+        data.custom.keyChangeCallback(key, data.custom._wfIndex, data.custom._testIndex)
+    };
 
-      <Accordion defaultActiveKey="0">
-        <Accordion.Item className='statusVerif-area area' eventKey="0">
-          <Accordion.Header ref={accordionRef} className='statusVerif-header header'>Match </Accordion.Header>
-          <Accordion.Body className='nodrag'>
+    const handleValueChange = (value) => {
+        setValue(value)
+        data.custom.valueChangeCallback(value, data.custom._wfIndex, data.custom._testIndex)
+    };
 
+    const generalNodeProps = {
+        data: data,
+        isConnectable: isConnectable,
+        nodeClass: 'match-node',
+        accItemClass: 'match-item',
+        accHeaderClass: 'match-header',
+        accBodyClass: 'nodrag',
+        header: 'Match'
+    };
 
-            <label htmlFor="text">Match </label>
-            <Form.Control value={key} onChange={(e) => handleKeyChange(e.target.value)} className="key-field" type="text" placeholder="Key" />
-            <Form.Control value={value} onChange={(e) => handleValueChange(e.target.value)} className="value-field" type="text" placeholder="Value" />
+    return (
+        <div>
+            <GeneralNode {...generalNodeProps}>
 
+                <label>Match </label>
+                <Form.Control id='matchKey' value={key} onChange={(e) => handleKeyChange(e.target.value)} className="key-field" type="text" placeholder="Key" />
+                <Form.Control id='matchValue' value={value} onChange={(e) => handleValueChange(e.target.value)} className="value-field" type="text" placeholder="Value" />
 
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
-
-      <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
-    </div>
-  );
+            </GeneralNode>
+        </div>
+    );
 }
 
 

@@ -1,18 +1,16 @@
-import { useEffect, useState } from 'react';
-import { Handle, Position } from 'reactflow';
+import { useState } from 'react';
 import React from 'react';
 
 import SimpleModalComp from '../../../components/SimpleModalComp';
 
-import { Form, Accordion, Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { Form, Tooltip, OverlayTrigger } from 'react-bootstrap';
 
-//import searchIcon from '../assets/search.png'
 import searchIcon from '../../../assets/search.png'
 
-import { Combobox } from 'react-widgets';
+import { LOG_LEVELS as level, rapiLog } from '../utils';
 
-import './css/generalNode.css'
 import './css/bodyNode.css'
+import GeneralNode from './generalNode';
 
 function BodyNode({ data, isConnectable, xPos, yPos }) {
 
@@ -21,28 +19,20 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
 
     const [showSchema, setShowSchema] = useState(false)
 
+    rapiLog(level.DEBUG, "[Body node] Workflow ID: ", data.custom._wfIndex)
+    rapiLog(level.DEBUG, "[Body node] X pos: ", xPos)
+    rapiLog(level.DEBUG, "[Body node] Y pos: ", yPos)
 
-    const [] = useState()
-
-    //data.custom.refList
-
-    console.log("[Body node] X pos: ", xPos)
-    console.log("[Body node] Y pos: ", yPos)
-    //<img className="seeMoreBody" onClick={this.showFullSchema} width="25" height="25" src={searchIcon} alt="Logo" />
     const onBodyTextChange = (evt) => {
-        console.log("[Body node] Body text: ", evt.target.value);
+        rapiLog(level.INFO, "[Body node] Body text: ", evt.target.value);
         setBodyText(evt.target.value)
         data.custom.bodyTextChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
 
     };
 
     const onBodyRefChange = (evt) => {
-        console.log("[Body node] Body ref: ", evt.target.value);
+        rapiLog(level.INFO, "[Body node] Body ref: ", evt.target.value);
         setBodyRef(evt.target.value)
-        /* data.custom.bodyRefChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex) */
-        /* let bodyVal = data.custom.dictObj[evt.target.value]
-        console.log("bodyVak");
-        console.log(bodyVal); */
         data.custom.bodyRefChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
     };
 
@@ -55,8 +45,8 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
     const renderSchemaData = () => {
         if (data.custom.dictObj) {
             return data.custom.dictObj[bodyRef]
-        } 
-        return "body placeholder wip"
+        }
+        return ""
     }
 
     const renderSchemaList = () => {
@@ -66,66 +56,44 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
             return []
     }
 
-    const onChangeSchemaList = (evt) => {
-        console.log("changed");
-        console.log(evt);
-        console.log(evt.target.value);
-        onBodyRefChange(evt)
-        //setBodyRef(evt.target.value)
-    }
+    const generalNodeProps = {
+        data: data,
+        isConnectable: isConnectable,
+        nodeClass: 'body-node',
+        accItemClass: 'body-item',
+        accHeaderClass: 'body-header',
+        accBodyClass: 'nodrag',
+        header: 'Body'
+    };
 
-    //&#9432;
-    //&#x1F6C8;
+
     return (
-        <div className="body-node node">
-            <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
+        <div>
+            <GeneralNode {...generalNodeProps}>
 
-            <Accordion defaultActiveKey="0">
-                <Accordion.Item className='body-area area' eventKey="0">
-                    <Accordion.Header className='body-header header'>Body</Accordion.Header>
-                    <Accordion.Body>
+                <label htmlFor="bodyText">
+                    Body text WIP
+                    <OverlayTrigger placement="right" overlay={tooltip}>
+                        <span>  🛈</span>
+                    </OverlayTrigger>
+                </label>
+                <Form.Control id='bodyText' value={bodyText} onChange={onBodyTextChange} className="body-text" type="text" placeholder="Enter text" />
 
+                <label htmlFor="bodyRef">Body ref WIP</label>
+                <div className='body-ref-div'>
+                    <Form.Select id='bodyRef' className='body-ref' aria-label="Default select example" onChange={onBodyRefChange} >
+                        <option></option>
+                        {renderSchemaList().map((item, index) => {
+                            return (
+                                <option key={index} value={item}>{item}</option>
+                            )
+                        })}
+                    </Form.Select>
 
-                        <label htmlFor="text">Body text WIP<OverlayTrigger placement="right" overlay={tooltip}>
-                            <span>  🛈</span>
-                        </OverlayTrigger></label>
+                    <img className="see-more-body" onClick={() => setShowSchema(true)} width="24" height="24" src={searchIcon} alt="Logo" />
+                </div>
 
-
-                        <Form.Control value={bodyText} onChange={onBodyTextChange} className="test-name" type="text" placeholder="Enter text" />
-
-                        <label htmlFor="text">Body ref WIP</label>
-
-                        <div className='bodyRefDiv'>
-                            {/* <Form.Control value={bodyRef} onChange={onBodyRefChange} className="bodyRef" type="text" placeholder="Enter text" /> */}
-
-                            {/* <Combobox className='nowheel bodyRefDiv'
-              data={renderSchemaList()}
-              filter={false}
-              onChange={onChangeSchemaList}
-              defaultValue={"wip list:"}
-            /> */}
-
-                            <Form.Select className='bodyRef' aria-label="Default select example" onChange={onChangeSchemaList} >
-                                <option></option>
-                                {renderSchemaList().map((item, index) => {
-                                    return (
-                                        <option key={index} value={item}>{item}</option>
-                                    )
-                                })}
-                            </Form.Select>
-
-                            <img className="seeMoreBody" onClick={() => setShowSchema(true)} width="24" height="24" src={searchIcon} alt="Logo" />
-                        </div>
-
-
-                        <div>
-                            <label htmlFor="text">Body node</label>
-                        </div>
-
-                    </Accordion.Body>
-                </Accordion.Item>
-            </Accordion>
-
+            </GeneralNode>
 
             <SimpleModalComp
                 title={"Body preview"}
@@ -134,7 +102,6 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
                 visible={showSchema}
             />
 
-            <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
         </div>
     );
 }

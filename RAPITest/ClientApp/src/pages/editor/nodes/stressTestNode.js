@@ -1,97 +1,70 @@
-import { useState, useRef } from 'react';
-import { Handle, Position } from 'reactflow';
+import { useState } from 'react';
 import React from 'react';
-import { Accordion } from 'react-bootstrap';
 import { Form } from 'react-bootstrap';
 
-
+import { LOG_LEVELS as level, rapiLog } from '../utils';
 
 import './css/stressTestNode.css'
-import './css/generalNode.css'
+import GeneralNode from './generalNode';
 
 
 function StressTestNode({ data, isConnectable, xPos, yPos }) {
 
 
-  const [count, setCount] = useState(data.custom.count || "")
-  const [threads, setThreads] = useState(data.custom.threads || "")
-  const [delay, setDelay] = useState(data.custom.delay || "")
+    const [count, setCount] = useState(data.custom.count || "")
+    const [threads, setThreads] = useState(data.custom.threads || "")
+    const [delay, setDelay] = useState(data.custom.delay || "")
 
 
-  console.log("[Stress test node] Workflow ID: ", data.custom._wfIndex)
-
-  console.log("[Stress test node] X pos: ", xPos)
-  console.log("[Stress test node] Y pos: ", yPos)
-
-
-  const accordionRef = useRef(null);
+    rapiLog(level.DEBUG, "[Stress test node] Workflow ID: ", data.custom._wfIndex)
+    rapiLog(level.DEBUG, "[Stress test node] X pos: ", xPos)
+    rapiLog(level.DEBUG, "[Stress test node] Y pos: ", yPos)
 
 
-  function collapseAccordion() {
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement && !childElement.classList.contains('collapsed')) {
-      childElement.click();
-    }
-  }
+    const onCountChange = (evt) => {
+        rapiLog(level.INFO, "[Stress test node] Count: ", evt.target.value)
+        setCount(evt.target.value)
+        data.custom.countChangeCallback(evt.target.value, data.custom._wfIndex)
+    };
 
-  function openAccordion() {
-    const childElement = accordionRef.current.querySelector('.accordion-button');
-    if (childElement && childElement.classList.contains('collapsed')) {
-      childElement.click();
-    }
-  }
+    const onThreadsChange = (evt) => {
+        rapiLog(level.INFO, "[Stress test node] Threads: ", evt.target.value)
+        setThreads(evt.target.value)
+        data.custom.threadsChangeCallback(evt.target.value, data.custom._wfIndex)
+    };
 
-  data.custom.collapseAccordion = collapseAccordion
-  data.custom.openAccordion = openAccordion
+    const onDelayChange = (evt) => {
+        rapiLog(level.INFO, "[Stress test node] Delay: ", evt.target.value)
+        setDelay(evt.target.value)
+        data.custom.delayChangeCallback(evt.target.value, data.custom._wfIndex)
+    };
 
-  const onCountChange = (evt) => {
-    console.log("[Stress test node] Count: ", evt.target.value);
-    setCount(evt.target.value)
-    data.custom.countChangeCallback(evt.target.value, data.custom._wfIndex)
-  };
+    const generalNodeProps = {
+        data: data,
+        isConnectable: isConnectable,
+        nodeClass: 'stress-node',
+        accItemClass: 'stress-item',
+        accHeaderClass: 'stress-header',
+        accBodyClass: 'nodrag',
+        header: 'Stress Test'
+    };
 
-  const onThreadsChange = (evt) => {
-    console.log("[Stress test node] Threads: ", evt.target.value);
-    setThreads(evt.target.value)
-    data.custom.threadsChangeCallback(evt.target.value, data.custom._wfIndex)
-  };
+    return (
+        <div>
+            <GeneralNode {...generalNodeProps}>
 
-  const onDelayChange = (evt) => {
-    console.log("[Stress test node] Delay: ", evt.target.value);
-    setDelay(evt.target.value)
-    data.custom.delayChangeCallback(evt.target.value, data.custom._wfIndex)
-  };
+                <label htmlFor="count">Count</label>
+                <Form.Control id='count' value={count} onChange={onCountChange} className="test-name" type="text" placeholder="Enter text" />
 
+                <label htmlFor="threads">Threads</label>
+                <Form.Control id='threads' value={threads} onChange={onThreadsChange} className="test-name" type="text" placeholder="Enter text" />
 
+                <label htmlFor="delay">Delay</label>
+                <Form.Control id='delay' value={delay} onChange={onDelayChange} className="test-name" type="text" placeholder="Enter text" />
 
-  return (
-    <div className="stress-node node">
-      <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
-
-
-      <Accordion defaultActiveKey="0">
-        <Accordion.Item className='stress-area area' eventKey="0">
-          <Accordion.Header ref={accordionRef} className='stress-header header'>Stress Test</Accordion.Header>
-          <Accordion.Body className='nodrag'>
-
-
-            <label htmlFor="text">Count</label>
-            <Form.Control value={count} onChange={onCountChange} className="test-name" type="text" placeholder="Enter text" />
-
-            <label htmlFor="text">Threads</label>
-            <Form.Control value={threads} onChange={onThreadsChange} className="test-name" type="text" placeholder="Enter text" />
-
-            <label htmlFor="text">Delay</label>
-            <Form.Control value={delay} onChange={onDelayChange} className="test-name" type="text" placeholder="Enter text" />
-
-
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
-
-      <Handle type="source" position={Position.Bottom} id="b" isConnectable={isConnectable} />
-    </div>
-  );
+            </GeneralNode>
+        </div>
+    );
 }
 
 
