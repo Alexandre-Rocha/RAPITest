@@ -10,8 +10,8 @@ import GeneralNode from './generalNode';
 
 function CountVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-    const [key, setKey] = useState("")
-    const [value, setValue] = useState("")
+    const [key, setKey] = useState(data.custom.key || "")
+    const [value, setValue] = useState(data.custom.value || "")
 
 
     rapiLog(level.DEBUG, "[Count node] Workflow ID: ", data.custom._wfIndex)

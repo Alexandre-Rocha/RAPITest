@@ -10,7 +10,7 @@ import GeneralNode from './generalNode';
 
 function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-    const [contains, setContains] = useState("");
+    const [contains, setContains] = useState(data.custom.contains || "");
 
 
     rapiLog(level.DEBUG, "[Contains node] Workflow ID: ", data.custom._wfIndex)

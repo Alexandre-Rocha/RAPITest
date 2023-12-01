@@ -10,7 +10,7 @@ import GeneralNode from './generalNode';
 
 function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-    const [selectedDll, setSelectedDll] = useState();
+    const [selectedDll, setSelectedDll] = useState(data.custom.dllName || "");
 
     rapiLog(level.DEBUG, "[Custom node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Custom node] Test ID: ", data.custom._testIndex)
@@ -49,7 +49,7 @@ function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
         <div>
             <GeneralNode {...generalNodeProps}>
 
-                <Form.Select aria-label="Default select example" value={selectedDll} onChange={onSelectedDllChange} >
+                <Form.Select aria-label="Default select example" onChange={onSelectedDllChange} >
                     <option value=""></option>
                     {getDllNames().map((item, index) => {
                         return (

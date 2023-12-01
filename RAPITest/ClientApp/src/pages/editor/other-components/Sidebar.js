@@ -7,7 +7,9 @@ import ButtonArea from "./ButtonArea"
 
 import { Form, Accordion, Tooltip, OverlayTrigger } from 'react-bootstrap';
 
-import Dropzone from "react-dropzone"
+//import Dropzone from "react-dropzone"
+
+import Dropzone from "../../../components/Dropzone"
 
 import { useState } from "react"
 
@@ -42,9 +44,24 @@ function Sidebar(props) {
     const { className } = props
 
 
-    const { onDictionaryDrop, onDllDrop } = props
+    const { onDictionaryDrop, onDllDrop, onTslDrop } = props
 
 
+    const onDropTsl = (accept, reject) => {
+
+
+        if (reject.length !== 0 || accept.length > 1) {
+            alert("WIP- one yaml file only!")
+            return
+        }
+
+        const tslFile = accept[0]
+        console.log("tsl uploaded");
+
+        //TODO: more verifs? idk
+        onTslDrop(tslFile)
+
+    }
 
 
     return (
@@ -59,12 +76,29 @@ function Sidebar(props) {
 
 
 
-                    <ApiUploadArea
-                        uploaded={false}
-                        apiTitle={apiTitle}
-                        handlerAPI={handlerAPI}
-                        onTestConfNameChange={onTestConfNameChange}>
-                    </ApiUploadArea>
+
+
+                <ApiUploadArea
+                    uploaded={false}
+                    apiTitle={apiTitle}
+                    handlerAPI={handlerAPI}
+                    onTestConfNameChange={onTestConfNameChange}>
+                </ApiUploadArea>
+
+                <SimpleAccordion header={"Upload TSL file"} accHeaderClass={"sidebar-simple-header"}>
+
+                    Recreate state from an existing TSL file (WIP)
+
+                    <Dropzone className="sidebar-dropzone"
+                        accept=".yaml"
+                        onDrop={onDropTsl}
+                        text={
+                            <div align="center">
+                                <p>Upload TSL (.yaml)</p>
+                            </div>}
+                    />
+
+                </SimpleAccordion>
 
                 <p></p>
 
@@ -77,7 +111,7 @@ function Sidebar(props) {
 
                 <p></p>
 
-                <SimpleAccordion header={"Timer Settings"}accHeaderClass={"sidebar-simple-header"}>
+                <SimpleAccordion header={"Timer Settings"} accHeaderClass={"sidebar-simple-header"}>
 
                     <TimerSettings
                         onRunGeneratedChange={onRunGeneratedChange}

@@ -22,6 +22,12 @@ import StressTestNode from './nodes/stressTestNode';
 
 import Sidebar from './other-components/Sidebar';
 
+import { LOG_LEVELS as level, rapiLog } from './utils';
+
+
+//import Dagre from '@dagrejs/dagre';
+
+
 import './Rflow5.css'
 
 import { SmallApiUpload } from './other-components/SmallApiUpload';
@@ -37,6 +43,29 @@ const initialEdges = []
 const proOptions = { hideAttribution: true };
 
 const nodeTypes = { status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode, stress: StressTestNode, match: MatchVerificationNode, custom: CustomVerificationNode, contains: ContainsVerificationNode, count: CountVerificationNode }
+
+
+//dagre
+/* const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+
+const getLayoutedElements = (nodes, edges, options) => {
+    g.setGraph({ rankdir: options.direction });
+
+    edges.forEach((edge) => g.setEdge(edge.source, edge.target));
+    nodes.forEach((node) => g.setNode(node.id, node));
+
+    Dagre.layout(g);
+
+    return {
+        nodes: nodes.map((node) => {
+            const { x, y } = g.node(node.id);
+
+            return { ...node, position: { x, y } };
+        }),
+        edges,
+    };
+}; */
+
 
 function deepCopy(obj) {
     if (typeof obj !== "object" || obj === null) {
@@ -56,6 +85,10 @@ function deepCopy(obj) {
 }
 
 function Flow() {
+
+    //dagre
+    //const { fitView } = useReactFlow();
+
 
     // #region State and Hooks
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -756,14 +789,30 @@ function Flow() {
     // #endregion
 
 
+    //dagre
+    /* const onLayout = useCallback(
+        (direction) => {
+            const layouted = getLayoutedElements(nodes, edges, { direction });
+
+            setNodes([...layouted.nodes]);
+            setEdges([...layouted.edges]);
+
+            window.requestAnimationFrame(() => {
+                fitView();
+            });
+        },
+        [nodes, edges]
+    ); */
+
 
     // #region Create Nodes
 
     const createWorkflowNode = (wfIndex = -1, wfName = "", x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
-        console.log("sffss");
-        console.log(wfIndex);
+
+        rapiLog(level.DEBUG, "[Editor] Creating new Workflow node with ID: ", id)
+
         const newNode = {
             id,
             position: {
@@ -888,9 +937,13 @@ function Flow() {
         return id;
     }
 
-    const createBodyNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+    const createBodyNode = (initialBodyText = null, initialBodyRef = null, _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
+
+        //TODO: verify bodytext and bodyref?
+
+        console.log("initibodyref", initialBodyRef);
 
         const newNode = {
             id,
@@ -903,7 +956,9 @@ function Flow() {
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex,
                     bodyTextChangeCallback: onBodyTextChangeCallback,
-                    bodyRefChangeCallback: onBodyRefChangeCallback, //TODO: initials
+                    bodyRefChangeCallback: onBodyRefChangeCallback,
+                    bodyText: initialBodyText,
+                    bodyRef: initialBodyRef
                 }
             },
             type: 'body'
@@ -995,9 +1050,12 @@ function Flow() {
     }
 
 
-    const createContainsVerificationNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+    const createContainsVerificationNode = (initialContains = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
+
+        //TODO: verify contains? no i think
+
         const newNode = {
             id,
             position: {
@@ -1007,6 +1065,7 @@ function Flow() {
             data: {
                 custom: {
                     containsChangeCallback: onContainsChangeCallback,
+                    contains: initialContains,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
@@ -1019,7 +1078,7 @@ function Flow() {
     }
 
 
-    const createCountVerificationNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+    const createCountVerificationNode = (initialCountKey = "", initialCountValue = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -1032,6 +1091,8 @@ function Flow() {
                 custom: {
                     valueChangeCallback: onCountValueChangeCallback,
                     keyChangeCallback: onCountKeyChangeCallback,
+                    key: initialCountKey,
+                    value: initialCountValue,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
@@ -1044,7 +1105,7 @@ function Flow() {
     }
 
 
-    const createMatchVerificationNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+    const createMatchVerificationNode = (initialMatchKey = "", initialMatchValue = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -1057,6 +1118,8 @@ function Flow() {
                 custom: {
                     valueChangeCallback: onMatchValueChangeCallback,
                     keyChangeCallback: onMatchKeyChangeCallback,
+                    key: initialMatchKey,
+                    value: initialMatchValue,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
@@ -1070,7 +1133,7 @@ function Flow() {
 
 
 
-    const createCustomVerificationNode = (_wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
+    const createCustomVerificationNode = (inititalDllName = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
         const id = `${nodeId.current}`;
         nodeId.current += 1
         const newNode = {
@@ -1082,6 +1145,7 @@ function Flow() {
             data: {
                 custom: {
                     customVerifChangeCallback: onCustomVerificationChange,
+                    dllName: inititalDllName,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
@@ -1119,7 +1183,175 @@ function Flow() {
         return id;
     }
 
-    //TODO: improve algorithm, its kinda hardcoded atm, missing stress, some nodes, etc
+    const processWorkflow = (wf, currX, currY) => {
+
+        rapiLog(level.DEBUG, "[Editor] Workflow found when recreating state. Assigned ID: ", wf._wfIndex)
+
+        const wfNodeId = createWorkflowNode(maxWfIndex.current, wf.WorkflowID, currX, currY) //WorkflowID is wf name TODO: whats the diff between yammlwfindex and maxwfindex
+
+        return wfNodeId
+    }
+
+    const processStress = (wf, yamlWfIndex, currX, currY) => {
+
+        rapiLog(level.DEBUG, "[Editor] Stress found when recreating state for workflow with ID ", yamlWfIndex)
+
+        const initialCount = wf.Stress.Count
+        const initialThreads = wf.Stress.Threads
+        const initialDelay = wf.Stress.Delay
+        const stressTestId = createStressNode(initialCount, initialThreads, initialDelay, yamlWfIndex, currX, currY)
+
+        return stressTestId
+    }
+
+    const processTest = (test, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+
+        rapiLog(level.DEBUG, "[Editor] Test found when recreating state for workflow with ID ", yamlWfIndex)
+
+        const testNodeServer = test.Server
+        const testNodePath = test.Path
+        const testNodeMethod = test.Method
+
+        const testNodeId = createTestNode(test.TestID, testNodeServer, testNodePath, testNodeMethod, yamlWfIndex, currYamlTestIndex, currX, currY) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
+
+        return testNodeId
+    }
+
+    const processBody = (bodyText, bodyRef, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Body found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
+        const bodyNodeId = createBodyNode(bodyText, bodyRef, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return bodyNodeId
+    }
+
+    const processHeaders = (headers, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Headers found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
+        //headers is array with here, like this: ["Accept:application/xml"]
+        //must process it //TODO: also test with more than 1 header
+
+        let processedHeaders = headers.map(headerString => {
+            let parts = headerString.split(":");
+            return {
+                key: parts[0],
+                value: parts[1]
+            };
+        });
+
+        const headersNodeId = createHeadersNode(processedHeaders, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return headersNodeId
+    }
+
+    const processQuery = (query, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Query found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //TODO: need to test this, dont have any example tsl file w query i think...
+        let processedQuery = query.map(queryString => {
+            let parts = queryString.split(":");
+            return {
+                key: parts[0],
+                value: parts[1]
+            };
+        });
+
+        const queryNodeId = createQueryNode(processedQuery, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return queryNodeId
+    }
+
+    const processRetain = (retain, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Retain found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
+        let processedRetain = retain.map(retainString => {
+            let parts = retainString.split("#$.");
+            return {
+                key: parts[0],
+                value: parts[1]
+            };
+        });
+
+        const retainNodeId = createRetainNode(processedRetain, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return retainNodeId
+    }
+
+    const processStatusVerif = (status, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Status verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
+        const statusVerifNodeId = createStatusVerificationNode(status, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return statusVerifNodeId
+    }
+
+    const processSchemaVerif = (schema, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Schema verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
+        const schemaVerifNodeId = createSchemaVerificationNode(schema, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return schemaVerifNodeId
+    }
+
+    const processContainsVerif = (contains, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Contains verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
+        //TODO: transform contains here or before process is called?
+        const containsVerifNodeId = createContainsVerificationNode(contains, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return containsVerifNodeId
+    }
+
+    const processCountVerif = (matchString, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Count verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
+        // TODO: process key and value here or before calling processmethod?
+
+        let processedMatch = matchString.split("#");
+        let key = processedMatch[0]
+        let value = processedMatch[1]
+
+
+        const countVerifNodeId = createCountVerificationNode(key, value, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return countVerifNodeId
+    }
+
+    const processMatchVerif = (matchString, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Match verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
+        //TODO: preocess key and value here or before calling processmetdo?
+
+        let processedMatch = matchString.split("#");
+        let key = processedMatch[0]
+        let value = processedMatch[1]
+
+        const matchVerifNodeId = createMatchVerificationNode(key, value, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return matchVerifNodeId
+    }
+
+    const processCustomVerif = (dllName, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+        // TODO:
+        rapiLog(level.DEBUG, "[Editor] Match verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
+        //TODO: process dll name here or begore
+        const customVerifNodeId = createCustomVerificationNode(dllName, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        return customVerifNodeId
+    }
+
+
+
+    //TODO: improve algorithm, its kinda hardcoded atm, missing some nodes, etc
     const createNodes = (newstate) => {
 
         let yamlWfIndex = 0;
@@ -1140,25 +1372,21 @@ function Flow() {
 
             wf._wfIndex = yamlWfIndex
             maxWfIndex.current += 1
-            const wfNodeID = createWorkflowNode(maxWfIndex.current, wf.WorkflowID, currX, currY) //WorkflowID is wf name
+
+            const wfNodeID = processWorkflow(wf, currX, currY)
 
             currX = currX + offsetX
 
             if (wf.Stress) {
-                console.log("stress found");
-                const initialCount = wf.Stress.Count
-                const initialThreads = wf.Stress.Threads
-                const initialDelay = wf.Stress.Delay
-                const stressTestId = createStressNode(initialCount, initialThreads, initialDelay, yamlWfIndex, currX, currY)
+                const stressNodeId = processStress(wf, yamlWfIndex, currX, currY)
 
                 const newEdgeWfStress = {
-                    id: "wf:" + wfNodeID.toString() + "-stress:" + stressTestId.toString(),
+                    id: "wf:" + wfNodeID.toString() + "-stress:" + stressNodeId.toString(),
                     source: wfNodeID.toString(),
-                    target: stressTestId.toString()
+                    target: stressNodeId.toString()
                 }
 
                 edgesList.push(newEdgeWfStress)
-
                 currY = currY + offsetY //TODO: pensar melhor nos layputs mais complexos
             }
 
@@ -1169,43 +1397,93 @@ function Flow() {
 
                 // ------------ REQUEST ------------
 
-                const testNodeServer = test.Server
-                const testNodePath = test.Path
-                const testNodeMethod = test.Method
-
-                const testNodeId = createTestNode(test.TestID, testNodeServer, testNodePath, testNodeMethod, yamlWfIndex, currYamlTestIndex, currX, currY) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
+                const testNodeId = processTest(test, yamlWfIndex, currYamlTestIndex, currX, currY)
 
                 testNodeIdsList.push(testNodeId)
 
                 //check optional stuff
 
                 if (test.Body) {
-                    console.log("body found");
+                    let bodyText = null
+                    let bodyRef = null
+                    //TODO: body text and ref
+
+
+                    if (test.Body.startsWith("$")) {
+                        //ref
+                        let auxbodyRef = test.Body
+
+                        let dictionaryIndex = auxbodyRef.indexOf("dictionary/");
+                        if (dictionaryIndex !== -1) {
+
+                            let result = auxbodyRef.substring(dictionaryIndex + "dictionary/".length);
+                            bodyRef = result
+
+                        }
+                    } else {
+                        //text
+                        bodyText = test.Body
+                    }
+
+                    console.log("bodyref", bodyRef);
+                    console.log("bodytext", bodyText);
+                    const bodyNodeId = processBody(bodyText, bodyRef, yamlWfIndex, currYamlTestIndex, currX, currY)
                     currY = currY + offsetY
+
+                    const newEdgeTestBody = {
+                        id: "test:" + testNodeId.toString() + "-get:" + bodyNodeId.toString(),
+                        source: testNodeId.toString(),
+                        target: bodyNodeId.toString()
+                    }
+
+                    edgesList.push(newEdgeTestBody)
                 }
 
                 if (test.Headers) {
-                    console.log("headers found");
-                    currY = currY + offsetY
-                    test.Headers.forEach(header => {
+                    rapiLog(level.WARN, "test.Headers")
+                    rapiLog(level.INFO, test)
+                    rapiLog(level.INFO, test.Headers)
 
-                    })
+                    const headersNodeId = processHeaders(test.Headers)
+                    currY = currY + offsetY
+
+                    const newEdgeTestHeaders = {
+                        id: "test:" + testNodeId.toString() + "-get:" + headersNodeId.toString(),
+                        source: testNodeId.toString(),
+                        target: headersNodeId.toString()
+                    }
+
+                    edgesList.push(newEdgeTestHeaders)
                 }
 
                 if (test.Query) {
-                    console.log("query found");
+                    const queryNodeId = processQuery(test.Query, yamlWfIndex, currYamlTestIndex)
                     currY = currY + offsetY
+
+                    const newEdgeTestQuery = {
+                        id: "test:" + testNodeId.toString() + "-get:" + queryNodeId.toString(),
+                        source: testNodeId.toString(),
+                        target: queryNodeId.toString()
+                    }
+
+                    edgesList.push(newEdgeTestQuery)
                 }
 
                 if (test.Retain) {
-                    console.log("retain found");
+                    const retainNodeId = processRetain(test.Retain, yamlWfIndex, currYamlTestIndex)
                     currY = currY + offsetY
+
+                    const newEdgeTestRetain = {
+                        id: "test:" + testNodeId.toString() + "-get:" + retainNodeId.toString(),
+                        source: testNodeId.toString(),
+                        target: retainNodeId.toString()
+                    }
+
+                    edgesList.push(newEdgeTestRetain)
                 }
 
 
                 // ----------- VERIFICATIONS ------------
-
-
 
 
                 const statusNodeCode = test.Verifications[0].Code   //Verifications is an array for some reason but always 1 element
@@ -1213,13 +1491,18 @@ function Flow() {
 
                 const statusVerifNodeId = createStatusVerificationNode(statusNodeCode, yamlWfIndex, currYamlTestIndex, currX, currY)
 
+                const newEdgeTestStatus = {
+                    id: "test:" + testNodeId.toString() + "-get:" + statusVerifNodeId.toString(),
+                    source: testNodeId.toString(),
+                    target: statusVerifNodeId.toString()
+                }
 
+                edgesList.push(newEdgeTestStatus)
 
 
                 //check optional stuff TODO:falta cenas
 
                 if (test.Verifications[0].Schema) {
-                    console.log("schema found");
                     currY = currY + offsetY
 
                     const schema = test.Verifications[0].Schema.split("$ref/definitions/")[1] //TODO: kinda hardcoded
@@ -1236,6 +1519,58 @@ function Flow() {
 
                 }
 
+                if (test.Verifications[0].Contains) {
+                    const containsVerifNodeId = processContainsVerif(test.Verifications[0].Contains, yamlWfIndex, currYamlTestIndex, currX, currY)
+                    currY = currY + offsetY
+
+                    const newEdgeTestContains = {
+                        id: "test:" + testNodeId.toString() + "-get:" + containsVerifNodeId.toString(),
+                        source: testNodeId.toString(),
+                        target: containsVerifNodeId.toString()
+                    }
+
+                    edgesList.push(newEdgeTestContains)
+                }
+
+                if (test.Verifications[0].Count) {
+                    const countVerifNodeId = processCountVerif(test.Verifications[0].Count, yamlWfIndex, currYamlTestIndex, currX, currY)
+                    currY = currY + offsetY
+
+                    const newEdgeTestCount = {
+                        id: "test:" + testNodeId.toString() + "-get:" + countVerifNodeId.toString(),
+                        source: testNodeId.toString(),
+                        target: countVerifNodeId.toString()
+                    }
+
+                    edgesList.push(newEdgeTestCount)
+                }
+
+                if (test.Verifications[0].Match) {
+                    const matchVerifNodeId = processMatchVerif(test.Verifications[0].Match, yamlWfIndex, currYamlTestIndex, currX, currY)
+                    currY = currY + offsetY
+
+                    const newEdgeTestMatch = {
+                        id: "test:" + testNodeId.toString() + "-get:" + matchVerifNodeId.toString(),
+                        source: testNodeId.toString(),
+                        target: matchVerifNodeId.toString()
+                    }
+
+                    edgesList.push(newEdgeTestMatch)
+                }
+
+                if (test.Verifications[0].Custom) {
+                    const customVerifNodeId = processCustomVerif(test.Verifications[0].Custom, yamlWfIndex, currYamlTestIndex, currX, currY)
+                    currY = currY + offsetY
+
+                    const newEdgeTestCustom = {
+                        id: "test:" + testNodeId.toString() + "-get:" + customVerifNodeId.toString(),
+                        source: testNodeId.toString(),
+                        target: customVerifNodeId.toString()
+                    }
+
+                    edgesList.push(newEdgeTestCustom)
+                }
+
 
 
                 //create the edge for this test
@@ -1247,18 +1582,10 @@ function Flow() {
                 }
 
 
-                const newEdgeTestStatus = {
-                    id: "test:" + testNodeId.toString() + "-get:" + statusVerifNodeId.toString(),
-                    source: testNodeId.toString(),
-                    target: statusVerifNodeId.toString()
-                }
-
-
 
 
 
                 edgesList.push(newEdgeWfTest)
-                edgesList.push(newEdgeTestStatus)
 
                 currYamlTestIndex = currYamlTestIndex + 1
 
@@ -1804,13 +2131,40 @@ function Flow() {
         setNodes(nodesArr)
     }
 
+    const onTslDrop = (tslFile) => {
+        //somehow recreate state
+
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const fileContents = event.target.result;
+
+            console.log(fileContents);
+
+            const newstate = jsYaml.load(fileContents)
+
+            console.log("mewstate");
+            console.log(newstate);
+
+            setWorkflows(newstate)
+
+            createNodes(newstate)
+        };
+
+        reader.readAsText(tslFile);
+
+
+
+    }
+
 
     return (
         <div>
             <div className='editor-container'>
 
 
-                <Sidebar className='sidebar' onRunGeneratedChange={onRunGeneratedChange}
+                <Sidebar className='sidebar'
+                    onRunGeneratedChange={onRunGeneratedChange}
                     onRunImmediatelyChange={onRunImmediatelyChange}
                     onRunIntervalChange={onRunIntervalChange}
                     apiTitle={testConfName}
@@ -1818,6 +2172,7 @@ function Flow() {
                     onTestConfNameChange={onTestConfNameChange}
                     onDictionaryDrop={onDictionaryDrop}
                     onDllDrop={onDllDrop}
+                    onTslDrop={onTslDrop}
                     buttonsArray={[
                         { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: "Workflow tooltip" },
                         { section: "Flow-related", title: "Test", onClick: onClickTestNode, class: "test" },
@@ -1853,9 +2208,17 @@ function Flow() {
                         onConnect={onConnect}
                         proOptions={proOptions}
                         deleteKeyCode={'Delete'}
+                        /* dagre */
+                        //fitView
                     >
                         <Background color='#000000' variant={'dots'} />
                         <Controls />
+
+                        {/* dagre */}
+                        {/* <Panel position="top-right">
+                            <button onClick={() => onLayout('TB')}>vertical layout</button>
+                            <button onClick={() => onLayout('LR')}>horizontal layout</button>
+                        </Panel> */}
                     </ReactFlow>
 
                 </div>
