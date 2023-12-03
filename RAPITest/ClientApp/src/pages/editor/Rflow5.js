@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom';
-import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider } from 'reactflow';
+import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider, Panel } from 'reactflow';
 import 'reactflow/dist/style.css';
 import StatusVerificationNode from './nodes/statusVerificationNode';
 
@@ -25,7 +25,7 @@ import Sidebar from './other-components/Sidebar';
 import { LOG_LEVELS as level, rapiLog } from './utils';
 
 
-//import Dagre from '@dagrejs/dagre';
+import Dagre from 'dagre';
 
 
 import './Rflow5.css'
@@ -46,7 +46,7 @@ const nodeTypes = { status: StatusVerificationNode, testID: TestIDNode, wf: Work
 
 
 //dagre
-/* const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
 const getLayoutedElements = (nodes, edges, options) => {
     g.setGraph({ rankdir: options.direction });
@@ -64,7 +64,7 @@ const getLayoutedElements = (nodes, edges, options) => {
         }),
         edges,
     };
-}; */
+};
 
 
 function deepCopy(obj) {
@@ -87,7 +87,7 @@ function deepCopy(obj) {
 function Flow() {
 
     //dagre
-    //const { fitView } = useReactFlow();
+    const { fitView } = useReactFlow();
 
 
     // #region State and Hooks
@@ -790,7 +790,7 @@ function Flow() {
 
 
     //dagre
-    /* const onLayout = useCallback(
+    const onLayout = useCallback(
         (direction) => {
             const layouted = getLayoutedElements(nodes, edges, { direction });
 
@@ -802,7 +802,7 @@ function Flow() {
             });
         },
         [nodes, edges]
-    ); */
+    );
 
 
     // #region Create Nodes
@@ -2209,16 +2209,16 @@ function Flow() {
                         proOptions={proOptions}
                         deleteKeyCode={'Delete'}
                         /* dagre */
-                        //fitView
+                        fitView
                     >
                         <Background color='#000000' variant={'dots'} />
                         <Controls />
 
                         {/* dagre */}
-                        {/* <Panel position="top-right">
+                        <Panel position="top-right">
                             <button onClick={() => onLayout('TB')}>vertical layout</button>
                             <button onClick={() => onLayout('LR')}>horizontal layout</button>
-                        </Panel> */}
+                        </Panel>
                     </ReactFlow>
 
                 </div>
