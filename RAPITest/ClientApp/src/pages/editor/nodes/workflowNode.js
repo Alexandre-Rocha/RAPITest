@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import React from 'react';
 import { Form } from 'react-bootstrap';
 
@@ -37,7 +37,7 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
 
 
     const renderWfTitle = () => {
-        let str = (wfName == false ? "Workflow" : wfName)
+        let str = (wfName === false ? "Workflow" : wfName)
         return str
     }
 

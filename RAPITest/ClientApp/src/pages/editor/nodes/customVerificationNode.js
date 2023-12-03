@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import React from 'react';
 
 import { Form } from 'react-bootstrap';
@@ -10,8 +9,6 @@ import GeneralNode from './generalNode';
 
 function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-    const [selectedDll, setSelectedDll] = useState(data.custom.dllName || "");
-
     rapiLog(level.DEBUG, "[Custom node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Custom node] Test ID: ", data.custom._testIndex)
     rapiLog(level.DEBUG, "[Custom node] X pos: ", xPos)
@@ -19,10 +16,7 @@ function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
 
 
     const onSelectedDllChange = (evt) => {
-
         const newSelectedDll = evt.target.value
-        setSelectedDll(newSelectedDll)
-
         data.custom.customVerifChangeCallback(newSelectedDll, data.custom._wfIndex, data.custom._testIndex)
     };
 

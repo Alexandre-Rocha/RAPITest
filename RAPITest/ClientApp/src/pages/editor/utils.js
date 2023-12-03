@@ -1,113 +1,113 @@
 
-    /*
-    this comment is just to visualize state schema
+/*
+this comment is just to visualize state schema
 
-    workflows = [wf1,wf2,...]
-    wf = {WorkflowID,Stress,Tests[t1,t2,...]}
-    Tests = {
-        Server,TestID,Path,Method,Headers[h1,h2...],Body,Verifications[v1,v2...]
-    }
-    Headers = {
-        keyItem,valueItem
-    }
-    Verifications = {
-        Code,Schema //missing some verifications
-    }
+workflows = [wf1,wf2,...]
+wf = {WorkflowID,Stress,Tests[t1,t2,...]}
+Tests = {
+    Server,TestID,Path,Method,Headers[h1,h2...],Body,Verifications[v1,v2...]
+}
+Headers = {
+    keyItem,valueItem
+}
+Verifications = {
+    Code,Schema //missing some verifications
+}
 
-    workflows[currWorkflow].Tests[currTest].Path
-    */
-
-
-    export const LOG_LEVELS = {
-      TRACE: 0,
-      DEBUG: 1,
-      INFO: 2,
-      WARN: 3,
-      ERROR: 4
-    };
+workflows[currWorkflow].Tests[currTest].Path
+*/
 
 
-    export function rapiLog(level, ...message){
+export const LOG_LEVELS = {
+    TRACE: 0,
+    DEBUG: 1,
+    INFO: 2,
+    WARN: 3,
+    ERROR: 4
+};
 
-    
-      switch (level) {
+
+export function rapiLog(level, ...message) {
+
+
+    switch (level) {
         case LOG_LEVELS.TRACE:
-          console.debug("TRACE logging level not currently supported. Using DEBUG instead.")
-          console.debug(...message);
-          break;
+            console.debug("TRACE logging level not currently supported. Using DEBUG instead.")
+            console.debug(...message);
+            break;
         case LOG_LEVELS.DEBUG:
-          console.debug(...message);
-          break;
+            console.debug(...message);
+            break;
         case LOG_LEVELS.INFO:
-          console.info(...message);
-          break;
+            console.info(...message);
+            break;
         case LOG_LEVELS.WARN:
-          console.warn(...message);
-          break;
+            console.warn(...message);
+            break;
         case LOG_LEVELS.ERROR:
-          console.error(...message);
-          break;
+            console.error(...message);
+            break;
         default:
-          console.log("Unrecognized logging level. Using default log instead.")
-          console.log(...message);
-      }
-
+            console.log("Unrecognized logging level. Using default log instead.")
+            console.log(...message);
     }
 
-    
-    
+}
 
 
-    const wfff = {
-      WorkflowID: "cr_pet",
-      Stress: {
+
+
+
+/* const wfff = {
+    WorkflowID: "cr_pet",
+    Stress: {
         Count: 10,
         Threads: 2,
         Delay: 0
-      },
-      Tests: [
+    },
+    Tests: [
         {
-          TestID: "createPet",
-          Server: "https://petstore3.io/api/v3",
-          Path: "/pet",
-          Method: "Post",
-          Headers: [
-            { "Content-Type": "application/json" },
-            { Accept: "application/json" }
-          ],
-          Body: "$ref/dictionary/petExample",
-          Retain: [
-            { "petId#$.id": null }
-          ],
-          Verifications: [
-            {
-              Code: 200,
-              Schema: "$ref/definitions/Pet"
-            }
-          ]
+            TestID: "createPet",
+            Server: "https://petstore3.io/api/v3",
+            Path: "/pet",
+            Method: "Post",
+            Headers: [
+                { "Content-Type": "application/json" },
+                { Accept: "application/json" }
+            ],
+            Body: "$ref/dictionary/petExample",
+            Retain: [
+                { "petId#$.id": null }
+            ],
+            Verifications: [
+                {
+                    Code: 200,
+                    Schema: "$ref/definitions/Pet"
+                }
+            ]
         },
         {
-          TestID: "readPet",
-          Server: "https://petstore3.io/api/v3",
-          Path: "/pet/{petId}",
-          Method: "Get",
-          Headers: [
-            { Accept: "application/xml" }
-          ],
-          Verifications: [
-            {
-              Code: 200,
-              Contains: "id",
-              Count: "doggie#1",
-              Schema: "$ref/definitions/Pet",
-              Match: "/Pet/name#doggie",
-              Custom: ["CustomVerificationTry1.dll"]
-            }
-          ]
+            TestID: "readPet",
+            Server: "https://petstore3.io/api/v3",
+            Path: "/pet/{petId}",
+            Method: "Get",
+            Headers: [
+                { Accept: "application/xml" }
+            ],
+            Verifications: [
+                {
+                    Code: 200,
+                    Contains: "id",
+                    Count: "doggie#1",
+                    Schema: "$ref/definitions/Pet",
+                    Match: "/Pet/name#doggie",
+                    Custom: ["CustomVerificationTry1.dll"]
+                }
+            ]
         }
-      ]
-    };
-    
+    ]
+}; */
+
 
 /*
 {
@@ -166,15 +166,15 @@ let verifications =  [{
 */
 function isValidVerification(verification) {
     if (!verification || !verification.hasOwnProperty('Code')) {
-      return false;
+        return false;
     }
-    
+
     if (typeof verification.Code != 'number') {
-      return false;
+        return false;
     }
-  
+
     return true;
-  }
+}
 
 /*
 let header = [{   
@@ -182,23 +182,23 @@ let header = [{
                 valueItem: ''
             }],                     // headers are OPTIONAL  //não ha headers obrigatorios 
 */
-  function isValidHeaders(headers) {
+function isValidHeaders(headers) {
     if (!Array.isArray(headers)) {
-      return false;
+        return false;
     }
-  
+
     for (const header of headers) {
-      if (!header.hasOwnProperty('keyItem') || !header.hasOwnProperty('valueItem')) {
-        return false;
-      }
-  
-      if (typeof header.keyItem != 'string' || typeof header.valueItem != 'string') {
-        return false;
-      }
+        if (!header.hasOwnProperty('keyItem') || !header.hasOwnProperty('valueItem')) {
+            return false;
+        }
+
+        if (typeof header.keyItem != 'string' || typeof header.valueItem != 'string') {
+            return false;
+        }
     }
-  
+
     return true;
-  }
+}
 
 
 /*
@@ -226,34 +226,34 @@ let test = {
 */
 
 //TODO: missing query here
-  function isValidTest(obj) {
+function isValidTest(obj) {
     if (!obj) {
-      return false;
-    }
-  
-    if (!obj.hasOwnProperty('Server') || !obj.hasOwnProperty('TestID') || !obj.hasOwnProperty('Path') ||
-        !obj.hasOwnProperty('Method') || !obj.hasOwnProperty('Verifications')) {
-      return false;
-    }
-  
-    if (typeof obj.Server != 'string' || typeof obj.TestID != 'string' ||
-        typeof obj.Path != 'string' || typeof obj.Method != 'string') {
-      return false;
+        return false;
     }
 
-    if (!["Get", "Post", "Delete", "Put"].includes(obj.Method) ) return false;
-  
+    if (!obj.hasOwnProperty('Server') || !obj.hasOwnProperty('TestID') || !obj.hasOwnProperty('Path') ||
+        !obj.hasOwnProperty('Method') || !obj.hasOwnProperty('Verifications')) {
+        return false;
+    }
+
+    if (typeof obj.Server != 'string' || typeof obj.TestID != 'string' ||
+        typeof obj.Path != 'string' || typeof obj.Method != 'string') {
+        return false;
+    }
+
+    if (!["Get", "Post", "Delete", "Put"].includes(obj.Method)) return false;
+
     if (!isValidHeaders(obj.Headers)) {
-      return false;
+        return false;
     }
-  
+
     if (typeof obj.Body != 'string' && obj.Body != undefined) {
-      return false;
+        return false;
     }
-  
+
     /* if (!isValidVerifications(obj.Verifications)) {
       return false;
     } */
-  
+
     return true;
-  }
+}

@@ -28,10 +28,8 @@ import { LOG_LEVELS as level, rapiLog } from './utils';
 import Dagre from 'dagre';
 
 
-import './Rflow5.css'
+import './Editor.css'
 
-import { SmallApiUpload } from './other-components/SmallApiUpload';
-import TimerSettings from './other-components/TimerSettings';
 
 const YAML = require('json-to-pretty-yaml');
 const jsYaml = require('js-yaml')
@@ -86,18 +84,18 @@ function deepCopy(obj) {
 
 function Flow() {
 
-    //dagre
-    const { fitView } = useReactFlow();
+    
 
 
     // #region State and Hooks
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-    const prevCallbackRef = useRef();
 
     const location = useLocation();
+    
     const reactFlowInstance = useReactFlow()
+    const { fitView } = useReactFlow(); //dagre
 
     // This will have servers, paths, schemas and schemavalues
     const [apiFile, setApiFile] = useState(location?.state?.apiFile || null)
@@ -536,12 +534,7 @@ function Flow() {
         });
     }
 
-    useEffect(() => {//TODO:removt thsi
-        if (prevCallbackRef.current !== onBodyRefChangeCallback) {
-            console.log('onBodyRefChangeCallback has been recreated');
-        }
-        prevCallbackRef.current = onBodyRefChangeCallback;
-    }, [onBodyRefChangeCallback]);
+
 
     const onStressCountChangeCallback = (count, _wfIndex) => {
 
@@ -850,8 +843,8 @@ function Flow() {
         const newNode = {
             id,
             position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
+                x: x,
+                y: y
             },
             data: {
                 //label: `Node ${id}`,
@@ -864,8 +857,8 @@ function Flow() {
                     initialPath: initialPath,
                     initialMethod: initialMethod,
                     paths: apiFile.paths,
-                    servers: apiFile.servers,//TODO: add http methods somehow nvm only the classic 4 are supported
-                    //mycallback2: onPathChange
+                    servers: apiFile.servers,
+                    httpMethods: ["Get", "Delete", "Post", "Put"], //TODO: shouldnt be hardcoded here prob
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex,
                     test: newTest,
@@ -2209,7 +2202,7 @@ function Flow() {
                         proOptions={proOptions}
                         deleteKeyCode={'Delete'}
                         /* dagre */
-                        fitView
+                        //fitView
                     >
                         <Background color='#000000' variant={'dots'} />
                         <Controls />
@@ -2228,7 +2221,7 @@ function Flow() {
 }
 
 
-function Rflow5() {
+function Editor() {
     return (
         <ReactFlowProvider>
             <Flow />
@@ -2237,4 +2230,4 @@ function Rflow5() {
 }
 
 
-export default Rflow5;
+export default Editor;

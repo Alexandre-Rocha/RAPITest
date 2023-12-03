@@ -1,11 +1,8 @@
 import React from "react"
-import { SmallApiUpload } from "./SmallApiUpload"
-import NodeArea from "./ButtonArea"
 import TimerSettings from "./TimerSettings"
 import ApiUploadArea from "./ApiUploadArea"
 import ButtonArea from "./ButtonArea"
 
-import { Form, Accordion, Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 //import Dropzone from "react-dropzone"
 

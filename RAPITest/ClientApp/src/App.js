@@ -10,8 +10,7 @@ import ApiAuthorizationRoutes from './pages/api-authorization/ApiAuthorizationRo
 import { ApplicationPaths } from './pages/api-authorization/ApiAuthorizationConstants';
 import { VisualizeReport } from './pages/VisualizeReport';
 import './custom.css'
-import Rflow5 from './pages/editor/Rflow5';
-
+import Editor from './pages/editor/Editor';
 
 export default class App extends Component {
   static displayName = App.name;
@@ -25,7 +24,7 @@ export default class App extends Component {
             <AuthorizeRoute exact path='/monitorTests/report/:apiId' component={VisualizeReport} />
             <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
             <Route exact path='/about' component={About} />
-            <Route exact path='/devEditor' component={Rflow5} />
+            <Route exact path='/devEditor' component={Editor} />
       </Layout>
     );
   }

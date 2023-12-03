@@ -11,7 +11,7 @@ import continueIcon from '../../assets/continue.png'
 
 import editIcon from '../../assets/pencil.png' //TODO: here
 
-import { withRouter } from 'react-router-dom';
+//import { withRouter } from 'react-router-dom'; //TODO: use this to navigat to editor
 
 
 export class TestName extends Component {

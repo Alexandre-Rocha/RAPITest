@@ -1,18 +1,6 @@
 import React from "react"
-import { SmallApiUpload } from "./SmallApiUpload"
-import NodeArea from "./ButtonArea"
-import TimerSettings from "./TimerSettings"
-import ApiUploadArea from "./ApiUploadArea"
-import ButtonArea from "./ButtonArea"
-
-import { Form, Accordion, Tooltip, OverlayTrigger } from 'react-bootstrap';
-
 import Dropzone from "../../../components/Dropzone"
-
-
 import { useState } from "react"
-
-
 
 import '../nodes/css/workflowNode.css'
 import '../nodes/css/generalNode.css'
@@ -28,7 +16,7 @@ function AuxFilesArea(props) {
 
     const [uploadedDLL, setUploadedDLL] = useState(false)
 
-    const [dic, setDic] = useState()
+    //const [dic, setDic] = useState()
 
     const [dllArr, setDllArr] = useState([])
 
@@ -43,7 +31,7 @@ function AuxFilesArea(props) {
         const txtFile = accept[0];
 
         onDictionaryDrop(txtFile)
-        setDic(txtFile)
+        //setDic(txtFile)
         setUploadedDic(true)
     }
 

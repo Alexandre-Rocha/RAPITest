@@ -14,9 +14,6 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
     const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1)
     const [testName, setTestName] = useState(data.custom.testName || "");
 
-    const [httpMethods, setHttpMethods] = useState(["Get", "Delete", "Post", "Put"]) //TODO: ideally this comes from parent
-
-
     rapiLog(level.DEBUG, "[Test node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Test node] Test ID: ", testIndex)
     rapiLog(level.DEBUG, "[Test node] X pos: ", xPos)
@@ -56,11 +53,12 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
             setTestIndex(data.custom._testIndex);
         }
     }, [data.custom._testIndex]); //we dont want testIndex here because it will lead to infinite rerender-> THIS IS WHY ESLINT IS DISABLED
+    //TODO: do i really need state? maybe
     /* eslint-enable */
 
 
     const renderTestTitle = () => {
-        let str = (testName == false ? "Test" : testName)
+        let str = (testName === false ? "Test" : testName)
         return str
     }
 
@@ -109,7 +107,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
                 <label htmlFor="methods">Method</label>
                 <Combobox id='methods' className='nowheel'
-                    data={httpMethods}
+                    data={data.custom.httpMethods}
                     filter={false}
                     onChange={onChangeMethod}
                     defaultValue={data.custom.initialMethod || "Methods:"}
