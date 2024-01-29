@@ -1,24 +1,25 @@
 .collapsible-sidebar {
-  width: 300px;
-  height: 754px;
-  /*100vh*/
+ flex: 1 1 8vh;
+
+
+ height: 84vh;
   background-color: #f0f0f0;
-  transition: width 0.3s ease;
+  transition: flex-basis 0.3s ease;
   border: 2px solid #ccc;
   border-right: 1px solid #ccc;
-
 }
 
 .collapsible-sidebar.collapsed {
-  width: 50px;
-  height: 754px;
   background-color: #f0f0f0;
-  ;
+  height: 84vh;
+  flex: 0 0 1vh;
+
+
 }
 
 .toggle-button {
   width: 100%;
-  height: 40px;
+  height: 4vh;
   background-color: #ccc;
   border: none;
   cursor: pointer;
@@ -37,8 +38,10 @@
   overflow-x: hidden;
 
   padding: 4px 4px;
-  height: 710px;
+  /*   height: 710px;
+ */
   margin-right: 2px;
+  max-height: inherit;
 }
 
 
@@ -150,7 +153,8 @@
 
 .sidebar-tooltip>.tooltip-inner {
   background-color: #f0f0f0;
-  color: #222;;
+  color: #222;
+  ;
 }
 
 /* .node-button.setup .aws-btn__content {
@@ -170,11 +174,11 @@
   background: aqua !important;
 } */
 
-.sidebar-simple-header .accordion-button{
+.sidebar-simple-header .accordion-button {
   font-size: medium;
 }
 
-.sidebar-dropzone{
+.sidebar-dropzone {
   margin-bottom: 4px;
   margin-top: 4px;
 }

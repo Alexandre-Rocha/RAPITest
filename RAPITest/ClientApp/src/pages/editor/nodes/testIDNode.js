@@ -58,7 +58,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
 
     const renderTestTitle = () => {
-        let str = (testName === false ? "Test" : testName)
+        let str = ( !Boolean(testName) ? "Test" : testName)
         return str
     }
 

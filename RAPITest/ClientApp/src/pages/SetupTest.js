@@ -2,7 +2,7 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap';
 import { Row, Col, Figure } from 'react-bootstrap'
-import { TestName } from "./steps/TestName";
+import  TestName  from "./steps/TestName";
 import { UploadApiSpecification } from "./steps/UploadApiSpecification";
 import { UploadTestSpecification } from "./steps/UploadTestSpecification";
 import { TimeLoop } from "./steps/TimeLoop";

@@ -85,6 +85,7 @@ function deepCopy(obj) {
 function Flow() {
 
     
+    rapiLog(level.INFO, "Flow component rendered")
 
 
     // #region State and Hooks
@@ -127,40 +128,52 @@ function Flow() {
     // #endregion
 
 
+    useEffect(() => {
+        // Add a unique class to the body
+        document.body.classList.add('editor-page');
+
+        // Cleanup: Remove the class when the component is unmounted
+        return () => {
+            document.body.classList.remove('editor-page');
+        };
+    }, []);
+
     // #region onChange in Editor
 
-    const onTestConfNameChange = (newTestConfName) => {
+    const onTestConfNameChange = useCallback((newTestConfName) => {
         const newName = newTestConfName.target.value
         console.log("[Editor] New test configuration name: ", newName);
         setTestConfName(newName)
-    }
+    }, [])
 
     //TODO: why is there no onApiUpload?
 
-    const onRunGeneratedChange = (runGenerated) => {
+    const onRunGeneratedChange = useCallback((runGenerated) => {
         const run = runGenerated.target.value
         //const run = aux === "true" ? "true" : "false"
         console.log("[Editor] Run generated: ", run);
         setRunGenerated(run)
-    }
-    const onRunImmediatelyChange = (runImmediately) => {
+    }, [])
+
+    const onRunImmediatelyChange = useCallback((runImmediately) => {
         const run = runImmediately.target.value
         //const run = aux === "true" ? "true" : "false"
         console.log("[Editor] Run immediately: ", run);
         setRunImmediatly(run)
-    }
-    const onRunIntervalChange = (runInterval) => {
+    }, [])
+
+    const onRunIntervalChange = useCallback((runInterval) => {
         const run = runInterval.target.value
         console.log("[Editor] Run interval: ", run);
         setRunInterval(run)
-    }
+    }, [])
 
     // #endregion
 
 
     // #region onChange callbacks
 
-    const onTestIDChange = (newTestID, _wfIndex, _testIndex) => {
+    const onTestIDChange = useCallback((newTestID, _wfIndex, _testIndex) => {
 
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
 
@@ -172,33 +185,33 @@ function Flow() {
             })
         }
 
-    }
+    }, [])
 
-    const onServerURLChange = (newURL, _wfIndex, _testIndex) => {
+    const onServerURLChange = useCallback((newURL, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Server = newURL
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onPathChange = (newPath, _wfIndex, _testIndex) => {
+    const onPathChange = useCallback((newPath, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Path = newPath
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onHttpMethodChange = (newHttpMethod, _wfIndex, _testIndex) => {
+    const onHttpMethodChange = useCallback((newHttpMethod, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Method = newHttpMethod
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onWfNameChange = (newWfId) => {
+    const onWfNameChange = useCallback((newWfId) => {
 
         console.log("New workflow: ", newWfId);
         console.log("Curr workflow: ", maxWfIndex.current);
@@ -208,37 +221,37 @@ function Flow() {
             const newWorkflows = deepCopy(oldWorkflows);
             newWorkflows[maxWfIndex.current].WorkflowID = newWfId;
             return newWorkflows;
-        });
-    }
+        })
+    }, [])
 
-    const onVerificationStatusChange = (newStatus, _wfIndex, _testIndex) => {
+    const onVerificationStatusChange = useCallback((newStatus, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Code = newStatus    //TODO: hardcoded 0
             return newWorkflows
         })
-    }
+    }, [])
 
 
 
-    const onCustomVerificationChange = (selectedCustomVerif, _wfIndex, _testIndex) => {
+    const onCustomVerificationChange = useCallback((selectedCustomVerif, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Custom = selectedCustomVerif    //TODO:  need to grab custom verif
             return newWorkflows
         })
-    }
+    }, [])
 
 
-    const onVerificationSchemaChange = (newStatus, _wfIndex, _testIndex) => {
+    const onVerificationSchemaChange = useCallback((newStatus, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Schema = newStatus    //TODO: hardcoded 0
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onCountKeyChangeCallback = (newCountKey, _wfIndex, _testIndex) => {
+    const onCountKeyChangeCallback = useCallback((newCountKey, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count) {
@@ -247,9 +260,9 @@ function Flow() {
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count.key = newCountKey
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onCountValueChangeCallback = (newCountValue, _wfIndex, _testIndex) => {
+    const onCountValueChangeCallback = useCallback((newCountValue, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count) {
@@ -258,9 +271,9 @@ function Flow() {
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count.value = newCountValue
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onMatchKeyChangeCallback = (newMatchKey, _wfIndex, _testIndex) => {
+    const onMatchKeyChangeCallback = useCallback((newMatchKey, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match) {
@@ -269,9 +282,9 @@ function Flow() {
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match.key = newMatchKey
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onMatchValueChangeCallback = (newMatchValue, _wfIndex, _testIndex) => {
+    const onMatchValueChangeCallback = useCallback((newMatchValue, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match) {
@@ -280,17 +293,17 @@ function Flow() {
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match.value = newMatchValue
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onContainsChangeCallback = (newContains, _wfIndex, _testIndex) => {
+    const onContainsChangeCallback = useCallback((newContains, _wfIndex, _testIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
             newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Contains = newContains
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onHeaderKeyChangeCallback = (index, key, _wfIndex, _testIndex) => {
+    const onHeaderKeyChangeCallback = useCallback((index, key, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -310,9 +323,9 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
-    const onHeaderValueChangeCallback = (index, value, _wfIndex, _testIndex) => {
+    const onHeaderValueChangeCallback = useCallback((index, value, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -329,9 +342,9 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
-    const onHeaderAddCallback = (_wfIndex, _testIndex) => {
+    const onHeaderAddCallback = useCallback((_wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -345,9 +358,9 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
-    const onHeaderRemoveCallback = (index, _wfIndex, _testIndex) => {
+    const onHeaderRemoveCallback = useCallback((index, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -361,9 +374,9 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
-    const onQueryAddCallback = (_wfIndex, _testIndex) => {
+    const onQueryAddCallback = useCallback((_wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -378,9 +391,9 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
-    const onQueryRemoveCallback = (index, _wfIndex, _testIndex) => {
+    const onQueryRemoveCallback = useCallback((index, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -394,10 +407,10 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
 
-    const onQueryKeyChangeCallback = (index, key, _wfIndex, _testIndex) => {
+    const onQueryKeyChangeCallback = useCallback((index, key, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -417,10 +430,10 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
 
-    const onQueryValueChangeCallback = (index, value, _wfIndex, _testIndex) => {
+    const onQueryValueChangeCallback = useCallback((index, value, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -437,10 +450,10 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
 
-    const onRetainAddCallback = (_wfIndex, _testIndex) => {
+    const onRetainAddCallback = useCallback((_wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -455,9 +468,9 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
-    const onRetainRemoveCallback = (index, _wfIndex, _testIndex) => {
+    const onRetainRemoveCallback = useCallback((index, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -471,10 +484,10 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
 
-    const onRetainKeyChangeCallback = (index, key, _wfIndex, _testIndex) => {
+    const onRetainKeyChangeCallback = useCallback((index, key, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -494,10 +507,10 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
 
-    const onRetainValueChangeCallback = (index, value, _wfIndex, _testIndex) => {
+    const onRetainValueChangeCallback = useCallback((index, value, _wfIndex, _testIndex) => {
         //TODO: ver isto melhor; ya as conexoes n tao bem com isto
         // o todo de cima foi copiado do do testID
 
@@ -514,29 +527,29 @@ function Flow() {
                 return newWorkflows
             })
         }
-    }
+    }, [])
 
 
-    const onBodyRefChangeCallback = (newBodyRef, _wfIndex, _testIndex) => {
+    const onBodyRefChangeCallback = useCallback((newBodyRef, _wfIndex, _testIndex) => {
         let bodyRef = `$ref/dictionary/${newBodyRef}`
         console.log(bodyRef);
         onBodyTextChangeCallback(bodyRef, _wfIndex, _testIndex);
-    }
+    }, [])
 
 
 
-    const onBodyTextChangeCallback = (newBodyText, _wfIndex, _testIndex) => {
+    const onBodyTextChangeCallback = useCallback((newBodyText, _wfIndex, _testIndex) => {
         //TODO:
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows);
             newWorkflows[_wfIndex].Tests[_testIndex].Body = newBodyText;
             return newWorkflows;
         });
-    }
+    }, [])
 
 
 
-    const onStressCountChangeCallback = (count, _wfIndex) => {
+    const onStressCountChangeCallback = useCallback((count, _wfIndex) => {
 
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
@@ -551,9 +564,9 @@ function Flow() {
             newWorkflows[_wfIndex].Stress.Count = count
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onStressThreadsChangeCallback = (threads, _wfIndex) => {
+    const onStressThreadsChangeCallback = useCallback((threads, _wfIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
 
@@ -567,9 +580,9 @@ function Flow() {
             newWorkflows[_wfIndex].Stress.Threads = threads
             return newWorkflows
         })
-    }
+    }, [])
 
-    const onStressDelayChangeCallback = (delay, _wfIndex) => {
+    const onStressDelayChangeCallback = useCallback((delay, _wfIndex) => {
         setWorkflows(oldWorkflows => {
             const newWorkflows = deepCopy(oldWorkflows)
 
@@ -583,7 +596,7 @@ function Flow() {
             newWorkflows[_wfIndex].Stress.Delay = delay
             return newWorkflows
         })
-    }
+    }, [])
 
     // #endregion
 
@@ -2152,7 +2165,6 @@ function Flow() {
 
 
     return (
-        <div>
             <div className='editor-container'>
 
 
@@ -2216,7 +2228,6 @@ function Flow() {
 
                 </div>
             </div>
-        </div>
     );
 }
 

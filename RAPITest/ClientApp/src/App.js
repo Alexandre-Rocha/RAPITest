@@ -21,11 +21,12 @@ export default class App extends Component {
         <Route exact path='/' component={Home} />
             <AuthorizeRoute exact path='/setupTest' component={SetupTest} />
             <AuthorizeRoute exact path='/monitorTests' component={MonitorTest} />
+            <AuthorizeRoute exact path='/editor' component={Editor} />
             <AuthorizeRoute exact path='/monitorTests/report/:apiId' component={VisualizeReport} />
             <Route path={ApplicationPaths.ApiAuthorizationPrefix} component={ApiAuthorizationRoutes} />
             <Route exact path='/about' component={About} />
-            <Route exact path='/devEditor' component={Editor} />
-      </Layout>
+{/*             <Route exact path='/devEditor' component={Editor} />
+ */}      </Layout>
     );
   }
 }

@@ -37,7 +37,7 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
 
 
     const renderWfTitle = () => {
-        let str = (wfName === false ? "Workflow" : wfName)
+        let str = ( !Boolean(wfName) ? "Workflow" : wfName)
         return str
     }
 

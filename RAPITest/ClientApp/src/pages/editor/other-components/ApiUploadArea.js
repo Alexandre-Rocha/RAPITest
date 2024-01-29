@@ -34,7 +34,12 @@ const ApiUploadArea = (props) => {
  */}
             <SimpleAccordion header={"API Upload"} accHeaderClass={"sidebar-simple-header"}>
 
-
+            {(uploaded === false) ? 
+                <div>
+                    <Form.Label style={{ fontWeight: 'bold' }}>API URL:</Form.Label>
+                    <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter text" />
+                </div> : <div>API uploaded! (WIP)</div>
+                }
 
             {(uploaded === false ) ?
                 <SmallApiUpload handlerAPI={newHandler} apiTitle={apiTitle} ></SmallApiUpload> : <div>API uploaded! (WIP)</div>}
