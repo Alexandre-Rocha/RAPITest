@@ -4,6 +4,7 @@ import { AwesomeButton } from 'react-awesome-button';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import SimpleAccordion from './SimpleAccordion';
 
+import "./css/buttons.css"
 
 /* data should be an array in the form: 
 [
@@ -24,7 +25,7 @@ const ButtonArea = (props) => {
             {sections.map((section, index) => (
                 <div className='single-button-area' key={index} >
                     <p></p>
-                    <SimpleAccordion header={section}accHeaderClass={"sidebar-simple-header"}>
+                    <SimpleAccordion header={section}accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={`acc-icon ${section}`}>
                     {data
                         .filter((buttonData) => buttonData.section === section)
                         .map((buttonData, buttonIndex) => (

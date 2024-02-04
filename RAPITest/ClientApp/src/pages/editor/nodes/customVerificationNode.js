@@ -35,6 +35,7 @@ function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'custom-item',
         accHeaderClass: 'custom-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'customVerif-icon',
         header: 'Custom'
     };
 

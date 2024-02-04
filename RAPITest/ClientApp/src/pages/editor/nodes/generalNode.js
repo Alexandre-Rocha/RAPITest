@@ -6,7 +6,7 @@ import './css/generalNode.css'
 import SimpleAccordion from '../other-components/SimpleAccordion';
 
 
-function GeneralNode({ data, isConnectable, children, nodeClass, header, accItemClass, accHeaderClass, accBodyClass }) {
+function GeneralNode({ data, isConnectable, children, nodeClass, header, accItemClass, accHeaderClass, accBodyClass, accIconClass }) {
 
     
     const accordionRef = useRef(null);
@@ -33,7 +33,7 @@ function GeneralNode({ data, isConnectable, children, nodeClass, header, accItem
         <div className={`${nodeClass} node`}>
             <Handle type="target" position={Position.Top} isConnectable={isConnectable} />
 
-            <SimpleAccordion accItemClass={accItemClass} accHeaderClass={accHeaderClass} accBodyClass={accBodyClass} header={header} headerRef={accordionRef}>
+            <SimpleAccordion accItemClass={accItemClass} accHeaderClass={accHeaderClass} accBodyClass={accBodyClass} accIconClass={accIconClass} header={header} headerRef={accordionRef}>
 
                 {children}
 

@@ -10,6 +10,12 @@
 
 } */
 
+.retain-icon{
+    background-image: url('../../../../assets/test.png');
+    background-size: 32px 32px;
+    margin-right: 1vh;
+  }
+
 .retain-line {
     display: flex;
     align-items: center;

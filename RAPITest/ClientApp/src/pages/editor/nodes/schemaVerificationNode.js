@@ -32,6 +32,7 @@ function SchemaVerificationNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'schema-item',
         accHeaderClass: 'schema-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'schemaVerif-icon',
         header: 'Schema'
     };
 

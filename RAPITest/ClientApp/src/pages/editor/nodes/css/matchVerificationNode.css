@@ -2,6 +2,12 @@
     background: #d5ffae;
 }
 
+.matchVerif-icon{
+    background-image: url('../../../../assets/tickSmall.png');
+    background-size: 32px 32px;
+    margin-right: 1vh;
+  }
+
 /* .match-item {
 
 }

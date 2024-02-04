@@ -31,6 +31,7 @@ function StatusVerificationNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'status-item',
         accHeaderClass: 'status-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'statusVerif-icon',
         header: 'Status Code'
     };
 

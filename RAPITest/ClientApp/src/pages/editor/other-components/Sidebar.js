@@ -16,7 +16,7 @@ import AuxFilesArea from "./AuxFilesArea"
 import '../nodes/css/workflowNode.css'
 import '../nodes/css/generalNode.css'
 
-import './css/sidebar.css'; // Create this CSS file for styling
+import './css/sidebar.css'; 
 
 import menu from '../../../assets/burger-menu-svgrepo-com.svg'
 import SimpleAccordion from "./SimpleAccordion"
@@ -26,13 +26,13 @@ function Sidebar(props) {
 
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    const toggleSidebar = () => {
-        setIsCollapsed((prevState) => !prevState);
-    };
+    
 
     const { onRunGeneratedChange, onRunImmediatelyChange, onRunIntervalChange } = props
 
     const { apiTitle, handlerAPI } = props
+
+    const {onToggleCollapse} = props
 
     const { onTestConfNameChange } = props
 
@@ -42,6 +42,21 @@ function Sidebar(props) {
 
 
     const { onDictionaryDrop, onDllDrop, onTslDrop } = props
+
+    const toggleSidebar = (dontCollapseClass) => {
+        console.log("step 1");
+        console.log(dontCollapseClass);
+        let dntClClass = "lele"
+        if (typeof dontCollapseClass === "string") {
+            dntClClass = dontCollapseClass
+        }
+        else if (!dontCollapseClass.target.value) {
+            dntClClass = "lalala"
+        }
+        console.log(dntClClass);
+        onToggleCollapse(!isCollapsed, dntClClass)
+        setIsCollapsed((prevState) => !prevState);
+    };
 
 
     const onDropTsl = (accept, reject) => {
@@ -61,68 +76,88 @@ function Sidebar(props) {
     }
 
 
+
     return (
         <div className={`collapsible-sidebar ${isCollapsed ? 'collapsed' : ''} `}>
 
             <button className="toggle-button" onClick={toggleSidebar}>
                 {/* {isCollapsed? "+" : "-"} */}
-                <img src={menu} alt="Menu Icon" width="35" height="35" />
+                {<img src={menu} alt="Menu Icon" width="35" height="35" />}
             </button>
+
             {/* TODO: uploaded hardocded false */}
-            <div className={className}>
 
+            {isCollapsed ?
 
+                <div className="sidebar-icon-area">
+                    <button className="name-icon sidebar-icon" onClick={()=>{toggleSidebar('name-icon')}}/>
+                    <button className="api-icon sidebar-icon" onClick={()=>{toggleSidebar('api-icon')}}/>
+                    <button className="tsl-icon sidebar-icon" onClick={()=>{toggleSidebar('tsl-icon')}}/>
+                    <button className="file-icon sidebar-icon" onClick={()=>{toggleSidebar('file-icon')}}/>
+                    <button className="timer-icon sidebar-icon" onClick={()=>{toggleSidebar('timer-icon')}}/>
+                    <button className="flow-icon sidebar-icon" onClick={()=>{toggleSidebar('Flow-related')}}/>
+                    <button className="test-icon sidebar-icon" onClick={()=>{toggleSidebar('HTTP')}}/>
+                    <button className="verifs-icon sidebar-icon" onClick={()=>{toggleSidebar('Verifications')}}/>
+                    <button className="setup-icon sidebar-icon" onClick={()=>{toggleSidebar('Setup-related')}}/>
+                </div>
 
+                :
 
+                <div className={className}>
 
-                <ApiUploadArea
-                    uploaded={false}
-                    apiTitle={apiTitle}
-                    handlerAPI={handlerAPI}
-                    onTestConfNameChange={onTestConfNameChange}>
-                </ApiUploadArea>
+                    <p></p>
+                    
+                    <ApiUploadArea
+                        uploaded={false}
+                        apiTitle={apiTitle}
+                        handlerAPI={handlerAPI}
+                        onTestConfNameChange={onTestConfNameChange}>
+                    </ApiUploadArea>
 
-                <SimpleAccordion header={"Upload TSL file"} accHeaderClass={"sidebar-simple-header"}>
+                    <p></p>
 
-                    Recreate state from an existing TSL file (WIP)
+                    <SimpleAccordion header={"Upload TSL file"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"tsl-icon"}>
 
-                    <Dropzone className="sidebar-dropzone"
-                        accept=".yaml"
-                        onDrop={onDropTsl}
-                        text={
-                            <div align="center">
-                                <p>Upload TSL (.yaml)</p>
-                            </div>}
-                    />
+                        Recreate state from an existing TSL file (WIP)
 
-                </SimpleAccordion>
+                        <Dropzone className="sidebar-dropzone"
+                            accept=".yaml"
+                            onDrop={onDropTsl}
+                            text={
+                                <div align="center">
+                                    <p>Upload TSL (.yaml)</p>
+                                </div>}
+                        />
 
-                <p></p>
+                    </SimpleAccordion>
 
-                <SimpleAccordion header={"Auxiliary Files"} accHeaderClass={"sidebar-simple-header"}>
+                    <p></p>
+                    
 
-                    <AuxFilesArea onDictionaryDrop={onDictionaryDrop} onDllDrop={onDllDrop}></AuxFilesArea>
+                    <SimpleAccordion header={"Auxiliary Files"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"file-icon"}>
 
-                </SimpleAccordion>
+                        <AuxFilesArea onDictionaryDrop={onDictionaryDrop} onDllDrop={onDllDrop}></AuxFilesArea>
 
+                    </SimpleAccordion>
 
-                <p></p>
+                    <p></p>
 
-                <SimpleAccordion header={"Timer Settings"} accHeaderClass={"sidebar-simple-header"}>
+                    <SimpleAccordion header={"Timer Settings"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"timer-icon"}>
 
-                    <TimerSettings
-                        onRunGeneratedChange={onRunGeneratedChange}
-                        onRunImmediatelyChange={onRunImmediatelyChange}
-                        onRunIntervalChange={onRunIntervalChange}>
-                    </TimerSettings>
-                </SimpleAccordion>
+                        <TimerSettings
+                            onRunGeneratedChange={onRunGeneratedChange}
+                            onRunImmediatelyChange={onRunImmediatelyChange}
+                            onRunIntervalChange={onRunIntervalChange}>
+                        </TimerSettings>
+                    </SimpleAccordion>
 
+                    <ButtonArea buttonsArray={buttonsArray}></ButtonArea>
 
+                    <p></p>
 
+                </div>
+            }
 
-                <ButtonArea buttonsArray={buttonsArray}></ButtonArea>
-
-            </div>
         </div>
     )
 }

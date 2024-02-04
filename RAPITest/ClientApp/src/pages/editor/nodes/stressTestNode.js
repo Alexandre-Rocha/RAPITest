@@ -46,6 +46,7 @@ function StressTestNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'stress-item',
         accHeaderClass: 'stress-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'stress-icon',
         header: 'Stress Test'
     };
 

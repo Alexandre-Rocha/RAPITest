@@ -1,10 +1,14 @@
 .editor-container {
   display: flex;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  height: 84vh;
+  height: 88vh;
   width: 100%;
 }
 
+
+.editor-page #footer{
+  display: none;
+}
 
 .editor-page #root > div > div {
     padding: 0;
@@ -23,8 +27,13 @@
 .editor-outline {
   border: 2px solid #ccc;
   flex: 4 1 0%;
- border-left: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-right: 6px solid #ccc;
+  border-top: 4px solid #ccc;
+  border-bottom: 4px solid #ccc;
 }
+
+
 
 .node-button {
   /* flex-grow: 1; */
@@ -32,4 +41,101 @@
 
 .node-radio {
   margin: 0 5px 0 5px;
+}
+
+
+.custom-panel {
+
+  position: absolute;
+  z-index: 5;
+  margin: 15px ;
+  box-shadow: 0 0 2px 1px rgba(0,0,0,0.08);
+  display: flex;
+
+  /* position: absolute;
+  top: 10px;
+  right: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px; 
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);  */
+}
+
+.custom-panel button {
+  display: flex;
+  background-color: #fefefe; /* Button background */
+  border: 1px solid #eee; /* Button border */
+  padding: 5px;
+  border: none;
+
+  justify-content: center;
+  align-items: center;
+ /*  width:16px;
+  height: 16px; */
+  cursor: pointer;
+  user-select: none;
+  
+  /* border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.3s; */
+}
+
+.custom-panel button:hover {
+  background-color: #f4f4f4; /* Darker background on hover */
+}
+
+
+.controlButton{
+  /* max-width: 12px;
+  max-height: 12px; */
+  
+}
+
+.layoutButton {
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/flow.svg');
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.settingsButton {
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/cog.svg');
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.copyrightButton {
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/Copyright.svg');
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.collapseButton {
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/collapse.svg');
+  background-size: 22px 22px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.expandButton {
+  width: 100%;
+  height: 100%;
+  background-image: url('../../assets/expand.svg');
+  background-size: 22px 22px;
+  background-repeat: no-repeat;
+  background-position: center;
 }

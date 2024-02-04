@@ -37,6 +37,7 @@ function CountVerificationNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'count-item',
         accHeaderClass: 'count-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'countVerif-icon',
         header: 'Count'
     };
 

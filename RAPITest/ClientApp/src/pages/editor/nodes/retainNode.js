@@ -51,6 +51,7 @@ function RetainNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'retain-item',
         accHeaderClass: 'retain-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'retain-icon',
         header: 'Retain'
     };
 

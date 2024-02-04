@@ -51,6 +51,7 @@ function QueryNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'query-item',
         accHeaderClass: 'query-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'query-icon',
         header: 'Query'
     };
 

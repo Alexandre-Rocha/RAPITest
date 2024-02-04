@@ -10,6 +10,12 @@
 
 } */
 
+.body-icon{
+  background-image: url('../../../../assets/test.png');
+  background-size: 32px 32px;
+  margin-right: 1vh;
+}
+
 .custom-tooltip>.tooltip-inner {
   background-color: #f0f0f0;
   color: #222;

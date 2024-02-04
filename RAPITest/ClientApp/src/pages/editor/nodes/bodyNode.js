@@ -63,6 +63,7 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'body-item',
         accHeaderClass: 'body-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'body-icon',
         header: 'Body'
     };
 

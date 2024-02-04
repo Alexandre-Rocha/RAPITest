@@ -36,6 +36,7 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'match-item',
         accHeaderClass: 'match-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'matchVerif-icon',
         header: 'Match'
     };
 

@@ -1,28 +1,18 @@
 .collapsible-sidebar {
- flex: 1 1 8vh;
-
-
- height: 84vh;
-  background-color: #f0f0f0;
+  flex: 1 1 8vh;
+  height: 88vh;
+  background-color: #ccc;
   transition: flex-basis 0.3s ease;
   border: 2px solid #ccc;
   border-right: 1px solid #ccc;
+  border-left: 6px solid #ccc;
 }
 
 .collapsible-sidebar.collapsed {
-  background-color: #f0f0f0;
-  height: 84vh;
+/*   background-color: #f0f0f0;
+ */  height: 88vh;
   flex: 0 0 1vh;
-
-
-}
-
-.toggle-button {
-  width: 100%;
-  height: 4vh;
-  background-color: #ccc;
-  border: none;
-  cursor: pointer;
+  border: 2px solid #ccc;
 }
 
 
@@ -31,154 +21,130 @@
 }
 
 .sidebar {
-
   display: flex;
+  background-color: #f0f0f0;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-
-  padding: 4px 4px;
-  /*   height: 710px;
- */
+  padding: 4px 8px;
   margin-right: 2px;
-  max-height: inherit;
+  max-height: 82vh;
+  border-radius: calc(0.25rem - 1px);
 }
-
-
-.single-button-area {
-  display: flex;
-  flex-direction: column;
-  margin-right: 1px;
-  margin-left: 1px;
-}
-
-/* .node-button .aws-btn__content {
-  background: aqua !important;
-}
-
-.node-button .aws-btn__wrapper::before {
-  background: green !important;
-} */
-
-
-.node-button.wf .aws-btn__content {
-  background: #ffdda9 !important;
-  color: #222;
-}
-
-.node-button.wf .aws-btn__wrapper::before {
-  background: #ffd18d !important;
-  color: #222;
-}
-
-.node-button.wf .aws-btn__content:hover {
-  background: #ffd18d !important;
-  color: #222;
-}
-
-
-
-.node-button.test .aws-btn__content {
-  background: #e0f0ff !important;
-  color: #222;
-}
-
-.node-button.test .aws-btn__wrapper::before {
-  background: #cbe6ff !important;
-  color: #222;
-}
-
-.node-button.test .aws-btn__content:hover {
-  background: #cbe6ff !important;
-  color: #222;
-}
-
-
-.node-button.stress .aws-btn__content {
-  background: #ffa792 !important;
-  color: #222;
-}
-
-.node-button.stress .aws-btn__wrapper::before {
-  background: #ff9379 !important;
-  color: #222;
-}
-
-.node-button.stress .aws-btn__content:hover {
-  background: #ff9379 !important;
-  color: #222;
-}
-
-
-
-.node-button.http .aws-btn__content {
-  background: #fff7ad !important;
-  color: #222;
-}
-
-.node-button.http .aws-btn__wrapper::before {
-  background: #f9ed81 !important;
-  color: #222;
-}
-
-.node-button.http .aws-btn__content:hover {
-  background: #f9ed81 !important;
-  color: #222;
-}
-
-
-.node-button.verif .aws-btn__content {
-  background: #d5ffae !important;
-  color: #222;
-}
-
-.node-button.verif .aws-btn__wrapper::before {
-  background: #befa85 !important;
-  color: #222;
-}
-
-.node-button.verif .aws-btn__content:hover {
-  background: #befa85 !important;
-  color: #222;
-}
-
-
-.node-button.aws-btn::before {
-  background: transparent
-}
-
-.node-button {
-  width: 100%;
-}
-
-.sidebar-tooltip>.tooltip-inner {
-  background-color: #f0f0f0;
-  color: #222;
-  ;
-}
-
-/* .node-button.setup .aws-btn__content {
-  background: #d5ffae !important;
-}
-.node-button.setup .aws-btn__wrapper::before {
-  background: #d5ffaef1 !important;
-}
- */
-
-/* .node-button .aws-btn--visible--right {
-  background: aqua;
-}
- */
-
-/* .aws-btn__content{
-  background: aqua !important;
-} */
 
 .sidebar-simple-header .accordion-button {
   font-size: medium;
+  background-color: #ccc;
+  padding: 2px;
+  padding-right: 4px;
 }
 
 .sidebar-dropzone {
   margin-bottom: 4px;
   margin-top: 4px;
+}
+
+.sidebar-simple-item{
+  border: 2px solid #ccc;
+}
+
+.toggle-button {
+  width: 100%;
+  height: 5vh;
+  background-color: #ccc;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.sidebar-icon-area{
+  background-color: #ccc;
+}
+
+.sidebar-icon{
+  width: 100%;
+  height: 5vh;
+  background-color: #ccc;
+  border: none;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 4px 0px;
+}
+
+.sidebar-icon:hover{
+  background-color: #dcdcdc;
+}
+
+.name-icon {
+  background-image: url('../../../../assets/pencil.png');
+  background-size: 32px 32px ;
+}
+
+.api-icon {
+  background-image: url('../../../../assets/uploadSmallAPI.png');
+  background-size: 32px 32px;
+}
+
+.tsl-icon {
+  background-image: url('../../../../assets/uploadSmallTSL.png');
+  background-size: 32px 32px;
+}
+
+.file-icon {
+  background-image: url('../../../../assets/uploadSmall.png');
+  background-size: 32px 32px;
+}
+
+
+.timer-icon {
+  background-image: url('../../../../assets/clock.png');
+  background-size: 32px 32px;
+}
+
+
+.flow-icon {
+  background-image: url('../../../../assets/share.png');
+  background-size: 32px 32px;
+}
+
+.test-icon {
+  background-image: url('../../../../assets/test.png');
+  background-size: 32px 32px;
+}
+
+.verifs-icon {
+  background-image: url('../../../../assets/tickSmall.png');
+  background-size: 32px 32px;
+}
+
+.setup-icon {
+  background-image: url('../../../../assets/gear.png');
+  background-size: 32px 32px;
+}
+
+
+.acc-icon.Flow-related{
+  background-image: url('../../../../assets/share.png');
+  background-size: 32px 32px;
+}
+
+.acc-icon.HTTP{
+  background-image: url('../../../../assets/test.png');
+  background-size: 32px 32px;
+}
+
+.acc-icon.Verifications{
+  background-image: url('../../../../assets/tickSmall.png');
+  background-size: 32px 32px;
+}
+
+.acc-icon.Setup-related{
+  background-image: url('../../../../assets/gear.png');
+  background-size: 32px 32px;
+}
+
+.acc-icon.Dev{
+  background-image: url('../../../../assets/gear.png');
+  background-size: 32px 32px;
 }

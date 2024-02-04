@@ -33,6 +33,7 @@ function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'contains-item',
         accHeaderClass: 'contains-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'containsVerif-icon',
         header: 'Contains'
     };
 

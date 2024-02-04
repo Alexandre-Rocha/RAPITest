@@ -49,6 +49,7 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'workflow-item',
         accHeaderClass: 'workflow-header',
         accBodyClass: 'nodrag',
+        accIconClass:'workflow-icon',
         header: renderWfTitle()
     };
 

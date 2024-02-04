@@ -1,0 +1,130 @@
+.single-button-area {
+    display: flex;
+    flex-direction: column;
+    margin-right: 1px;
+    margin-left: 1px;
+  }
+
+
+
+/* .node-button .aws-btn__content {
+  background: aqua !important;
+}
+
+.node-button .aws-btn__wrapper::before {
+  background: green !important;
+} */
+
+
+.node-button.wf .aws-btn__content {
+    background: #ffdda9 !important;
+    color: #222;
+}
+
+.node-button.wf .aws-btn__wrapper::before {
+    background: #ffd18d !important;
+    color: #222;
+}
+
+.node-button.wf .aws-btn__content:hover {
+    background: #ffd18d !important;
+    color: #222;
+}
+
+
+
+.node-button.test .aws-btn__content {
+    background: #e0f0ff !important;
+    color: #222;
+}
+
+.node-button.test .aws-btn__wrapper::before {
+    background: #cbe6ff !important;
+    color: #222;
+}
+
+.node-button.test .aws-btn__content:hover {
+    background: #cbe6ff !important;
+    color: #222;
+}
+
+
+.node-button.stress .aws-btn__content {
+    background: #ffa792 !important;
+    color: #222;
+}
+
+.node-button.stress .aws-btn__wrapper::before {
+    background: #ff9379 !important;
+    color: #222;
+}
+
+.node-button.stress .aws-btn__content:hover {
+    background: #ff9379 !important;
+    color: #222;
+}
+
+
+
+.node-button.http .aws-btn__content {
+    background: #fff7ad !important;
+    color: #222;
+}
+
+.node-button.http .aws-btn__wrapper::before {
+    background: #f9ed81 !important;
+    color: #222;
+}
+
+.node-button.http .aws-btn__content:hover {
+    background: #f9ed81 !important;
+    color: #222;
+}
+
+
+.node-button.verif .aws-btn__content {
+    background: #d5ffae !important;
+    color: #222;
+}
+
+.node-button.verif .aws-btn__wrapper::before {
+    background: #befa85 !important;
+    color: #222;
+}
+
+.node-button.verif .aws-btn__content:hover {
+    background: #befa85 !important;
+    color: #222;
+}
+
+
+.node-button.aws-btn::before {
+    background: transparent
+}
+
+.node-button {
+    width: 100%;
+}
+
+.sidebar-tooltip>.tooltip-inner {
+    background-color: #f0f0f0;
+    color: #222;
+    ;
+}
+
+/* .node-button.setup .aws-btn__content {
+    background: #d5ffae !important;
+  }
+  .node-button.setup .aws-btn__wrapper::before {
+    background: #d5ffaef1 !important;
+  }
+   */
+
+/* .node-button .aws-btn--visible--right {
+    background: aqua;
+  }
+   */
+
+/* .aws-btn__content{
+    background: aqua !important;
+  } */

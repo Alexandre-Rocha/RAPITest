@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom';
-import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider, Panel } from 'reactflow';
+import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider, Panel, ControlButton } from 'reactflow';
 import 'reactflow/dist/style.css';
 import StatusVerificationNode from './nodes/statusVerificationNode';
 
@@ -29,6 +29,9 @@ import Dagre from 'dagre';
 
 
 import './Editor.css'
+
+
+import cog from '../../assets/flow.svg'
 
 
 const YAML = require('json-to-pretty-yaml');
@@ -84,7 +87,7 @@ function deepCopy(obj) {
 
 function Flow() {
 
-    
+
     rapiLog(level.INFO, "Flow component rendered")
 
 
@@ -94,7 +97,7 @@ function Flow() {
 
 
     const location = useLocation();
-    
+
     const reactFlowInstance = useReactFlow()
     const { fitView } = useReactFlow(); //dagre
 
@@ -120,6 +123,9 @@ function Flow() {
 
     const [canCollapse, setCanCollapse] = useState(false)
 
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+    const [dontCollapseClass, setDontCollapseClass] = useState("")
+
     const [dict, setDict] = useState({})
 
     const [dictFile, setDictFile] = useState()
@@ -137,6 +143,7 @@ function Flow() {
             document.body.classList.remove('editor-page');
         };
     }, []);
+
 
     // #region onChange in Editor
 
@@ -2001,6 +2008,51 @@ function Flow() {
         )
     }
 
+    const collapseSidebarAccordions = () => {
+        console.log("collapse sidebar accordions");
+        const elements = document.querySelectorAll('.sidebar-simple-header .accordion-button');
+    
+        console.log("step 3");
+        console.log(dontCollapseClass)
+
+        elements.forEach((element) => {
+            const isNotCollapsed = !element.classList.contains('collapsed') 
+            
+            const children = element.children
+
+            let childHasDntClpsClass = false
+
+            Array.from(children).forEach(child => {
+                if(child.classList.contains(dontCollapseClass)) {
+                    childHasDntClpsClass = true
+                }
+            });
+
+            if (isNotCollapsed && !childHasDntClpsClass) {
+                element.click()
+            }
+            else{
+                element.scrollIntoView({
+                    behavior: 'smooth', // Optional: Defines the transition animation
+                    block: 'nearest' // Scrolls so that the targetItem is aligned to the top of the sidebar
+                  });
+            }
+
+            childHasDntClpsClass = false
+
+        });
+    }
+
+    const onToggleCollapse = (newCollapsedState, dontCollapseClass="") =>{
+        setSidebarCollapsed(newCollapsedState)
+        console.log(" step 2 dontCollapseClass");
+        console.log(dontCollapseClass);
+        setDontCollapseClass(dontCollapseClass)
+    }
+
+    useEffect(()=>{
+        collapseSidebarAccordions()
+    },[sidebarCollapsed])
 
     //TODO: maybe I can analyse this to see how the schemasvalues are passed to do same in MonitorTests
     const handlerAPI = function (paths, servers, schemas, schemasValues) {
@@ -2165,69 +2217,88 @@ function Flow() {
 
 
     return (
-            <div className='editor-container'>
+        <div className='editor-container'>
 
 
-                <Sidebar className='sidebar'
-                    onRunGeneratedChange={onRunGeneratedChange}
-                    onRunImmediatelyChange={onRunImmediatelyChange}
-                    onRunIntervalChange={onRunIntervalChange}
-                    apiTitle={testConfName}
-                    handlerAPI={handlerAPI}
-                    onTestConfNameChange={onTestConfNameChange}
-                    onDictionaryDrop={onDictionaryDrop}
-                    onDllDrop={onDllDrop}
-                    onTslDrop={onTslDrop}
-                    buttonsArray={[
-                        { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: "Workflow tooltip" },
-                        { section: "Flow-related", title: "Test", onClick: onClickTestNode, class: "test" },
-                        { section: "Flow-related", title: "Stress Test", onClick: onClickStressTestNode, class: "stress" },
-                        { section: "HTTP Requests", title: "Body", onClick: onClickBodyNode, class: "http" },
-                        { section: "HTTP Requests", title: "Headers", onClick: onClickHeadersNode, class: "http" },
-                        { section: "HTTP Requests", title: "Query", onClick: onClickQueryNode, class: "http" },
-                        { section: "HTTP Requests", title: "Retain", onClick: onClickRetainNode, class: "http" },
-                        { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class: "verif" },
-                        { section: "Verifications", title: "Schema", onClick: onClickSchema, class: "verif" },
-                        { section: "Verifications", title: "Contains ", onClick: onClickContains, class: "verif" },
-                        { section: "Verifications", title: "Count ", onClick: onClickCount, class: "verif" },
-                        { section: "Verifications", title: "Match ", onClick: onClickMatch, class: "verif" },
-                        { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif" },
-                        { section: "Setup-related", title: "Save changes", onClick: saveWorkflow, class: "setup" },
-                        { section: "Setup-related", title: "Finish Setup", onClick: finishSetup, class: "setup" },
-                        { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf, class: "setup" },
-                        { section: "Dev", title: "Dump state", onClick: dumpState, class: "setup" },
-                        { section: "Dev", title: "Collapse nodes", onClick: collapseNodes, class: "setup" },
-                        { section: "Dev", title: "Open nodes", onClick: openNodes, class: "setup" },
-                    ]}>
-                </Sidebar>
+            <Sidebar className='sidebar'
+                onRunGeneratedChange={onRunGeneratedChange}
+                onRunImmediatelyChange={onRunImmediatelyChange}
+                onRunIntervalChange={onRunIntervalChange}
+                onToggleCollapse={onToggleCollapse}
+                apiTitle={testConfName}
+                handlerAPI={handlerAPI}
+                onTestConfNameChange={onTestConfNameChange}
+                onDictionaryDrop={onDictionaryDrop}
+                onDllDrop={onDllDrop}
+                onTslDrop={onTslDrop}
+                buttonsArray={[
+                    { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: "Workflow tooltip", iconClass: "flow-icon" },
+                    { section: "Flow-related", title: "Test", onClick: onClickTestNode, class: "test", iconClass: "flow-icon" },
+                    { section: "Flow-related", title: "Stress Test", onClick: onClickStressTestNode, class: "stress", iconClass: "flow-icon" },
+                    { section: "HTTP Requests", title: "Body", onClick: onClickBodyNode, class: "http", iconClass: "test-icon" },
+                    { section: "HTTP Requests", title: "Headers", onClick: onClickHeadersNode, class: "http", iconClass: "test-icon" },
+                    { section: "HTTP Requests", title: "Query", onClick: onClickQueryNode, class: "http", iconClass: "test-icon" },
+                    { section: "HTTP Requests", title: "Retain", onClick: onClickRetainNode, class: "http", iconClass: "test-icon" },
+                    { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class: "verif", iconClass: "verifs-icon" },
+                    { section: "Verifications", title: "Schema", onClick: onClickSchema, class: "verif", iconClass: "verifs-icon" },
+                    { section: "Verifications", title: "Contains ", onClick: onClickContains, class: "verif", iconClass: "verifs-icon" },
+                    { section: "Verifications", title: "Count ", onClick: onClickCount, class: "verif", iconClass: "verifs-icon" },
+                    { section: "Verifications", title: "Match ", onClick: onClickMatch, class: "verif", iconClass: "verifs-icon" },
+                    { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon" },
+                    { section: "Setup-related", title: "Save changes", onClick: saveWorkflow, class: "setup", iconClass: "gear-icon" },
+                    { section: "Setup-related", title: "Finish Setup", onClick: finishSetup, class: "setup", iconClass: "gear-icon" },
+                    { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf, class: "setup", iconClass: "gear-icon" },
+                    { section: "Dev", title: "Dump state", onClick: dumpState, class: "setup", iconClass: "gear-icon" },
+                    { section: "Dev", title: "Collapse nodes", onClick: collapseNodes, class: "setup", iconClass: "gear-icon" },
+                    { section: "Dev", title: "Open nodes", onClick: openNodes, class: "setup", iconClass: "gear-icon" },
+                ]}>
+            </Sidebar>
 
 
 
-                <div className='editor-outline'>
-                    <ReactFlow
-                        nodes={nodes}
-                        edges={edges}
-                        nodeTypes={nodeTypes}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        onConnect={onConnect}
-                        proOptions={proOptions}
-                        deleteKeyCode={'Delete'}
-                        /* dagre */
-                        //fitView
-                    >
-                        <Background color='#000000' variant={'dots'} />
-                        <Controls />
+            <div className='editor-outline'>
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    nodeTypes={nodeTypes}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    proOptions={proOptions}
+                    deleteKeyCode={'Delete'}
+                /* dagre */
+                //fitView
+                >
+                    <Background color='#000000' variant={'dots'} />
+                    <Controls>
 
-                        {/* dagre */}
-                        <Panel position="top-right">
-                            <button onClick={() => onLayout('TB')}>vertical layout</button>
-                            <button onClick={() => onLayout('LR')}>horizontal layout</button>
-                        </Panel>
-                    </ReactFlow>
+                        <ControlButton onClick={() => alert('wip')} title='collapse all nodes'>
+                            <div className='collapseButton' ></div>
+                        </ControlButton>
+                        <ControlButton onClick={() => alert('wip')} title='expand all nodes'>
+                            <div className='expandButton' ></div>
+                        </ControlButton>
+                        <ControlButton onClick={() => onLayout('TB')} title='auto layout nodes'>
+                            <div className='layoutButton' ></div>
+                        </ControlButton>
+                        <ControlButton onClick={() => alert('wip')} title='open settings window'>
+                            <div className='settingsButton' ></div>
+                        </ControlButton>
+                        <ControlButton title='© 2022 - RapiTest - ISEL'>
+                            <div className='copyrightButton' ></div>
+                        </ControlButton>
+                    </Controls>
 
-                </div>
+
+                    {/* dagre */}
+                    {/* <Panel className='custom-panel' position="bottom-center">
+                        <button onClick={() => onLayout('TB')}>vertical layout</button>
+                        <button onClick={() => onLayout('LR')}>horizontal layout</button>
+                    </Panel> */}
+                </ReactFlow>
+
             </div>
+        </div>
     );
 }
 

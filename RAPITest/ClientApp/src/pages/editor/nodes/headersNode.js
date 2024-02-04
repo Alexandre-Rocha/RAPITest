@@ -51,6 +51,7 @@ function HeadersNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'headers-item',
         accHeaderClass: 'headers-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'headers-icon',
         header: 'Headers'
     };
 

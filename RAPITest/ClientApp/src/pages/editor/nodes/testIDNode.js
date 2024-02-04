@@ -78,6 +78,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'test-item',
         accHeaderClass: 'test-header',
         accBodyClass: 'nodrag',
+        accIconClass: 'test-icon',
         header: renderTestTitle()
     };
 
