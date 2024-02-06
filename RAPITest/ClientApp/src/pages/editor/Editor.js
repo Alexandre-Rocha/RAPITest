@@ -31,8 +31,6 @@ import Dagre from 'dagre';
 import './Editor.css'
 
 
-import cog from '../../assets/flow.svg'
-
 
 const YAML = require('json-to-pretty-yaml');
 const jsYaml = require('js-yaml')
@@ -87,17 +85,14 @@ function deepCopy(obj) {
 
 function Flow() {
 
-
     rapiLog(level.INFO, "Flow component rendered")
 
-
     // #region State and Hooks
+
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-
     const location = useLocation();
-
     const reactFlowInstance = useReactFlow()
     const { fitView } = useReactFlow(); //dagre
 
@@ -133,16 +128,32 @@ function Flow() {
 
     // #endregion
 
-
+    // this is so i have more freedom applying custom css effects while making sure they dont affect the app elsewhere (as in outside the editor page)
+    // adds custom class to body and removes it when component unmounts
     useEffect(() => {
-        // Add a unique class to the body
         document.body.classList.add('editor-page');
 
-        // Cleanup: Remove the class when the component is unmounted
         return () => {
             document.body.classList.remove('editor-page');
         };
     }, []);
+
+
+    //dagre
+    const onLayout = useCallback(
+        (direction) => {
+            const layouted = getLayoutedElements(nodes, edges, { direction });
+
+            setNodes([...layouted.nodes]);
+            setEdges([...layouted.edges]);
+
+            window.requestAnimationFrame(() => {
+                fitView();
+            });
+        },
+        [nodes, edges]
+    );
+
 
 
     // #region onChange in Editor
@@ -800,22 +811,6 @@ function Flow() {
         }
 
     // #endregion
-
-
-    //dagre
-    const onLayout = useCallback(
-        (direction) => {
-            const layouted = getLayoutedElements(nodes, edges, { direction });
-
-            setNodes([...layouted.nodes]);
-            setEdges([...layouted.edges]);
-
-            window.requestAnimationFrame(() => {
-                fitView();
-            });
-        },
-        [nodes, edges]
-    );
 
 
     // #region Create Nodes
@@ -1620,12 +1615,19 @@ function Flow() {
         })
 
         setCanCollapse(true)
+        //collapseNodesWhenReady
 
         console.log("edges set");
     }
 
+    // when state is recreated and nodes are created and ready to be collapsed
+    // the canCollapse flag is set to true
+    // when that happens, this function is executed which collapses the nodes after 100 ms
+    // the reason this needs to happen in useEffect after state update is because the nodes and edges etc are state updates
+    // as well, and React takes a bit to process those. so I cant call collapseNodes directly before the state updates are processed.
+    // this solution perhaps could be more elegant but it makes sense and works fine
+    // TODO: alternativas?/comment cleanup
     useEffect(() => {
-        console.log("can collapse");
         if (canCollapse) {
             setTimeout(() => {
                 collapseNodes(); // Call collapseNodes after 1 second
@@ -2050,6 +2052,9 @@ function Flow() {
         setDontCollapseClass(dontCollapseClass)
     }
 
+    // whenever the sidebar is collapsed, the accordions inside should collapse too
+    // the dependency is triggered 
+    // TODO: isto é necessário? nao posso simplesmente passar collapseSidebarAccordions como callback à sidebar?
     useEffect(()=>{
         collapseSidebarAccordions()
     },[sidebarCollapsed])
@@ -2219,7 +2224,6 @@ function Flow() {
     return (
         <div className='editor-container'>
 
-
             <Sidebar className='sidebar'
                 onRunGeneratedChange={onRunGeneratedChange}
                 onRunImmediatelyChange={onRunImmediatelyChange}
@@ -2255,7 +2259,6 @@ function Flow() {
             </Sidebar>
 
 
-
             <div className='editor-outline'>
                 <ReactFlow
                     nodes={nodes}
@@ -2266,19 +2269,17 @@ function Flow() {
                     onConnect={onConnect}
                     proOptions={proOptions}
                     deleteKeyCode={'Delete'}
-                /* dagre */
-                //fitView
                 >
                     <Background color='#000000' variant={'dots'} />
                     <Controls>
 
-                        <ControlButton onClick={() => alert('wip')} title='collapse all nodes'>
+                        <ControlButton onClick={collapseNodes} title='collapse all nodes'>
                             <div className='collapseButton' ></div>
                         </ControlButton>
-                        <ControlButton onClick={() => alert('wip')} title='expand all nodes'>
+                        <ControlButton onClick={openNodes} title='expand all nodes'>
                             <div className='expandButton' ></div>
                         </ControlButton>
-                        <ControlButton onClick={() => onLayout('TB')} title='auto layout nodes'>
+                        <ControlButton onClick={() => {onLayout('TB');onLayout('TB')}} title='auto layout nodes'>
                             <div className='layoutButton' ></div>
                         </ControlButton>
                         <ControlButton onClick={() => alert('wip')} title='open settings window'>
@@ -2289,12 +2290,6 @@ function Flow() {
                         </ControlButton>
                     </Controls>
 
-
-                    {/* dagre */}
-                    {/* <Panel className='custom-panel' position="bottom-center">
-                        <button onClick={() => onLayout('TB')}>vertical layout</button>
-                        <button onClick={() => onLayout('LR')}>horizontal layout</button>
-                    </Panel> */}
                 </ReactFlow>
 
             </div>
