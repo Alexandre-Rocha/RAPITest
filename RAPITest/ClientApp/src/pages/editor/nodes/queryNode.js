@@ -17,28 +17,34 @@ function QueryNode({ data, isConnectable, xPos, yPos }) {
         const updatedQuery = [...query];
         updatedQuery[index].key = value;
         setQuery(updatedQuery);
-        data.custom.keyChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex);
+        //data.custom.keyChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex);
     };
 
     const handleValueChange = (index, value) => {
         const updatedQuery = [...query];
         updatedQuery[index].value = value;
         setQuery(updatedQuery);
-        data.custom.valueChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex);
+        //data.custom.valueChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex);
     };
 
     const addQuery = () => {
         setQuery([...query, { key: '', value: '' }]);
-        data.custom.addQueryCallback(data.custom._wfIndex, data.custom._testIndex)
+        //data.custom.addQueryCallback(data.custom._wfIndex, data.custom._testIndex)
     };
 
     const removeQuery = (index) => {
         const updatedQuery = [...query];
         updatedQuery.splice(index, 1);
         setQuery(updatedQuery);
-        data.custom.removeQueryCallback(index, data.custom._wfIndex, data.custom._testIndex)
+        //data.custom.removeQueryCallback(index, data.custom._wfIndex, data.custom._testIndex)
     };
 
+    const getState = () => {
+        const state = query
+        return state
+    }
+
+    data.custom.getState = getState
 
     rapiLog(level.DEBUG, "[Query node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Query node] X pos: ", xPos)

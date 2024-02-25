@@ -16,3 +16,7 @@
 .stress-header {
 
 } */
+
+.stress-node [data-handleid="topHandle"]{
+  background-color: #ffa792 !important;
+}

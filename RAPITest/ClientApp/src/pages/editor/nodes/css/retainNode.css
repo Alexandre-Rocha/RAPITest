@@ -43,3 +43,11 @@
     border-top-right-radius: 0.25rem;
     border-bottom-right-radius: 0.25rem;
 }
+
+.retain-node [data-handleid="bottomHandle"]{
+    background-color: #fff7ad !important;
+  }
+
+  .retain-node [data-handleid="topHandle"]{
+    background-color: #fff7ad !important;
+  }

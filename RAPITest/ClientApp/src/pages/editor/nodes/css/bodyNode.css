@@ -35,3 +35,12 @@
   display: inline;
   width: 80%;
 }
+
+
+.body-node [data-handleid="bottomHandle"]{
+  background-color: #fff7ad !important;
+}
+
+.body-node [data-handleid="topHandle"]{
+  background-color: #fff7ad !important;
+}

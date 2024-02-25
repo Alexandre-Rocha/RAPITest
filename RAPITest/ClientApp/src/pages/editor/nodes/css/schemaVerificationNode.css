@@ -15,3 +15,11 @@
 
 }
  */
+
+ .schema-node [data-handleid="bottomHandle"]{
+    background-color: #d5ffae !important;
+  }
+
+  .schema-node [data-handleid="topHandle"]{
+    background-color: #d5ffae !important;
+  }

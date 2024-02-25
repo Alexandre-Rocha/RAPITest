@@ -14,3 +14,12 @@
 .status-header {
 
 } */
+
+.status-node [data-handleid="bottomHandle"]{
+    background-color: #d5ffae !important;
+  }
+
+
+  .status-node [data-handleid="topHandle"]{
+    background-color: #d5ffae !important;
+  }

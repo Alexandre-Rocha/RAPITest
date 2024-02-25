@@ -23,7 +23,7 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
         rapiLog(level.INFO, "[Workflow node] Workflow name: ", evt.target.value)
 
         setWfName(evt.target.value)
-        data.custom.nameChangeCallback(evt.target.value)
+        //data.custom.nameChangeCallback(evt.target.value)
     };
 
 
@@ -41,6 +41,15 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
         return str
     }
 
+    const getState = () => {
+        return {
+            name: wfName,
+            _wfIndex: wfIndex
+        }
+    }
+
+    data.custom.getState = getState
+
 
     const generalNodeProps = {
         data: data,
@@ -50,7 +59,9 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
         accHeaderClass: 'workflow-header',
         accBodyClass: 'nodrag',
         accIconClass:'workflow-icon',
-        header: renderWfTitle()
+        header: renderWfTitle(),
+        doubleHandle: true,
+        topHandle: false
     };
 
     return (

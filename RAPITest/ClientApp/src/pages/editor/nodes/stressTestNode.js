@@ -24,19 +24,19 @@ function StressTestNode({ data, isConnectable, xPos, yPos }) {
     const onCountChange = (evt) => {
         rapiLog(level.INFO, "[Stress test node] Count: ", evt.target.value)
         setCount(evt.target.value)
-        data.custom.countChangeCallback(evt.target.value, data.custom._wfIndex)
+        //data.custom.countChangeCallback(evt.target.value, data.custom._wfIndex)
     };
 
     const onThreadsChange = (evt) => {
         rapiLog(level.INFO, "[Stress test node] Threads: ", evt.target.value)
         setThreads(evt.target.value)
-        data.custom.threadsChangeCallback(evt.target.value, data.custom._wfIndex)
+        //data.custom.threadsChangeCallback(evt.target.value, data.custom._wfIndex)
     };
 
     const onDelayChange = (evt) => {
         rapiLog(level.INFO, "[Stress test node] Delay: ", evt.target.value)
         setDelay(evt.target.value)
-        data.custom.delayChangeCallback(evt.target.value, data.custom._wfIndex)
+        //data.custom.delayChangeCallback(evt.target.value, data.custom._wfIndex)
     };
 
     const generalNodeProps = {
@@ -47,8 +47,20 @@ function StressTestNode({ data, isConnectable, xPos, yPos }) {
         accHeaderClass: 'stress-header',
         accBodyClass: 'nodrag',
         accIconClass: 'stress-icon',
-        header: 'Stress Test'
+        header: 'Stress Test',
+        bottomHandle: false
     };
+
+    const getState = () => {
+        const state = {
+            count: count,
+            threads: threads,
+            delay: delay
+        }
+        return state
+    }
+
+    data.custom.getState = getState
 
     return (
         <div>

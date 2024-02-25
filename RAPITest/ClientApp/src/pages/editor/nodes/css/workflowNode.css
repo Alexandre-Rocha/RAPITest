@@ -15,3 +15,12 @@
 .workflow-header {
 
 } */
+
+
+.workflow-node [data-handleid="leftHandle"]{
+  background-color: #ffa792 !important;
+}
+
+.workflow-node [data-handleid="rightHandle"]{
+  background-color: #e0f0ff !important;
+}

@@ -21,8 +21,17 @@ function StatusVerificationNode({ data, isConnectable, xPos, yPos }) {
     const onStatusCodeChange = (evt) => {
         rapiLog(level.INFO, "[Status node] Status code: ", evt.target.value)
         setStatusCode(evt.target.value)
-        data.custom.statusChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+        //data.custom.statusChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
     };
+
+    const getState = () => {
+        const state = {
+            status: statusCode
+        }
+        return state
+    }
+
+    data.custom.getState = getState
 
     const generalNodeProps = {
         data: data,
@@ -34,6 +43,7 @@ function StatusVerificationNode({ data, isConnectable, xPos, yPos }) {
         accIconClass: 'statusVerif-icon',
         header: 'Status Code'
     };
+
 
     return (
         <div>

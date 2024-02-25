@@ -16,3 +16,11 @@
 
 }
  */
+
+ .match-node [data-handleid="bottomHandle"]{
+    background-color: #d5ffae !important;
+  }
+
+  .match-node [data-handleid="topHandle"]{
+    background-color: #d5ffae !important;
+  }

@@ -13,8 +13,11 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
     const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1)
     const [testName, setTestName] = useState(data.custom.testName || "");
+    const [server, setServer] = useState(data.custom.server || "");
+    const [path, setPath] = useState(data.custom.path || "");
+    const [method, setMethod] = useState(data.custom.method || "");
 
-    rapiLog(level.DEBUG, "[Test node] Workflow ID: ", data.custom._wfIndex)
+    //rapiLog(level.DEBUG, "[Test node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Test node] Test ID: ", testIndex)
     rapiLog(level.DEBUG, "[Test node] X pos: ", xPos)
     rapiLog(level.DEBUG, "[Test node] Y pos: ", yPos)
@@ -24,25 +27,28 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
         const _testName = evt.target.value
         rapiLog(level.INFO, "[Test node] Test name: ", _testName)
         setTestName(_testName)
-        data.custom.nameChangeCallback(_testName, data.custom._wfIndex, data.custom._testIndex)
+        //data.custom.nameChangeCallback(_testName, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const onChangeServer = (event) => {
         const _server = event
         rapiLog(level.INFO, "[Test node] Selected server: ", _server)
-        data.custom.serverChangeCallback(_server, data.custom._wfIndex, data.custom._testIndex)
+        setServer(_server)
+        //data.custom.serverChangeCallback(_server, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const onChangePath = (event) => {
         const _path = event
         rapiLog(level.INFO, "[Test node] Selected path: ", _path)
-        data.custom.pathChangeCallback(_path, data.custom._wfIndex, data.custom._testIndex)
+        setPath(_path)
+        //data.custom.pathChangeCallback(_path, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const onChangeMethod = (event) => {
         const _method = event
         rapiLog(level.INFO, "[Test node] Selected method: ", _method)
-        data.custom.methodChangeCallback(_method, data.custom._wfIndex, data.custom._testIndex)
+        setMethod(_method)
+        //data.custom.methodChangeCallback(_method, data.custom._wfIndex, data.custom._testIndex)
     };
 
 
@@ -58,9 +64,23 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
 
     const renderTestTitle = () => {
-        let str = ( !Boolean(testName) ? "Test" : testName)
+        let str = (!Boolean(testName) ? "Test" : testName)
         return str
     }
+
+
+    const getState = () => {
+        const state = {
+            name: testName,
+            server: server,
+            path: path,
+            method: method,
+            _testIndex: testIndex
+        }
+        return state
+    }
+
+    data.custom.getState = getState
 
 
     //TODO: Think better on how to implement changing Test order; for now this works
@@ -79,7 +99,8 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
         accHeaderClass: 'test-header',
         accBodyClass: 'nodrag',
         accIconClass: 'test-icon',
-        header: renderTestTitle()
+        header: renderTestTitle(),
+        doubleHandle: true
     };
 
     return (

@@ -16,6 +16,7 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
 
     const [bodyText, setBodyText] = useState(data.custom.bodyText || "")
     const [bodyRef, setBodyRef] = useState(data.custom.bodyRef || "")
+    const [useBodyRef, setUseBodyRef] = useState(data.custom.useBodyRef || false)
 
     const [showSchema, setShowSchema] = useState(false)
 
@@ -26,14 +27,14 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
     const onBodyTextChange = (evt) => {
         rapiLog(level.INFO, "[Body node] Body text: ", evt.target.value);
         setBodyText(evt.target.value)
-        data.custom.bodyTextChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+        //data.custom.bodyTextChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
 
     };
 
     const onBodyRefChange = (evt) => {
         rapiLog(level.INFO, "[Body node] Body ref: ", evt.target.value);
         setBodyRef(evt.target.value)
-        data.custom.bodyRefChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+        //data.custom.bodyRefChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const tooltip = (
@@ -55,6 +56,17 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
         } else
             return []
     }
+
+    const getState = () => {
+        const state = {
+            bodyText: bodyText,
+            bodyRef: bodyRef,
+            useBodyRef: useBodyRef
+        }
+        return state
+    }
+
+    data.custom.getState = getState
 
     const generalNodeProps = {
         data: data,

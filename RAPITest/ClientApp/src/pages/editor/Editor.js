@@ -41,7 +41,44 @@ const initialEdges = []
 
 const proOptions = { hideAttribution: true };
 
-const nodeTypes = { status: StatusVerificationNode, testID: TestIDNode, wf: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode, stress: StressTestNode, match: MatchVerificationNode, custom: CustomVerificationNode, contains: ContainsVerificationNode, count: CountVerificationNode }
+const rf_nodeTypes = { status: StatusVerificationNode, test: TestIDNode, workflow: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode, stress: StressTestNode, match: MatchVerificationNode, custom: CustomVerificationNode, contains: ContainsVerificationNode, count: CountVerificationNode } //TODO: remove
+
+const NodeType = Object.freeze({
+    WORKFLOW: "workflow",
+    TEST: "test",
+    STRESS: "stress",
+    BODY: "body",
+    HEADERS: "headers",
+    QUERY: "query",
+    RETAIN: "retain",
+    STATUS: "status",
+    SCHEMA: "schema",
+    MATCH: "match",
+    CONTAINS: "contains",
+    COUNT: "count",
+    CUSTOM: "custom"
+})
+
+const nodeTypes = {
+    [NodeType.WORKFLOW]: WorkflowNode,
+    [NodeType.TEST]: TestIDNode,
+    [NodeType.STRESS]: StressTestNode,
+    [NodeType.BODY]: BodyNode,
+    [NodeType.HEADERS]: HeadersNode,
+    [NodeType.QUERY]: QueryNode,
+    [NodeType.RETAIN]: RetainNode,
+    [NodeType.STATUS]: StatusVerificationNode,
+    [NodeType.SCHEMA]: SchemaVerificationNode,
+    [NodeType.MATCH]: MatchVerificationNode,
+    [NodeType.CONTAINS]: ContainsVerificationNode,
+    [NodeType.COUNT]: CountVerificationNode,
+    [NodeType.CUSTOM]: CustomVerificationNode,
+}
+
+const flowNodeTypes = [NodeType.WORKFLOW, NodeType.TEST, NodeType.STRESS]
+const requestNodeTypes = [NodeType.BODY, NodeType.HEADERS, NodeType.QUERY, NodeType.RETAIN]
+const verificationNodeTypes = [NodeType.STATUS, NodeType.SCHEMA, NodeType.MATCH, NodeType.CONTAINS, NodeType.COUNT, NodeType.CUSTOM]
+
 
 
 //dagre
@@ -189,626 +226,202 @@ function Flow() {
     // #endregion
 
 
-    // #region onChange callbacks
-
-    const onTestIDChange = useCallback((newTestID, _wfIndex, _testIndex) => {
-
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                newWorkflows[_wfIndex].Tests[_testIndex].TestID = newTestID
-                return newWorkflows
-            })
-        }
-
-    }, [])
-
-    const onServerURLChange = useCallback((newURL, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            newWorkflows[_wfIndex].Tests[_testIndex].Server = newURL
-            return newWorkflows
-        })
-    }, [])
-
-    const onPathChange = useCallback((newPath, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            newWorkflows[_wfIndex].Tests[_testIndex].Path = newPath
-            return newWorkflows
-        })
-    }, [])
-
-    const onHttpMethodChange = useCallback((newHttpMethod, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            newWorkflows[_wfIndex].Tests[_testIndex].Method = newHttpMethod
-            return newWorkflows
-        })
-    }, [])
-
-    const onWfNameChange = useCallback((newWfId) => {
-
-        console.log("New workflow: ", newWfId);
-        console.log("Curr workflow: ", maxWfIndex.current);
-
-
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows);
-            newWorkflows[maxWfIndex.current].WorkflowID = newWfId;
-            return newWorkflows;
-        })
-    }, [])
-
-    const onVerificationStatusChange = useCallback((newStatus, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Code = newStatus    //TODO: hardcoded 0
-            return newWorkflows
-        })
-    }, [])
-
-
-
-    const onCustomVerificationChange = useCallback((selectedCustomVerif, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Custom = selectedCustomVerif    //TODO:  need to grab custom verif
-            return newWorkflows
-        })
-    }, [])
-
-
-    const onVerificationSchemaChange = useCallback((newStatus, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Schema = newStatus    //TODO: hardcoded 0
-            return newWorkflows
-        })
-    }, [])
-
-    const onCountKeyChangeCallback = useCallback((newCountKey, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count) {
-                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count = { key: '', value: '' }
-            }
-            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count.key = newCountKey
-            return newWorkflows
-        })
-    }, [])
-
-    const onCountValueChangeCallback = useCallback((newCountValue, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count) {
-                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count = { key: '', value: '' }
-            }
-            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Count.value = newCountValue
-            return newWorkflows
-        })
-    }, [])
-
-    const onMatchKeyChangeCallback = useCallback((newMatchKey, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match) {
-                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match = { key: '', value: '' }
-            }
-            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match.key = newMatchKey
-            return newWorkflows
-        })
-    }, [])
-
-    const onMatchValueChangeCallback = useCallback((newMatchValue, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            if (!newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match) {
-                newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match = { key: '', value: '' }
-            }
-            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Match.value = newMatchValue
-            return newWorkflows
-        })
-    }, [])
-
-    const onContainsChangeCallback = useCallback((newContains, _wfIndex, _testIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-            newWorkflows[_wfIndex].Tests[_testIndex].Verifications[0].Contains = newContains
-            return newWorkflows
-        })
-    }, [])
-
-    const onHeaderKeyChangeCallback = useCallback((index, key, _wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
-                    console.log("if");
-                    newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
-                    console.log(newWorkflows);
-                }
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Headers[index] = { key: '', value: '' }
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Headers[index].key = key
-                console.log(newWorkflows);
-                return newWorkflows
-            })
-        }
-    }, [])
-
-    const onHeaderValueChangeCallback = useCallback((index, value, _wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
-                }
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Headers[index] = { key: '', value: '' }
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Headers[index].value = value
-                return newWorkflows
-            })
-        }
-    }, [])
-
-    const onHeaderAddCallback = useCallback((_wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Headers.push({ key: '', value: '' })
-                return newWorkflows
-            })
-        }
-    }, [])
-
-    const onHeaderRemoveCallback = useCallback((index, _wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Headers) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Headers = []
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Headers.splice(index, 1)
-                return newWorkflows
-            })
-        }
-    }, [])
-
-    const onQueryAddCallback = useCallback((_wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        //TODO: when i add withoout test id does nothing and will screw up after i think idk
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Query = []
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Query.push({ key: '', value: '' })
-                return newWorkflows
-            })
-        }
-    }, [])
-
-    const onQueryRemoveCallback = useCallback((index, _wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Query = []
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Query.splice(index, 1)
-                return newWorkflows
-            })
-        }
-    }, [])
-
-
-    const onQueryKeyChangeCallback = useCallback((index, key, _wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query) {
-                    console.log("if");
-                    newWorkflows[_wfIndex].Tests[_testIndex].Query = []
-                    console.log(newWorkflows);
-                }
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Query[index] = { key: '', value: '' }
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Query[index].key = key
-                console.log(newWorkflows);
-                return newWorkflows
-            })
-        }
-    }, [])
-
-
-    const onQueryValueChangeCallback = useCallback((index, value, _wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Query = []
-                }
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Query[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Query[index] = { key: '', value: '' }
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Query[index].value = value
-                return newWorkflows
-            })
-        }
-    }, [])
-
-
-    const onRetainAddCallback = useCallback((_wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        //TODO: when i add withoout test id does nothing and will screw up after i think idk
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Retain) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Retain = []
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Retain.push({ key: '', value: '' })
-                return newWorkflows
-            })
-        }
-    }, [])
-
-    const onRetainRemoveCallback = useCallback((index, _wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Retain) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Retain = []
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Retain.splice(index, 1)
-                return newWorkflows
-            })
-        }
-    }, [])
-
-
-    const onRetainKeyChangeCallback = useCallback((index, key, _wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Retain) {
-                    console.log("if");
-                    newWorkflows[_wfIndex].Tests[_testIndex].Retain = []
-                    console.log(newWorkflows);
-                }
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Retain[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Retain[index] = { key: '', value: '' }
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Retain[index].key = key
-                console.log(newWorkflows);
-                return newWorkflows
-            })
-        }
-    }, [])
-
-
-    const onRetainValueChangeCallback = useCallback((index, value, _wfIndex, _testIndex) => {
-        //TODO: ver isto melhor; ya as conexoes n tao bem com isto
-        // o todo de cima foi copiado do do testID
-
-        if (_wfIndex !== -1 && _testIndex !== -1) {
-            setWorkflows(oldWorkflows => {
-                const newWorkflows = deepCopy(oldWorkflows)
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Retain) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Retain = []
-                }
-                if (!newWorkflows[_wfIndex].Tests[_testIndex].Retain[index]) {
-                    newWorkflows[_wfIndex].Tests[_testIndex].Retain[index] = { key: '', value: '' }
-                }
-                newWorkflows[_wfIndex].Tests[_testIndex].Retain[index].value = value
-                return newWorkflows
-            })
-        }
-    }, [])
-
-
-    const onBodyRefChangeCallback = useCallback((newBodyRef, _wfIndex, _testIndex) => {
-        let bodyRef = `$ref/dictionary/${newBodyRef}`
-        console.log(bodyRef);
-        onBodyTextChangeCallback(bodyRef, _wfIndex, _testIndex);
-    }, [])
-
-
-
-    const onBodyTextChangeCallback = useCallback((newBodyText, _wfIndex, _testIndex) => {
-        //TODO:
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows);
-            newWorkflows[_wfIndex].Tests[_testIndex].Body = newBodyText;
-            return newWorkflows;
-        });
-    }, [])
-
-
-
-    const onStressCountChangeCallback = useCallback((count, _wfIndex) => {
-
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-
-            if (!newWorkflows[_wfIndex].Stress) {
-                newWorkflows[_wfIndex].Stress = {
-                    Count: -1,
-                    Threads: -1,
-                    Delay: -1
-                }
-            }
-            newWorkflows[_wfIndex].Stress.Count = count
-            return newWorkflows
-        })
-    }, [])
-
-    const onStressThreadsChangeCallback = useCallback((threads, _wfIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-
-            if (!newWorkflows[_wfIndex].Stress) {
-                newWorkflows[_wfIndex].Stress = {
-                    Count: -1,
-                    Threads: -1,
-                    Delay: -1
-                }
-            }
-            newWorkflows[_wfIndex].Stress.Threads = threads
-            return newWorkflows
-        })
-    }, [])
-
-    const onStressDelayChangeCallback = useCallback((delay, _wfIndex) => {
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-
-            if (!newWorkflows[_wfIndex].Stress) {
-                newWorkflows[_wfIndex].Stress = {
-                    Count: -1,
-                    Threads: -1,
-                    Delay: -1
-                }
-            }
-            newWorkflows[_wfIndex].Stress.Delay = delay
-            return newWorkflows
-        })
-    }, [])
-
-    // #endregion
-
 
     // #region Connection logic
 
+
+    const getNodesInLinearChainBidirectional = (startNode) => {
+        let allNodes = reactFlowInstance.getNodes();
+        let allEdges = reactFlowInstance.getEdges();
+
+        let result = [startNode]; // Start with the initial node in the result set
+        let currentNode = startNode;
+
+        // Forward search: Find all succeeding nodes
+        while (true) {
+            console.log("curr node");
+            console.log(currentNode);
+
+            console.log("all edges");
+            console.log(allEdges);
+
+            const nextEdge = allEdges.find(edge => edge.source === currentNode.id);
+            if (!nextEdge) break; // End of the chain reached
+
+            console.log("next edge found");
+
+            const nextNode = allNodes.find(node => node.id === nextEdge.target);
+            if (!nextNode) break; // Safety check
+
+            console.log("next node found");
+            console.log(nextNode);
+
+            result.push(nextNode);
+            currentNode = nextNode;
+        }
+
+        // Reset current node for backward search
+        currentNode = startNode;
+
+        // Backward search: Find all preceding nodes
+        while (true) {
+            const prevEdge = allEdges.find(edge => edge.target === currentNode.id);
+            if (!prevEdge) break; // Start of the chain reached
+
+            const prevNode = allNodes.find(node => node.id === prevEdge.source);
+            if (!prevNode) break; // Safety check
+
+            result.unshift(prevNode); // Add to the beginning of the result array
+            currentNode = prevNode;
+        }
+
+        return result;
+    };
+
+    //TODO: redo all this cuz source and target is based on handle type not handle order LOL
     const onConnect =
         (connection) => {
 
             const { source, target } = connection;
+            console.log(connection);
 
             let sourceNode = reactFlowInstance.getNode(source)
             let targetNode = reactFlowInstance.getNode(target)
 
             console.log("onConnect; source: %s; target: %s;", sourceNode.type, targetNode.type)
 
-            if (sourceNode.type === "wf") {
-                onConnectWorkflow(sourceNode, targetNode, connection)
+            if (sourceNode.type === NodeType.WORKFLOW) {  //happens when connecting anything to workflow / workflow to anything
+                onConnectWorkflow(targetNode, connection)
             }
-            else if (sourceNode.type === "testID") {
-                onConnectTest(sourceNode, targetNode, connection)
+
+            else if (sourceNode.type === NodeType.TEST) {  //happens when connecting anything to test / test to anything
+                onConnectTest(targetNode, connection)
             }
-            //TODO: else if stress test?
+
+            // no need to check for stress test because there isnt a way to connect stress test to anything
+
+            else if (requestNodeTypes.includes(sourceNode.type)) { //happens when connecting anything to request / request to anything
+                onConnectRequestComponent(sourceNode, targetNode, connection)
+            }
+
+            else if (verificationNodeTypes.includes(sourceNode.type)) { //happens when connecting anything to verification / verification to anything
+                onConnectVerification(sourceNode, targetNode, connection)
+            }
+
             else {
-                onConnectNormal(sourceNode, targetNode, connection)
+                //TODO: should never come here
             }
 
         }
 
-    const onConnectWorkflow =
-        (sourceNode, targetNode, connection) => {
+    const onConnectWorkflow = (targetNode, connection) => {
 
-            // this method is called if sourceNode is workflow node
+        // this method is called if sourceNode is workflow node
 
-            let sourceWorkflow = sourceNode.data.custom._wfIndex
-            console.log("srcWf" + sourceWorkflow);
-
-            if (targetNode.type === "wf") {  //reject
-                alert("you cant do that")
-                return false
-            }
-            else if (targetNode.type === "testID") {  //accept
-                // set test index to next one (in wf node)
-
-                let newTestIndex = workflows[sourceNode.data.custom._wfIndex].Tests.length //sourceNode.data.custom.Tests.length TODO:added +1 recently, check this better...nvm
-
-
-                targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow, _testIndex: newTestIndex } };   // set wfId of test node(tgt) to be the same as wf node(src)
-
-
-                setNodes((nodes) =>
-                    nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
-                );
-
-                //TODO: here is when i should connect the test and wf
-
-                let newtest = targetNode.data.custom.test
-                newtest._testIndex = newTestIndex //it be a lil confusing but i think it work
-
-                // TODO: tf is this? this even used anymore?
-                setWorkflows(oldWorkflows => {
-                    const newWorkflows = deepCopy(oldWorkflows);
-                    newWorkflows[sourceWorkflow].Tests.push(newtest)
-                    return newWorkflows;
-                });
-
-
-            }
-            else if (targetNode.type === "stress") {
-                console.log("target node stress"); //TODO: does this make sense here? idk
-
-                console.log("target nodeb4");
-                console.log(targetNode);
-
-                console.log(targetNode.data.custom_wfIndex);
-
-                targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow } };   // set wfId of test node(tgt) to be the same as wf node(src)
-
-                console.log("target node");
-                console.log(targetNode);
-
-                setNodes((nodes) =>
-                    nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
-                );
-
-            }
-            else {   //reject
-                alert("you cant do that")
-                return false
-            }
-
-            setEdges((eds) => addEdge(connection, eds))
-
-        }
-    const onConnectTest =
-        (sourceNode, targetNode, connection) => {
-
-            // this method is called if sourceNode is test node
-
-            let targetWorkflow = targetNode.data.custom._wfIndex
-            let sourceWorkflow = sourceNode.data.custom._wfIndex
-
-            let sourceTest = sourceNode.data.custom._testIndex
-
-
-            if (targetNode.type === "testID") {  //reject
-                alert("you cant do that")
-                return false
-            }
-            else if (targetNode.type === "wf") {  //accept
-                sourceNode.data = { ...sourceNode.data, custom: { ...sourceNode.data.custom, _wfIndex: targetWorkflow } };    // set wfId of test node(src) to be the same as wf node(tgt)
-                setNodes((nodes) =>
-                    nodes.map((node) => (node.id === sourceNode.id ? sourceNode : node))
-                );
-            }
-            else {  //accept
-
-                //TODO: handle connection to normal node
-
-                // can only do this if test node is already connected to workflow node
-                // and if normal node not connected to anything else
-                const testIsConToWf = (sourceNode.data.custom._wfIndex !== -1 && sourceNode.data.custom._testIndex !== -1)
-                const normalIsNotConn = (targetNode.data.custom._wfIndex === -1 || targetNode.data.custom._testIndex === -1)
-
-                if (testIsConToWf && normalIsNotConn) {
-                    targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow, _testIndex: sourceTest } };   // set wfId and testId of normal node(tgt) to be the same as test node(src)
-                    setNodes((nodes) =>
-                        nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
-                    );
-                }
-                else {
-                    alert("you cant do that")
-                    return false
-                }
-            }
-
-            setEdges((eds) => addEdge(connection, eds))
-
+        if (targetNode.type === NodeType.WORKFLOW) {
+            alert("you cant do that")
+            return false
         }
 
-    const onConnectNormal =
-        (sourceNode, targetNode, connection) => {
+        else if (targetNode.type === NodeType.TEST) {
 
-            // this method is called if sourceNode is a normal node (not wf, not test)
-
-            let targetWorkflow = targetNode.data.custom._wfIndex
-            let sourceWorkflow = sourceNode.data.custom._wfIndex
-
-            let sourceTest = sourceNode.data.custom._testIndex
-            let targetTest = targetNode.data.custom._testIndex
-
-            if (targetNode.type === "wf") {  //reject
+            if (connection.sourceHandle !== "rightHandle") { //rightHandle is the one for tests, so others arent allowed
                 alert("you cant do that")
                 return false
-
             }
-            else if (targetNode.type === "testID") {  //accept
-                //TODO: handle connection to test node
+        }
+
+        else if (targetNode.type === NodeType.STRESS) {
+
+            if (connection.sourceHandle !== "leftHandle") { //leftHandle is the one for stress tests, so others arent allowed
+                alert("you cant do that")
+                return false
             }
-            else {   //target is regular node; accept
-                //TODO: handle connection to normal node
-                //falta ver as condiçoes
-
-                const normalSrcIsConToTest = (sourceNode.data.custom._wfIndex !== -1 && sourceNode.data.custom._testIndex !== -1)
-                const normalTrgIsNotConn = (targetNode.data.custom._wfIndex === -1 || targetNode.data.custom._testIndex === -1)
-
-                const normalSrcIsNotConn = (sourceNode.data.custom._wfIndex === -1 && sourceNode.data.custom._testIndex === -1)
-                const normalTrgIsConToTest = (targetNode.data.custom._wfIndex !== -1 || targetNode.data.custom._testIndex !== -1)
-
-                if (normalSrcIsConToTest && normalTrgIsNotConn) {
-
-                    targetNode.data = { ...targetNode.data, custom: { ...targetNode.data.custom, _wfIndex: sourceWorkflow, _testIndex: sourceTest } };   // set wfId and testId of normal node(tgt) to be the same as normal node(src)
-                    setNodes((nodes) =>
-                        nodes.map((node) => (node.id === targetNode.id ? targetNode : node))
-                    );
-                }
-
-                else if (normalSrcIsNotConn && normalTrgIsConToTest) {
-                    sourceNode.data = { ...sourceNode.data, custom: { ...sourceNode.data.custom, _wfIndex: targetWorkflow, _testIndex: targetTest } };    // set wfId and testId of normal node(src) to be the same as normal node(tgt)
-                    setNodes((nodes) =>
-                        nodes.map((node) => (node.id === sourceNode.id ? sourceNode : node))
-                    );
-                }
-                else {
-                    alert("you cant to that")
-                    return false
-                }
-
-
-            }
-
-            setEdges((eds) => addEdge(connection, eds))
 
         }
+        else {   //cant connect workflow to any other nodes
+            alert("you cant do that")
+            return false
+        }
+
+        setEdges((eds) => addEdge(connection, eds))
+    }
+
+    const onConnectTest = (targetNode, connection) => {
+
+        // this method is called if sourceNode is test node
+
+        if (requestNodeTypes.includes(targetNode.type)) {
+            if (connection.sourceHandle !== "leftHandle") { // leftHandle is the one for request components, so others arent allowed
+                alert("you cant do that")
+                return false
+            }
+        }
+
+        else if (verificationNodeTypes.includes(targetNode.type)) {
+            if (connection.sourceHandle !== "rightHandle") {    // rightHandle is the one for request components, so others arent allowed
+                alert("you cant do that")
+                return false
+            }
+        }
+
+        else {  //cant connect test to any other nodes
+            alert("you cant do that")
+            return false
+        }
+
+        setEdges((eds) => addEdge(connection, eds))
+    }
+
+    const onConnectRequestComponent = (sourceNode, targetNode, connection) => {
+
+        // this method is called if sourceNode is a request component node
+
+        if (!requestNodeTypes.includes(targetNode.type)) {  //can only connect to other request nodes
+            alert("you cant do that")
+            return false
+        }
+
+        const nodesInSourceChain = getNodesInLinearChainBidirectional(sourceNode)
+        const nodesInTargetChain = getNodesInLinearChainBidirectional(targetNode)
+
+        const sourceNodeTypes = nodesInSourceChain.map(node => node.type);
+        const targetNodeTypes = nodesInTargetChain.map(node => node.type);
+
+        const hasOverlappingTypes = sourceNodeTypes.some(type => targetNodeTypes.includes(type));
+
+        if (hasOverlappingTypes) {
+            alert('already have a node of that type connected')
+            return false
+        }
+
+        setEdges((eds) => addEdge(connection, eds))
+    }
+
+    const onConnectVerification = (sourceNode, targetNode, connection) => {
+
+        // this method is called if sourceNode is a verification node
+
+        if (!verificationNodeTypes.includes(targetNode.type)) { //can only connect to other verification nodes
+            alert("you cant do that")
+            return false
+        }
+
+        const nodesInSourceChain = getNodesInLinearChainBidirectional(sourceNode)
+        const nodesInTargetChain = getNodesInLinearChainBidirectional(targetNode)
+
+        const sourceNodeTypes = nodesInSourceChain.map(node => node.type);
+        const targetNodeTypes = nodesInTargetChain.map(node => node.type);
+
+        const hasOverlappingTypes = sourceNodeTypes.some(type => targetNodeTypes.includes(type));
+
+        if (hasOverlappingTypes) {
+            alert('already have a node of that type connected')
+            return false
+        }
+
+        setEdges((eds) => addEdge(connection, eds))
+    }
 
     // #endregion
 
@@ -829,12 +442,12 @@ function Flow() {
             },
             data: {
                 custom: {
-                    nameChangeCallback: onWfNameChange,
-                    wfName: wfName,
+/*                     nameChangeCallback: onWfNameChange,
+ */                    wfName: wfName,
                     _wfIndex: wfIndex
                 }
             },
-            type: 'wf'
+            type: NodeType.WORKFLOW
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -864,10 +477,10 @@ function Flow() {
             data: {
                 //label: `Node ${id}`,
                 custom: {
-                    nameChangeCallback: onTestIDChange,
+                    /* nameChangeCallback: onTestIDChange,
                     serverChangeCallback: onServerURLChange,
                     pathChangeCallback: onPathChange,
-                    methodChangeCallback: onHttpMethodChange,
+                    methodChangeCallback: onHttpMethodChange, */
                     initialServer: initialServer,
                     initialPath: initialPath,
                     initialMethod: initialMethod,
@@ -880,7 +493,7 @@ function Flow() {
                     testName: testName //TODO:this info is also in test, maybe test is not necessart? idk
                 }
             },
-            type: 'testID'
+            type: NodeType.TEST
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -901,16 +514,16 @@ function Flow() {
             },
             data: {
                 custom: {
-                    keyChangeCallback: onHeaderKeyChangeCallback,
+                    /* keyChangeCallback: onHeaderKeyChangeCallback,
                     valueChangeCallback: onHeaderValueChangeCallback,
                     addHeaderCallback: onHeaderAddCallback,
-                    removeHeaderCallback: onHeaderRemoveCallback,
+                    removeHeaderCallback: onHeaderRemoveCallback, */
                     headers: initialHeadersArr,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
             },
-            type: 'headers'
+            type: NodeType.HEADERS
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -929,16 +542,16 @@ function Flow() {
             },
             data: {
                 custom: {
-                    keyChangeCallback: onQueryKeyChangeCallback,
+                    /* keyChangeCallback: onQueryKeyChangeCallback,
                     valueChangeCallback: onQueryValueChangeCallback,
                     addQueryCallback: onQueryAddCallback,
-                    removeQueryCallback: onQueryRemoveCallback,
+                    removeQueryCallback: onQueryRemoveCallback, */
                     query: initialQueryArr,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
             },
-            type: 'query'
+            type: NodeType.QUERY
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -963,13 +576,13 @@ function Flow() {
                 custom: {
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex,
-                    bodyTextChangeCallback: onBodyTextChangeCallback,
-                    bodyRefChangeCallback: onBodyRefChangeCallback,
+                    /* bodyTextChangeCallback: onBodyTextChangeCallback,
+                    bodyRefChangeCallback: onBodyRefChangeCallback, */
                     bodyText: initialBodyText,
                     bodyRef: initialBodyRef
                 }
             },
-            type: 'body'
+            type: NodeType.BODY
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -988,16 +601,16 @@ function Flow() {
             },
             data: {
                 custom: {
-                    keyChangeCallback: onRetainKeyChangeCallback,
+                    /* keyChangeCallback: onRetainKeyChangeCallback,
                     valueChangeCallback: onRetainValueChangeCallback,
                     addRetainCallback: onRetainAddCallback,
-                    removeRetainCallback: onRetainRemoveCallback,
+                    removeRetainCallback: onRetainRemoveCallback, */
                     retains: initialRetainArr,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
             },
-            type: 'retain'
+            type: NodeType.RETAIN
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -1020,12 +633,12 @@ function Flow() {
                     threads: initialThreads,
                     delay: initialDelay,
                     _wfIndex: _wfIndex,
-                    countChangeCallback: onStressCountChangeCallback,
+                    /* countChangeCallback: onStressCountChangeCallback,
                     threadsChangeCallback: onStressThreadsChangeCallback,
-                    delayChangeCallback: onStressDelayChangeCallback
+                    delayChangeCallback: onStressDelayChangeCallback */
                 }
             },
-            type: 'stress'
+            type: NodeType.STRESS
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -1044,13 +657,13 @@ function Flow() {
             },
             data: {
                 custom: {
-                    statusChangeCallback: onVerificationStatusChange,
+                    /* statusChangeCallback: onVerificationStatusChange, */
                     initialStatusCode: initialStatus,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
             },
-            type: 'status'
+            type: NodeType.STATUS
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -1072,13 +685,13 @@ function Flow() {
             },
             data: {
                 custom: {
-                    containsChangeCallback: onContainsChangeCallback,
+                    /* containsChangeCallback: onContainsChangeCallback, */
                     contains: initialContains,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
             },
-            type: 'contains'
+            type: NodeType.CONTAINS
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -1097,15 +710,15 @@ function Flow() {
             },
             data: {
                 custom: {
-                    valueChangeCallback: onCountValueChangeCallback,
-                    keyChangeCallback: onCountKeyChangeCallback,
+                    /* valueChangeCallback: onCountValueChangeCallback,
+                    keyChangeCallback: onCountKeyChangeCallback, */
                     key: initialCountKey,
                     value: initialCountValue,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
             },
-            type: 'count'
+            type: NodeType.COUNT
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -1124,15 +737,15 @@ function Flow() {
             },
             data: {
                 custom: {
-                    valueChangeCallback: onMatchValueChangeCallback,
-                    keyChangeCallback: onMatchKeyChangeCallback,
+                    /* valueChangeCallback: onMatchValueChangeCallback,
+                    keyChangeCallback: onMatchKeyChangeCallback, */
                     key: initialMatchKey,
                     value: initialMatchValue,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
             },
-            type: 'match'
+            type: NodeType.MATCH
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -1152,13 +765,13 @@ function Flow() {
             },
             data: {
                 custom: {
-                    customVerifChangeCallback: onCustomVerificationChange,
+                    /* customVerifChangeCallback: onCustomVerificationChange, */
                     dllName: inititalDllName,
                     _wfIndex: _wfIndex,
                     _testIndex: _testIndex
                 }
             },
-            type: 'custom'
+            type: NodeType.CUSTOM
         };
         reactFlowInstance.addNodes(newNode);
 
@@ -1177,21 +790,48 @@ function Flow() {
             },
             data: {
                 custom: {
-                    schemaChangeCallback: onVerificationSchemaChange,
+                    /* schemaChangeCallback: onVerificationSchemaChange, */
                     initialSchema: initialSchema,
                     schemas: apiFile.schemas,
                     _wfIndex: -1,
                     _testIndex: -1
                 }
             },
-            type: 'schema'
+            type: NodeType.SCHEMA
         };
         reactFlowInstance.addNodes(newNode);
 
         return id;
     }
 
-    const processWorkflow = (wf, currX, currY) => {
+
+    /**
+     * Function to create a React Flow node. 
+     * 
+     * @param {string} type - the type of node to be created. for example NodeType.TEST, NodeType.Body, ...
+     * @param {*} nodeData - the data to be passed to the node. it will be passed as data.custom. typically has at least _wfIndex and _testIndex props
+     * @param {x:number, y:number} [position] - should be an object that has x and y coordinates that represent where the node will be placed
+     * @returns 
+     */
+    const createNode = (type, nodeData = {}, position = { x: Math.random() * 500, y: Math.random() * 500 }) => {
+        const id = `${nodeId.current}`;
+        nodeId.current += 1
+
+        const newNode = {
+            id,
+            position: position,
+            data: {
+                custom: nodeData
+            },
+            type: type
+        }
+
+        reactFlowInstance.addNodes(newNode)
+
+        return id
+    }
+
+    /* const processWorkflow = (wf, currX, currY) => {
 
         rapiLog(level.DEBUG, "[Editor] Workflow found when recreating state. Assigned ID: ", wf._wfIndex)
 
@@ -1355,12 +995,12 @@ function Flow() {
         const customVerifNodeId = createCustomVerificationNode(dllName, yamlWfIndex, currYamlTestIndex, currX, currY)
 
         return customVerifNodeId
-    }
+    } */
 
 
 
     //TODO: improve algorithm, its kinda hardcoded atm, missing some nodes, etc
-    const createNodes = (newstate) => {
+    /* const createNodes = (newstate) => {
 
         let yamlWfIndex = 0;
         let currYamlTestIndex = 0;
@@ -1618,7 +1258,7 @@ function Flow() {
         //collapseNodesWhenReady
 
         console.log("edges set");
-    }
+    } */
 
     // when state is recreated and nodes are created and ready to be collapsed
     // the canCollapse flag is set to true
@@ -1648,10 +1288,18 @@ function Flow() {
         maxWfIndex.current += 1
         console.log("dsdfs");
         console.log(maxWfIndex.current);
-        createWorkflowNode(maxWfIndex.current, "")
+        //createWorkflowNode(maxWfIndex.current, "")
 
 
-        //create the actual workflow
+
+        const nodeData = {
+            wfName: "",
+            _wfIndex: maxWfIndex.current    //TODO: think this is worthless now
+        }
+        createNode(NodeType.WORKFLOW, nodeData)
+
+
+        /* //create the actual workflow
         let newWf = {
             _wfIndex: maxWfIndex.current,
             WorkflowID: "NEW WORKFLOW",
@@ -1662,7 +1310,7 @@ function Flow() {
             const newWorkflows = deepCopy(oldWorkflows);
             newWorkflows.push(newWf)
             return newWorkflows;
-        });
+        }); */
 
     }
 
@@ -1670,7 +1318,14 @@ function Flow() {
 
         //create node with no wfIndex and no textIndex because that will be decided on connection
         //node is created with an empty test inside so that when connection to wfNode happens, test is put in correct position
-        createTestNode()
+        //createTestNode()
+
+        const nodeData = {
+            paths: apiFile.paths,
+            servers: apiFile.servers,
+            httpMethods: ["Get", "Delete", "Post", "Put"], //TODO: shouldnt be hardcoded here prob
+        }
+        createNode(NodeType.TEST, nodeData)
 
 
         /*
@@ -1687,67 +1342,76 @@ function Flow() {
 
     const onClickStatus = () => {
         console.log("[Editor] Adding Status Verification node");
-        createStatusVerificationNode()
+        //createStatusVerificationNode()
+        createNode(NodeType.STATUS)
     }
 
     const onClickWip = () => {
         console.log("Work in progress");
+        alert('wip')
 
     }
 
     const onClickCount = () => {
         console.log("[Editor] Adding Count Verification node");
-        createCountVerificationNode()
+        //createCountVerificationNode()
+        createNode(NodeType.COUNT)
     }
 
     const onClickContains = () => {
         console.log("[Editor] Adding Contains Verification node");
-        createContainsVerificationNode()
+        //createContainsVerificationNode()
+        createNode(NodeType.CONTAINS)
     }
 
     const onClickMatch = () => {
         console.log("[Editor] Adding Match Verification node");
-        createMatchVerificationNode()
+        //createMatchVerificationNode()
+        createNode(NodeType.MATCH)
     }
 
     const onClickCustom = () => {
         console.log("[Editor] Adding Custom Verification node");
-        createCustomVerificationNode()
+        //createCustomVerificationNode()
+        createNode(NodeType.CUSTOM)
     }
-
-
-
 
 
     //TODO:
     const onClickSchema = () => {
         console.log("[Editor] Adding Schema Verification node");
-        createSchemaVerificationNode()
+        //createSchemaVerificationNode()
+        createNode(NodeType.SCHEMA)
     }
 
     const onClickBodyNode = () => {
         console.log("[Editor] Adding Body node");
-        createBodyNode()
+        //createBodyNode()
+        createNode(NodeType.BODY)
     }
 
     const onClickHeadersNode = () => {
         console.log("[Editor] Adding Headers node");
-        createHeadersNode()
+        //createHeadersNode()
+        createNode(NodeType.HEADERS)
     }
 
     const onClickQueryNode = () => {
         console.log("[Editor] Adding Query node");
-        createQueryNode()
+        //createQueryNode()
+        createNode(NodeType.QUERY)
     }
 
     const onClickRetainNode = () => {
         console.log("[Editor] Adding Retain node");
-        createRetainNode()
+        //createRetainNode()
+        createNode(NodeType.RETAIN)
     }
 
     const onClickStressTestNode = () => {
         console.log('[Editor] Adding Stress test node');
-        createStressNode()
+        //createStressNode()
+        createNode(NodeType.STRESS)
     }
 
     // #endregion
@@ -1757,7 +1421,7 @@ function Flow() {
 
     const onClickChangeWf = () => {
 
-
+/* 
         //TODO: add way to upload tsl as file similar to this
         const workflowsA = [
             {
@@ -1796,186 +1460,11 @@ function Flow() {
 
         setWorkflows(newstate)
 
-        createNodes(newstate)
+        createNodes(newstate) */
 
     }
 
 
-    //TODO: in the future check this as well as finishSetup()
-    const saveWorkflow = () => {
-
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows)
-
-            // process each workflow
-            for (let wfIndex = 0; wfIndex < newWorkflows.length; wfIndex++) {
-
-                const workflow = newWorkflows[wfIndex];
-                delete workflow._wfIndex
-
-                // process Stress Test
-                // TODO: No processing required?
-
-                // process each test for this workflow
-                for (let testIndex = 0; testIndex < workflow.Tests.length; testIndex++) {
-
-                    const test = workflow.Tests[testIndex];
-                    delete test._testIndex
-
-                    // process Headers
-                    if (test.Headers) {
-                        const transformedHeaders = test.Headers.map(({ key, value }) => `${key}:${value}`);
-                        test.Headers = transformedHeaders
-                    }
-
-                    // process Query
-                    if (test.Query) {
-                        const transformedQuery = test.Query.map(({ key, value }) => `${key}=${value}`);
-                        test.Query = transformedQuery
-                    }
-
-                    // process Retain
-                    if (test.Retain) {
-                        const transformedRetain = test.Retain.map(({ key, value }) => `${key}#$.${value}`);
-                        test.Retain = transformedRetain
-                    }
-
-                    // process Body
-                    if (test.Body) {
-                        //TODO: nothing needed?
-                    }
-
-
-
-                    // process Verifications
-                    for (let ver = 0; ver < test.Verifications.length; ver++) { // this loop should only be executed once, i think
-                        const verification = test.Verifications[ver];
-
-                        // process Status
-                        // TODO: No processing required?
-
-                        // process Schema
-                        if (verification.Schema) {
-                            let schemaStr = "$ref/definitions/" + verification.Schema
-                            verification.Schema = schemaStr
-                        }
-
-                        // process Count
-                        if (verification.Count) {
-                            const transformedCount = `${verification.Count.key}#${verification.Count.value}`;
-                            verification.Count = transformedCount
-                        }
-
-                        // process Match
-                        if (verification.Match) {
-                            const transformedMatch = `$.${verification.Match.key}#${verification.Match.value}`;
-                            verification.Match = transformedMatch
-                        }
-
-                        // process Contains
-                        // TODO: No processing required?
-
-                        // process Custom
-                        // TODO:
-                        if (verification.Custom) {
-                            const transformedCustom = `[${verification.Custom}]`;
-                            verification.Custom = transformedCustom
-                        }
-                    }
-                }
-            }
-
-            return newWorkflows
-        })
-
-    };
-
-    const finishSetup = async () => {
-        let newFile = YAML.stringify(workflows);
-        console.log(newFile);
-        var blob = new Blob([newFile], {
-            type: 'text/plain'
-        });
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = 'Created_TSL.yaml';
-        a.click();
-
-        const file = new File([blob], 'sample.txt')
-
-        let testSpecification = [file]
-
-        let data = new FormData();
-
-
-        if (dictFile) {
-            console.log("appending dictionary...");
-            data.append('dictionary.txt', dictFile); //TODO: this is file or json?
-        }
-
-
-        let i = 1
-        if (testSpecification !== null) {
-            for (const file of testSpecification) {
-                data.append("tsl_" + i + ".yaml", file)
-                i++
-            }
-        }
-
-
-        if (dllFileArr) {
-            for (const file of dllFileArr) {
-                console.log("appending dll file...");
-                data.append(file.name, file)
-            }
-        }
-
-
-
-        data.append('runimmediately', runImmediately);
-        data.append('interval', runInterval);
-        data.append('rungenerated', runGenerated);
-
-        const token = await authService.getAccessToken();
-
-        fetch(`SetupTest/UploadFile`, {
-            method: 'POST',
-            headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
-            body: data
-        }).then(res => {
-            if (!res.ok) {
-                console.error("Test setup failed...");
-            } else {
-                console.log("Test setup was successful!")
-            }
-        })
-    }
-
-    const dumpState = () => {
-        console.log("Logging the state...")
-        console.log("API file: ", apiFile);
-
-        console.log("Run Generated:", runGenerated);
-        console.log("Run Immediatly:", runImmediately);
-        console.log("Run Interval:", runInterval);
-
-        console.log("----------------------------");
-        console.log("Workflows: ");
-        console.log(workflows);
-
-        console.log("----------------------------");
-        console.log("Nodes: ");
-        console.log(nodes);
-
-        console.log("----------------------------");
-        console.log("Edges: ");
-        console.log(edges);
-
-        console.log("----------------------------");
-        console.log("Dictionary file:");
-        console.log(dict);
-    }
 
     const collapseNodes = () => {
         console.log("collapsing nodes");
@@ -2013,19 +1502,19 @@ function Flow() {
     const collapseSidebarAccordions = () => {
         console.log("collapse sidebar accordions");
         const elements = document.querySelectorAll('.sidebar-simple-header .accordion-button');
-    
+
         console.log("step 3");
         console.log(dontCollapseClass)
 
         elements.forEach((element) => {
-            const isNotCollapsed = !element.classList.contains('collapsed') 
-            
+            const isNotCollapsed = !element.classList.contains('collapsed')
+
             const children = element.children
 
             let childHasDntClpsClass = false
 
             Array.from(children).forEach(child => {
-                if(child.classList.contains(dontCollapseClass)) {
+                if (child.classList.contains(dontCollapseClass)) {
                     childHasDntClpsClass = true
                 }
             });
@@ -2033,11 +1522,11 @@ function Flow() {
             if (isNotCollapsed && !childHasDntClpsClass) {
                 element.click()
             }
-            else{
+            else {
                 element.scrollIntoView({
                     behavior: 'smooth', // Optional: Defines the transition animation
                     block: 'nearest' // Scrolls so that the targetItem is aligned to the top of the sidebar
-                  });
+                });
             }
 
             childHasDntClpsClass = false
@@ -2045,7 +1534,7 @@ function Flow() {
         });
     }
 
-    const onToggleCollapse = (newCollapsedState, dontCollapseClass="") =>{
+    const onToggleCollapse = (newCollapsedState, dontCollapseClass = "") => {
         setSidebarCollapsed(newCollapsedState)
         console.log(" step 2 dontCollapseClass");
         console.log(dontCollapseClass);
@@ -2055,9 +1544,9 @@ function Flow() {
     // whenever the sidebar is collapsed, the accordions inside should collapse too
     // the dependency is triggered 
     // TODO: isto é necessário? nao posso simplesmente passar collapseSidebarAccordions como callback à sidebar?
-    useEffect(()=>{
+    useEffect(() => {
         collapseSidebarAccordions()
-    },[sidebarCollapsed])
+    }, [sidebarCollapsed])
 
     //TODO: maybe I can analyse this to see how the schemasvalues are passed to do same in MonitorTests
     const handlerAPI = function (paths, servers, schemas, schemasValues) {
@@ -2076,6 +1565,32 @@ function Flow() {
         }
     }, []); // Empty dependency array ensures the effect runs only once -> THIS IS WHY ESLINT IS DISABLED (dependencies dont matter)
     /* eslint-enable */
+
+
+    const dumpState = () => {
+        console.log("Logging the state...")
+        //console.log("API file: ", apiFile);
+
+        //console.log("Run Generated:", runGenerated);
+        //console.log("Run Immediatly:", runImmediately);
+        //console.log("Run Interval:", runInterval);
+
+        console.log("----------------------------");
+        console.log("Workflows: ");
+        console.log(workflows);
+
+        //console.log("----------------------------");
+        //console.log("Nodes: ");
+        //console.log(nodes);
+
+        //console.log("----------------------------");
+        //console.log("Edges: ");
+        //console.log(edges);
+
+        //console.log("----------------------------");
+        //console.log("Dictionary file:");
+        //console.log(dict);
+    }
 
     // #endregion
 
@@ -2197,7 +1712,7 @@ function Flow() {
     const onTslDrop = (tslFile) => {
         //somehow recreate state
 
-        const reader = new FileReader();
+        /* const reader = new FileReader();
 
         reader.onload = (event) => {
             const fileContents = event.target.result;
@@ -2214,12 +1729,389 @@ function Flow() {
             createNodes(newstate)
         };
 
-        reader.readAsText(tslFile);
-
-
+        reader.readAsText(tslFile); */
 
     }
 
+
+    /**
+     * Aux function to get connected nodes of a specific type given a single root node
+     * 
+     * @param {import('reactflow').Node} rootNode // the root node to grab the connect nodes from
+     * @param {string} desiredType  // the type of the nodes to get (use NodeType.XXX)
+     * @returns 
+     */
+    const getConnectedNodes = (rootNode, desiredType) => {
+        const nodes = reactFlowInstance.getNodes()
+        const edges = reactFlowInstance.getEdges()
+
+        return edges
+            .filter(edge => edge.source === rootNode.id || edge.target === rootNode.id) // Find connected edges
+            .map(edge => edge.source === rootNode.id ? edge.target : edge.source) // Get connected node IDs
+            .map(id => nodes.find(node => node.id === id)) // Map IDs to node objects
+            .filter(node => node && node.type === desiredType);
+    }
+
+
+    const getConnectedNodesByHandle = (rootNode, sourceHandle) => {
+        const nodes = reactFlowInstance.getNodes();
+        const edges = reactFlowInstance.getEdges();
+
+        const connectedEdges = edges.filter(edge => edge.source === rootNode.id && edge.sourceHandle === sourceHandle);
+        const connectedNodes = connectedEdges.map(edge => nodes.find(node => node.id === edge.target));
+
+        return connectedNodes
+    }
+
+
+    const getNodesInLinearChain = (startNode) => {
+        let allNodes = reactFlowInstance.getNodes()
+        let allEdges = reactFlowInstance.getEdges()
+
+        let result = [startNode]; // Start with the initial node in the result set
+        let currentNode = startNode;
+
+        // Use a loop to follow the chain in one direction
+        while (true) {
+            const nextEdge = allEdges.find(edge => edge.source === currentNode.id);
+            if (!nextEdge) break; // If there's no outgoing edge, we've reached the end of the chain
+
+            const nextNode = allNodes.find(node => node.id === nextEdge.target);
+            if (!nextNode) break; // Safety check, though in a linear chain this should never happen
+
+            result.push(nextNode); // Add the connected node to the result
+            currentNode = nextNode; // Move to the next node in the chain
+        }
+
+        return result;
+    }
+
+
+
+    const scanEditorState = () => {
+        const workflows = []
+
+        const nodes = reactFlowInstance.getNodes()
+        const wfNodes = nodes.filter(node => node.type === NodeType.WORKFLOW);
+
+        wfNodes.forEach(wfNode => {
+
+            const wfState = wfNode.data.custom.getState() // {name: "", _wfIndex: ""}
+
+            const workflow = {
+                _wfIndex: wfState._wfIndex,
+                WorkflowID: wfState.name,
+                Tests: []
+            }
+
+            const connectedStressNodes = getConnectedNodes(wfNode, NodeType.STRESS)
+            if (connectedStressNodes.length > 1) {
+                alert('can only have 1 stress test')
+                return false //TODO: check how to leave this method bettter?
+            }
+            if (connectedStressNodes.length === 1) {
+                const stressState = connectedStressNodes[0].data.custom.getState() // {count: "", threads:"", delay:""}
+                workflow.Stress = stressState
+            }
+
+            const connectedTestNodes = getConnectedNodes(wfNode, NodeType.TEST)
+            if (connectedTestNodes.length < 1) {
+                alert('workflows must have at least 1 test')
+                return false //TODO: check how to leave this method bettter?
+            }
+            connectedTestNodes.forEach(testNode => {
+                const testState = testNode.data.custom.getState() // {name: "", server:"", path:"", method:"", _testIndex: ""}
+
+                const test = {
+                    _testIndex: testState._testIndex,
+                    Server: testState.server,
+                    TestID: testState.name,
+                    Path: testState.path,
+                    Method: testState.method,
+                    Verifications: [{ Code: -1 }]
+                }
+
+
+                // get request nodes from test
+                const connectedRequestNodes = getConnectedNodesByHandle(testNode, "leftHandle")
+                if (connectedRequestNodes.length >= 1) {
+                    if (connectedRequestNodes.length > 1) {
+                        alert('only one request node can be connected directly to a test node')
+                        return false //TODO: check how to leave this method bettter?
+                    }
+
+                    const connectedRequestNode = connectedRequestNodes[0]
+                    if (!requestNodeTypes.includes(connectedRequestNode.type)) {
+                        alert('something wrong w connection')
+                        return false //TODO: check how to leave this method bettter? 
+                    }
+                    const restOfTheRequestNodes = getNodesInLinearChain(connectedRequestNode)
+                    const allRequestNodes = connectedRequestNodes.concat(restOfTheRequestNodes)
+                    if (!allRequestNodes.every(node => requestNodeTypes.includes(node.type))) {
+                        alert('something wrong w connection')
+                        return false //TODO: check how to leave this method bettter?
+                    }
+
+                    const headersNode = allRequestNodes.find(node => node.type === NodeType.HEADERS);
+                    const bodyNode = allRequestNodes.find(node => node.type === NodeType.BODY);
+                    const retainNode = allRequestNodes.find(node => node.type === NodeType.RETAIN);
+                    const queryNode = allRequestNodes.find(node => node.type === NodeType.QUERY);
+
+                    if (headersNode) {
+                        const headersState = headersNode.data.custom.getState() // {[{ key: '', value: '' }]}
+                        test.Headers = headersState
+                    }
+
+                    if (bodyNode) {
+                        const bodyState = bodyNode.data.custom.getState() // {bodyText: "", bodyRef: "", useBodyRef: ""}
+                        if (bodyState.useBodyRef) {
+                            const ref = `$ref/dictionary/${bodyState.bodyRef}`
+                            test.Body = ref
+                        }
+                        else test.Body = bodyState.bodyText
+                    }
+
+                    if (retainNode) {
+                        const retainState = retainNode.data.custom.getState() // {[{ key: '', value: '' }]}
+                        test.Retain = retainState
+                    }
+
+                    if (queryNode) {
+                        const queryState = queryNode.data.custom.getState() // {[{ key: '', value: '' }]}
+                        test.Query = queryState
+                    }
+                }
+
+
+                // get request nodes from test
+                const connectedVerificationNodes = getConnectedNodesByHandle(testNode, "rightHandle")
+                if (connectedVerificationNodes.length === 0) {
+                    alert('you need at least the status verification on every test')
+                    return false //TODO: check how to leave this method bettter?
+                }
+
+                if (connectedVerificationNodes.length > 1) {
+                    alert('only one verification node can be connected directly to a test node')
+                    return false //TODO: check how to leave this method bettter?
+                }
+
+                const connectedVerificationNode = connectedVerificationNodes[0]
+                if (!verificationNodeTypes.includes(connectedVerificationNode.type)) {
+                    alert('something wrong w connection')
+                    return false //TODO: check how to leave this method bettter?
+                }
+                const restOfTheVerificationNodes = getNodesInLinearChain(connectedVerificationNode)
+                const allVerificationNodes = connectedVerificationNodes.concat(restOfTheVerificationNodes)
+                if (!allVerificationNodes.every(node => verificationNodeTypes.includes(node.type))) {
+                    alert('something wrong w connection')
+                    return false //TODO: check how to leave this method bettter? 
+                }
+
+                if (connectedVerificationNodes.length === 0) {
+                    alert('you need at least the status verification on every test')
+                    return false //TODO: check how to leave this method bettter?
+                }
+
+                const statusNode = allVerificationNodes.find(node => node.type === NodeType.STATUS);
+                const schemaNode = allVerificationNodes.find(node => node.type === NodeType.SCHEMA);
+                const matchNode = allVerificationNodes.find(node => node.type === NodeType.MATCH);
+                const containsNode = allVerificationNodes.find(node => node.type === NodeType.CONTAINS);
+                const countNode = allVerificationNodes.find(node => node.type === NodeType.COUNT);
+                const customNode = allVerificationNodes.find(node => node.type === NodeType.CUSTOM);
+
+                if (statusNode) {
+                    const statusState = statusNode.data.custom.getState() // { status: "" }
+                    test.Verifications[0].Code = statusState.status
+                }
+
+                if (schemaNode) {
+                    const schemaState = schemaNode.data.custom.getState() // { schema: "" }
+                    test.Verifications[0].Schema = schemaState.schema
+                }
+
+                if (matchNode) {
+                    const matchState = matchNode.data.custom.getState() // { key: "", value: ""}
+                    test.Verifications[0].Match = matchState
+                }
+
+                if (containsNode) {
+                    const containsState = containsNode.data.custom.getState() // { key: "", value: ""}
+                    test.Verifications[0].Contains = containsState
+                }
+
+                if (countNode) {
+                    const countState = countNode.data.custom.getState() // { key: "", value: ""}
+                    test.Verifications[0].Count = countState
+                }
+
+                if (customNode) {
+                    const customState = customNode.data.custom.getState() // { dllName: "" }
+                    test.Verifications[0].Custom = customState.dllName
+                }
+
+
+                workflow.Tests.push(test)
+
+            });
+
+            workflows.push(workflow)
+        });
+
+        return workflows
+    }
+
+    const postProcessState = (workflows) => {
+        const newWorkflows = workflows
+
+        // process each workflow
+        for (let wfIndex = 0; wfIndex < newWorkflows.length; wfIndex++) {
+
+            const workflow = newWorkflows[wfIndex];
+            delete workflow._wfIndex
+
+            // process Stress Test
+            // TODO: No processing required?
+
+            // process each test for this workflow
+            for (let testIndex = 0; testIndex < workflow.Tests.length; testIndex++) {
+
+                const test = workflow.Tests[testIndex];
+                delete test._testIndex
+
+                // process Headers
+                if (test.Headers) {
+                    const transformedHeaders = test.Headers.map(({ key, value }) => `${key}:${value}`);
+                    test.Headers = transformedHeaders
+                }
+
+                // process Query
+                if (test.Query) {
+                    const transformedQuery = test.Query.map(({ key, value }) => `${key}=${value}`);
+                    test.Query = transformedQuery
+                }
+
+                // process Retain
+                if (test.Retain) {
+                    const transformedRetain = test.Retain.map(({ key, value }) => `${key}#$.${value}`);
+                    test.Retain = transformedRetain
+                }
+
+                // process Body
+                if (test.Body) {
+                    //TODO: nothing needed?
+                }
+
+
+
+                // process Verifications
+                for (let ver = 0; ver < test.Verifications.length; ver++) { // this loop should only be executed once, i think
+                    const verification = test.Verifications[ver];
+
+                    // process Status
+                    // TODO: No processing required?
+
+                    // process Schema
+                    if (verification.Schema) {
+                        let schemaStr = "$ref/definitions/" + verification.Schema
+                        verification.Schema = schemaStr
+                    }
+
+                    // process Count
+                    if (verification.Count) {
+                        const transformedCount = `${verification.Count.key}#${verification.Count.value}`;
+                        verification.Count = transformedCount
+                    }
+
+                    // process Match
+                    if (verification.Match) {
+                        const transformedMatch = `$.${verification.Match.key}#${verification.Match.value}`;
+                        verification.Match = transformedMatch
+                    }
+
+                    // process Contains
+                    // TODO: No processing required?
+
+                    // process Custom
+                    // TODO:
+                    if (verification.Custom) {
+                        const transformedCustom = `[${verification.Custom}]`;
+                        verification.Custom = transformedCustom
+                    }
+                }
+            }
+        }
+
+        return newWorkflows
+    }
+
+    const finalizeConfiguration = async (workflows) => {
+
+        let newFile = YAML.stringify(workflows);
+        console.log(newFile);
+        var blob = new Blob([newFile], {
+            type: 'text/plain'
+        });
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = 'Created_TSL.yaml';
+        a.click();
+
+        const file = new File([blob], 'sample.txt')
+
+        let testSpecification = [file]
+
+        let data = new FormData();
+
+
+        if (dictFile) {
+            console.log("appending dictionary...");
+            data.append('dictionary.txt', dictFile); //TODO: this is file or json?
+        }
+
+
+        let i = 1
+        if (testSpecification !== null) {
+            for (const file of testSpecification) {
+                data.append("tsl_" + i + ".yaml", file)
+                i++
+            }
+        }
+
+
+        if (dllFileArr) {
+            for (const file of dllFileArr) {
+                console.log("appending dll file...");
+                data.append(file.name, file)
+            }
+        }
+
+
+
+        data.append('runimmediately', runImmediately);
+        data.append('interval', runInterval);
+        data.append('rungenerated', runGenerated);
+
+        const token = await authService.getAccessToken();
+
+        fetch(`SetupTest/UploadFile`, {
+            method: 'POST',
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
+            body: data
+        }).then(res => {
+            if (!res.ok) {
+                console.error("Test setup failed...");
+            } else {
+                console.log("Test setup was successful!")
+            }
+        })
+    }
+
+    const finishSetup = async () => {
+        const workflows = scanEditorState()
+        const processedWorkflows = postProcessState(workflows)
+        finalizeConfiguration(processedWorkflows)
+    }
 
     return (
         <div className='editor-container'>
@@ -2249,7 +2141,7 @@ function Flow() {
                     { section: "Verifications", title: "Count ", onClick: onClickCount, class: "verif", iconClass: "verifs-icon" },
                     { section: "Verifications", title: "Match ", onClick: onClickMatch, class: "verif", iconClass: "verifs-icon" },
                     { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon" },
-                    { section: "Setup-related", title: "Save changes", onClick: saveWorkflow, class: "setup", iconClass: "gear-icon" },
+                    { section: "Setup-related", title: "Save changes", onClick: onClickWip, class: "setup", iconClass: "gear-icon" },
                     { section: "Setup-related", title: "Finish Setup", onClick: finishSetup, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Dump state", onClick: dumpState, class: "setup", iconClass: "gear-icon" },
@@ -2263,7 +2155,7 @@ function Flow() {
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
-                    nodeTypes={nodeTypes}
+                    nodeTypes={rf_nodeTypes}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
@@ -2279,10 +2171,10 @@ function Flow() {
                         <ControlButton onClick={openNodes} title='expand all nodes'>
                             <div className='expandButton' ></div>
                         </ControlButton>
-                        <ControlButton onClick={() => {onLayout('TB');onLayout('TB')}} title='auto layout nodes'>
+                        <ControlButton onClick={() => { onLayout('TB'); onLayout('TB') }} title='auto layout nodes'>
                             <div className='layoutButton' ></div>
                         </ControlButton>
-                        <ControlButton onClick={() => alert('wip')} title='open settings window'>
+                        <ControlButton onClick={() => { alert('wip'); finishSetup() }} title='open settings window'>
                             <div className='settingsButton' ></div>
                         </ControlButton>
                         <ControlButton title='© 2022 - RapiTest - ISEL'>

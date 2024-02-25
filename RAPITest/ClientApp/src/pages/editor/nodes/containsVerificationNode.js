@@ -22,8 +22,17 @@ function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
     const onContainsChange = (evt) => {
         rapiLog(level.INFO, "[Contains node] Contains: ", evt.target.value)
         setContains(evt.target.value)
-        data.custom.containsChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
+        //data.custom.containsChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
     };
+
+    const getState = () => {
+        const state = {
+            contains: contains
+        }
+        return state
+    }
+
+    data.custom.getState = getState
 
 
     const generalNodeProps = {

@@ -5,7 +5,9 @@
     color: #222;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 15%), 0 2px 4px -1px rgb(0 0 0 / 8%);
     border-radius: 4px;
-}
+
+    border: 3px solid #464545
+ }
 
 
 .accordion-item {
@@ -67,3 +69,15 @@
 .form-select {
     font-size: 14px;
 }
+
+
+
+.react-flow .react-flow__handle {
+    width: 26px;
+    height: 10px;
+    border-radius: 3px;
+    border-width: 3px;
+    border-color: #464545;
+  }
+
+ 

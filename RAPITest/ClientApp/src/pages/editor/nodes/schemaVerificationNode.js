@@ -21,9 +21,18 @@ function SchemaVerificationNode({ data, isConnectable, xPos, yPos }) {
     const onSchemaChange = (evt) => {
         const schema = evt.target.value
         setSchema(schema)
-        data.custom.schemaChangeCallback(schema, data.custom._wfIndex, data.custom._testIndex)
+        //data.custom.schemaChangeCallback(schema, data.custom._wfIndex, data.custom._testIndex)
 
     }
+
+    const getState = () => {
+        const state = {
+            schema: schema
+        }
+        return state
+    }
+
+    data.custom.getState = getState
 
     const generalNodeProps = {
         data: data,

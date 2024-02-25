@@ -16,6 +16,8 @@ export class Home extends Component {
 
     static displayName = Home.name;
 
+    _isMounted = false; // try to fix memory leak?
+
     constructor(props) {
         super(props)
         this.state = {
@@ -30,6 +32,10 @@ export class Home extends Component {
 
     //check if user is autenticated, if not render notAuth vs render Auth
     async componentDidMount() {
+
+        this._isMounted = true; // Set to true when the component is mounted
+
+
         let token = await authService.getAccessToken()
         if (token !== null) {
             //fetch para saber os dados do user
@@ -37,52 +43,65 @@ export class Home extends Component {
                 method: 'GET',
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
             }).then(res => {
-                if (res.status !== 204) {
-                    res.json().then(details => {
-                        let lastLoginString = details.LastLogin.split('T')
-                        let finalString = lastLoginString[0] + ' ' + lastLoginString[1].split('.')[0]
 
-                        details.LatestActions.forEach(api => {
-                            let auxString = ""
-                            let auxfinalString = ""
-                            if (api.ReportDate !== "0001-01-01T00:00:00") {
-                                auxString = api.ReportDate.split('T')
-                                auxfinalString = auxString[0] + ' ' + auxString[1].split('.')[0]
-                                api.ReportDate = auxfinalString
-                            }
-                            if (api.NextTest !== "0001-01-01T00:00:00") {
-                                auxString = api.NextTest.split('T')
-                                auxfinalString = auxString[0] + ' ' + auxString[1].split('.')[0]
-                                api.NextTest = auxfinalString
-                            }
-                        })
+                if (this._isMounted) {
 
-                        this.setState({
-                            Auth: true,
-                            currentSetupTests: details.SetupApiCount,
-                            latestActions: details.LatestActions,
-                            lastLogin: finalString,
-                            render: true
+                    if (res.status !== 204) {
+                        res.json().then(details => {
+                            let lastLoginString = details.LastLogin.split('T')
+                            let finalString = lastLoginString[0] + ' ' + lastLoginString[1].split('.')[0]
+
+                            details.LatestActions.forEach(api => {
+                                let auxString = ""
+                                let auxfinalString = ""
+                                if (api.ReportDate !== "0001-01-01T00:00:00") {
+                                    auxString = api.ReportDate.split('T')
+                                    auxfinalString = auxString[0] + ' ' + auxString[1].split('.')[0]
+                                    api.ReportDate = auxfinalString
+                                }
+                                if (api.NextTest !== "0001-01-01T00:00:00") {
+                                    auxString = api.NextTest.split('T')
+                                    auxfinalString = auxString[0] + ' ' + auxString[1].split('.')[0]
+                                    api.NextTest = auxfinalString
+                                }
+                            })
+
+                            this.setState({
+                                Auth: true,
+                                currentSetupTests: details.SetupApiCount,
+                                latestActions: details.LatestActions,
+                                lastLogin: finalString,
+                                render: true
+                            })
+                        }).catch(err => {
+                            console.log("Error in GetUserDetails");
+                            console.error(err);
                         })
-                    }).catch(err =>{
-                        console.log("Error in GetUserDetails");
-                        console.error(err);
-                    })
+                    }
+                    else {
+                        this.setState({ render: true })
+                    }
+
                 }
-                else {
-                    this.setState({ render: true })
-                }
-            }).catch(err =>{
+            }).catch(err => {
                 console.log("Error in GetUserDetails");
                 console.error(err);
             })
         }
         else {
-            this.setState({
-                render: true
-            })
+
+            if (this._isMounted) {
+                this.setState({
+                    render: true
+                })
+            }
+
         }
 
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false
     }
 
     renderLastReports(latestReports) {
@@ -93,7 +112,7 @@ export class Home extends Component {
                         return (
                             <ListGroup.Item key={report.ApiId}>
                                 {report.Errors === -1 ? <div className="link-button" onClick={() => this.props.history.push('/monitorTests')}><img style={{ marginRight: "10px" }} width="20" height="20" src={testIcon} alt="Logo" />{report.Title} on {report.ReportDate} <div style={{ float: 'right' }}><Badge bg="danger">Validation Error</Badge></div></div> : <div className="link-button" onClick={() => this.props.history.push('/monitorTests/report/' + report.ApiId)}><img style={{ marginRight: "10px" }} width="20" height="20" src={testIcon} alt="Logo" />{report.Title} on {report.ReportDate} <div style={{ float: 'right' }}><Badge bg="danger">{report.Errors} Errors</Badge>{' '}<Badge bg="warning">{report.Warnings} Warnings</Badge></div></div>}
-                                
+
                             </ListGroup.Item>
                         )
                     }
@@ -107,11 +126,11 @@ export class Home extends Component {
     renderAuth() {
         return (
             <div>
-                <Row style={{ textAlign:"center" }}>
+                <Row style={{ textAlign: "center" }}>
                     <h1 className="row justify-content-md-center" style={{ width: "100%" }}>Welcome back!</h1>
                     <h4 className="row justify-content-md-center" style={{ marginTop: 25, width: "100%" }}>Here is some general data about you:</h4>
                 </Row>
-                <Row style={{paddingTop: "50px"}}>
+                <Row style={{ paddingTop: "50px" }}>
                     <Col>
                         <CardComp
                             title='Recently Completed Tests'
@@ -119,12 +138,12 @@ export class Home extends Component {
                             icon={clockIcon}
                         />
                     </Col>
-                    <Col>                    
+                    <Col>
                         <CardComp
                             title='Configured Tests'
                             body={this.state.currentSetupTests}
                             icon={testIcon}
-                        />                       
+                        />
                         <div style={{ paddingTop: "47px" }}></div>
                         <CardComp
                             title='Previous Login'
@@ -143,7 +162,7 @@ export class Home extends Component {
                             </tr>
                         </thead>
                         <tbody>
-                            {this.state.latestActions.map((report,index) => {
+                            {this.state.latestActions.map((report, index) => {
                                 return <tr key={index}><td>{index}</td><td>{report.Title}</td><td>{report.NextTest === "0001-01-01T00:00:00" ? "-" : report.NextTest}</td></tr>
                             })}
                         </tbody>
@@ -204,7 +223,7 @@ export class Home extends Component {
                     </Col>
                 </Row>
                 <Row className="justify-content-center" style={{ paddingTop: "50px" }}>
-                    <AwesomeButton style={{ width: "200px" }} type="primary" onPress={() => this.props.history.push('setupTest') }>Get Started!</AwesomeButton>
+                    <AwesomeButton style={{ width: "200px" }} type="primary" onPress={() => this.props.history.push('setupTest')}>Get Started!</AwesomeButton>
                 </Row >
             </div>
         );
