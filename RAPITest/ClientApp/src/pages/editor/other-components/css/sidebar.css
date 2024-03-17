@@ -129,7 +129,7 @@
   background-size: 32px 32px;
 }
 
-.acc-icon.HTTP{
+.acc-icon.Request{
   background-image: url('../../../../assets/test.png');
   background-size: 32px 32px;
 }
@@ -147,4 +147,15 @@
 .acc-icon.Dev{
   background-image: url('../../../../assets/gear.png');
   background-size: 32px 32px;
+}
+
+
+.sidebarTextDivider{
+  font-size: large;
+  font-weight: bold;
+}
+
+
+.editor-page{
+  
 }

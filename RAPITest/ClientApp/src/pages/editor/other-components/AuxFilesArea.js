@@ -7,6 +7,16 @@ import '../nodes/css/generalNode.css'
 
 import './css/sidebar.css'; // Create this CSS file for styling
 
+
+import ListGroupComp from '../../../components/ListGroupComp';
+
+import successIcon from '../../../assets/tickSmall.png'
+import binIcon from '../../../assets/bin.png'
+import AcceptedFilesList from "./AcceptedFilesList"
+
+
+
+
 function AuxFilesArea(props) {
 
     const { onDictionaryDrop, onDllDrop } = props
@@ -21,7 +31,18 @@ function AuxFilesArea(props) {
     const [dllArr, setDllArr] = useState([])
 
 
+    const [files, setFiles] = useState([])
 
+
+    const fileNameFuction = (file)=>{
+        //return "file test"
+        return (<div>{file.name}</div>)
+    }
+    
+    const removeFileFunction = (fileToRemove) => {
+        setFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
+    }
+    
 
     const onDropDic = (accept, reject) => {
         if (reject.length !== 0 || accept.length > 1) {
@@ -33,6 +54,10 @@ function AuxFilesArea(props) {
         onDictionaryDrop(txtFile)
         //setDic(txtFile)
         setUploadedDic(true)
+        
+        setFiles(currentFiles => [...currentFiles, ...accept]);
+
+          
     }
 
     const onDropDll = (accept, reject) => {
@@ -54,6 +79,8 @@ function AuxFilesArea(props) {
         onDllDrop(newDllArr)
         setDllArr(newDllArr);
         setUploadedDLL(true)
+
+        setFiles(currentFiles => [...currentFiles, ...accept]);
     }
 
 
@@ -125,6 +152,17 @@ function AuxFilesArea(props) {
                         )}
                     </Dropzone> */}
             </div>
+
+                
+            <AcceptedFilesList
+                    title="Accepted Files"
+                    files={files}
+                    symbol={successIcon}
+                    toShow={fileNameFuction}
+                    removeSymbol={binIcon}
+                    removeFunction={removeFileFunction}></AcceptedFilesList>
+
+
         </div>
     )
 }

@@ -12,6 +12,7 @@ import { VisualizeReport } from './pages/VisualizeReport';
 import './custom.css'
 import Editor from './pages/editor/Editor';
 
+
 export default class App extends Component {
   static displayName = App.name;
 

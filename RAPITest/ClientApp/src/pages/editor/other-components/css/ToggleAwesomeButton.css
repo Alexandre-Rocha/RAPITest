@@ -1,0 +1,6 @@
+.inlineToggleButton{
+    display: inline-block;
+    padding: 0;
+    box-sizing: border-box;
+    overflow:hidden
+}

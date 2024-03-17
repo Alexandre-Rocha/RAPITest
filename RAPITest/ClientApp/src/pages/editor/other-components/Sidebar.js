@@ -20,6 +20,7 @@ import './css/sidebar.css';
 
 import menu from '../../../assets/burger-menu-svgrepo-com.svg'
 import SimpleAccordion from "./SimpleAccordion"
+import TslUploadArea from "./TslUploadArea"
 
 function Sidebar(props) {
 
@@ -106,6 +107,10 @@ function Sidebar(props) {
                 <div className={className}>
 
                     <p></p>
+
+                    <div className="sidebarTextDivider">Configuration</div>
+
+                    <p></p>
                     
                     <ApiUploadArea
                         uploaded={false}
@@ -116,20 +121,10 @@ function Sidebar(props) {
 
                     <p></p>
 
-                    <SimpleAccordion header={"Upload TSL file"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"tsl-icon"}>
-
-                        Recreate state from an existing TSL file (WIP)
-
-                        <Dropzone className="sidebar-dropzone"
-                            accept=".yaml"
-                            onDrop={onDropTsl}
-                            text={
-                                <div align="center">
-                                    <p>Upload TSL (.yaml)</p>
-                                </div>}
-                        />
-
-                    </SimpleAccordion>
+                    <TslUploadArea
+                        uploaded={false}
+                        onDropTsl={onDropTsl}>
+                    </TslUploadArea> 
 
                     <p></p>
                     
@@ -150,6 +145,10 @@ function Sidebar(props) {
                             onRunIntervalChange={onRunIntervalChange}>
                         </TimerSettings>
                     </SimpleAccordion>
+
+                    <p></p>
+
+                    <div className="sidebarTextDivider">Editor</div> 
 
                     <ButtonArea buttonsArray={buttonsArray}></ButtonArea>
 

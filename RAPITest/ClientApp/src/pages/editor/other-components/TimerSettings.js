@@ -1,80 +1,101 @@
 import React, { useState } from "react"
-
+import { Form } from 'react-bootstrap'
 
 function TimerSettings(props) {
 
-
-    const {onRunGeneratedChange, onRunImmediatelyChange, onRunIntervalChange} = props 
+    const { onRunGeneratedChange, onRunImmediatelyChange, onRunIntervalChange } = props
 
     const [selectedRunGen, setRunGen] = useState("true")
     const [selectedRunImm, setRunImm] = useState("true")
     const [selectedRunInt, setRunInt] = useState("Never")
 
-    const runGenChange = (evt)=>{
+    const runGenChange = (evt) => {
         setRunGen(evt.target.value)
         onRunGeneratedChange(evt)
     }
 
-    const runImmChange = (evt)=>{
+    const runImmChange = (evt) => {
         setRunImm(evt.target.value)
         onRunImmediatelyChange(evt)
     }
 
-    const runIntChange = (evt)=>{
+    const runIntChange = (evt) => {
         setRunInt(evt.target.value)
         onRunIntervalChange(evt)
     }
-    
+
     return (
-        <div>
-{/*             <label><b>Timer settings:</b></label>
- */}
-            <div>
+        <Form>
+            <Form.Group>
+                <Form.Label style={{ fontWeight: 'bold' }}>Run Generated?</Form.Label>
                 <div>
-                    <label>Run Generated?</label>
-                    <div>
-                        <input className='node-radio' type="radio" id="runGeneratedYes" name="runGenerated" value="true" onChange={runGenChange} checked={selectedRunGen === "true"} />
-                        <label htmlFor="runGeneratedYes">Yes</label>
-
-                        <input className='node-radio' type="radio" id="runGeneratedNo" name="runGenerated" value="false" onChange={runGenChange} checked={selectedRunGen === "false"} />
-                        <label htmlFor="runGeneratedNo">No</label>
-                    </div>
+                    <Form.Check
+                        inline
+                        type="radio"
+                        label="Yes"
+                        name="runGenerated"
+                        value="true"
+                        onChange={runGenChange}
+                        checked={selectedRunGen === "true"}
+                        id="runGeneratedYes"
+                    />
+                    <Form.Check
+                        inline
+                        type="radio"
+                        label="No"
+                        name="runGenerated"
+                        value="false"
+                        onChange={runGenChange}
+                        checked={selectedRunGen === "false"}
+                        id="runGeneratedNo"
+                    />
                 </div>
+            </Form.Group>
+            <Form.Group>
+                <Form.Label style={{ fontWeight: 'bold' }}>Run Immediately?</Form.Label>
                 <div>
-                    <label>Run Immediately?</label>
-                    <div>
-                        <input className='node-radio' type="radio" id="runImmediatelyYes" name="runImmediately" value="true" onChange={runImmChange} checked={selectedRunImm === "true"}/>
-                        <label htmlFor="runImmediatelyYes">Yes</label>
-
-                        <input className='node-radio' type="radio" id="runImmediatelyNo" name="runImmediately" value="false" onChange={runImmChange} checked={selectedRunImm === "false"}/>
-                        <label htmlFor="runImmediatelyNo">No</label>
-                    </div>
+                    <Form.Check
+                        inline
+                        type="radio"
+                        label="Yes"
+                        name="runImmediately"
+                        value="true"
+                        onChange={runImmChange}
+                        checked={selectedRunImm === "true"}
+                        id="runImmediatelyYes"
+                    />
+                    <Form.Check
+                        inline
+                        type="radio"
+                        label="No"
+                        name="runImmediately"
+                        value="false"
+                        onChange={runImmChange}
+                        checked={selectedRunImm === "false"}
+                        id="runImmediatelyNo"
+                    />
                 </div>
+            </Form.Group>
+            <Form.Group>
+                <Form.Label style={{ fontWeight: 'bold' }}>Select Run Interval:</Form.Label>
                 <div>
-                    <label>Select Run Interval:</label>
-                    <div>
-                        <input className='node-radio' type="radio" id="runInterval1" name="runInterval" value="1 hour" onChange={runIntChange} checked={selectedRunInt === "1 hour"}/>
-                        <label htmlFor="runInterval1">1 hour</label>
-
-                        <input className='node-radio' type="radio" id="runInterval2" name="runInterval" value="12 hours" onChange={runIntChange} checked={selectedRunInt === "12 hours"}/>
-                        <label htmlFor="runInterval2">12 hours</label>
-
-                        <input className='node-radio' type="radio" id="runInterval3" name="runInterval" value="24 hours" onChange={runIntChange}checked={selectedRunInt === "24 hours"} />
-                        <label htmlFor="runInterval3">24 hours</label>
-
-                        <input className='node-radio' type="radio" id="runInterval4" name="runInterval" value="1 week" onChange={runIntChange}
-                        checked={selectedRunInt === "1 week"} />
-                        <label htmlFor="runInterval4">1 week</label>
-
-                        <input className='node-radio' type="radio" id="runInterval5" name="runInterval" value="Never" onChange={runIntChange}
-                        checked={selectedRunInt === "Never"} />
-                        <label htmlFor="runInterval5">Never</label>
-                    </div>
+                    {["1 hour", "12 hours", "24 hours", "1 week", "Never"].map((interval, index) => (
+                        <Form.Check
+                            key={index}
+                            inline
+                            type="radio"
+                            label={interval}
+                            name="runInterval"
+                            value={interval}
+                            onChange={runIntChange}
+                            checked={selectedRunInt === interval}
+                            id={`runInterval${index}`}
+                        />
+                    ))}
                 </div>
-            </div>
-        </div>
+            </Form.Group>
+        </Form>
     )
 }
-
 
 export default TimerSettings

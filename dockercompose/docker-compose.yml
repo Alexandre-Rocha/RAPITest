@@ -24,7 +24,7 @@ services:
     restart: always
 
   rapitest:
-    image: duartefelicio/rapitest:latest
+    image: alexandrerocha99/rapitest:2.0
     depends_on:
         - db
         - rabbitmq
@@ -33,7 +33,7 @@ services:
     restart: always
 
   runtestsworkerservice:
-    image: duartefelicio/runtestsworkerservice:latest
+    image: alexandrerocha99/runtestsworkerservice:2.0
     depends_on:
         - db
         - rabbitmq
@@ -41,7 +41,7 @@ services:
 
 
   setuptestsworkerservice:
-    image: duartefelicio/setuptestsworkerservice:latest
+    image: alexandrerocha99/setuptestsworkerservice:2.0
     depends_on:
         - db
         - rabbitmq

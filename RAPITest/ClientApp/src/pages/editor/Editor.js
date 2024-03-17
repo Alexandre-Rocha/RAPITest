@@ -30,6 +30,9 @@ import Dagre from 'dagre';
 
 import './Editor.css'
 
+import SimpleModalComp from '../../components/SimpleModalComp';
+import Settings from './other-components/Settings';
+
 
 
 const YAML = require('json-to-pretty-yaml');
@@ -41,7 +44,6 @@ const initialEdges = []
 
 const proOptions = { hideAttribution: true };
 
-const rf_nodeTypes = { status: StatusVerificationNode, test: TestIDNode, workflow: WorkflowNode, schema: SchemaVerificationNode, query: QueryNode, body: BodyNode, headers: HeadersNode, retain: RetainNode, stress: StressTestNode, match: MatchVerificationNode, custom: CustomVerificationNode, contains: ContainsVerificationNode, count: CountVerificationNode } //TODO: remove
 
 const NodeType = Object.freeze({
     WORKFLOW: "workflow",
@@ -103,22 +105,6 @@ const getLayoutedElements = (nodes, edges, options) => {
 };
 
 
-function deepCopy(obj) {
-    if (typeof obj !== "object" || obj === null) {
-        return obj;
-    }
-
-    if (Array.isArray(obj)) {
-        return obj.map(deepCopy);
-    }
-
-    const newObj = {};
-    for (let key in obj) {
-        newObj[key] = deepCopy(obj[key]);
-    }
-
-    return newObj;
-}
 
 function Flow() {
 
@@ -159,6 +145,8 @@ function Flow() {
     const [dontCollapseClass, setDontCollapseClass] = useState("")
 
     const [dict, setDict] = useState({})
+
+    const [settingsVisible, setSettingsVisible] = useState(false)
 
     const [dictFile, setDictFile] = useState()
     const [dllFileArr, setDllFileArr] = useState([])
@@ -234,27 +222,16 @@ function Flow() {
         let allNodes = reactFlowInstance.getNodes();
         let allEdges = reactFlowInstance.getEdges();
 
-        let result = [startNode]; // Start with the initial node in the result set
+        let result = [startNode];
         let currentNode = startNode;
 
         // Forward search: Find all succeeding nodes
         while (true) {
-            console.log("curr node");
-            console.log(currentNode);
-
-            console.log("all edges");
-            console.log(allEdges);
-
             const nextEdge = allEdges.find(edge => edge.source === currentNode.id);
-            if (!nextEdge) break; // End of the chain reached
-
-            console.log("next edge found");
+            if (!nextEdge) break;
 
             const nextNode = allNodes.find(node => node.id === nextEdge.target);
-            if (!nextNode) break; // Safety check
-
-            console.log("next node found");
-            console.log(nextNode);
+            if (!nextNode) break;
 
             result.push(nextNode);
             currentNode = nextNode;
@@ -266,53 +243,51 @@ function Flow() {
         // Backward search: Find all preceding nodes
         while (true) {
             const prevEdge = allEdges.find(edge => edge.target === currentNode.id);
-            if (!prevEdge) break; // Start of the chain reached
+            if (!prevEdge) break;
 
             const prevNode = allNodes.find(node => node.id === prevEdge.source);
-            if (!prevNode) break; // Safety check
+            if (!prevNode) break;
 
-            result.unshift(prevNode); // Add to the beginning of the result array
+            result.unshift(prevNode);
             currentNode = prevNode;
         }
 
         return result;
     };
 
-    //TODO: redo all this cuz source and target is based on handle type not handle order LOL
-    const onConnect =
-        (connection) => {
 
-            const { source, target } = connection;
-            console.log(connection);
+    const onConnect = (connection) => {
 
-            let sourceNode = reactFlowInstance.getNode(source)
-            let targetNode = reactFlowInstance.getNode(target)
+        const { source, target } = connection;
 
-            console.log("onConnect; source: %s; target: %s;", sourceNode.type, targetNode.type)
+        const sourceNode = reactFlowInstance.getNode(source)
+        const targetNode = reactFlowInstance.getNode(target)
 
-            if (sourceNode.type === NodeType.WORKFLOW) {  //happens when connecting anything to workflow / workflow to anything
-                onConnectWorkflow(targetNode, connection)
-            }
-
-            else if (sourceNode.type === NodeType.TEST) {  //happens when connecting anything to test / test to anything
-                onConnectTest(targetNode, connection)
-            }
-
-            // no need to check for stress test because there isnt a way to connect stress test to anything
-
-            else if (requestNodeTypes.includes(sourceNode.type)) { //happens when connecting anything to request / request to anything
-                onConnectRequestComponent(sourceNode, targetNode, connection)
-            }
-
-            else if (verificationNodeTypes.includes(sourceNode.type)) { //happens when connecting anything to verification / verification to anything
-                onConnectVerification(sourceNode, targetNode, connection)
-            }
-
-            else {
-                //TODO: should never come here
-            }
-
+        if (sourceNode.type === NodeType.WORKFLOW) {
+            onConnectWorkflow(targetNode, connection)
         }
+
+        else if (sourceNode.type === NodeType.TEST) {
+            onConnectTest(targetNode, connection)
+        }
+
+        // no need to check for stress test because there isnt a way to connect stress test to anything
+
+        else if (requestNodeTypes.includes(sourceNode.type)) {
+            onConnectRequestComponent(sourceNode, targetNode, connection)
+        }
+
+        else if (verificationNodeTypes.includes(sourceNode.type)) {
+            onConnectVerification(sourceNode, targetNode, connection)
+        }
+
+        else {
+            //TODO: should never come here
+            alert('something went wrong')
+            return false
+        }
+
+    }
 
     const onConnectWorkflow = (targetNode, connection) => {
 
@@ -428,382 +403,6 @@ function Flow() {
 
     // #region Create Nodes
 
-    const createWorkflowNode = (wfIndex = -1, wfName = "", x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-
-        rapiLog(level.DEBUG, "[Editor] Creating new Workflow node with ID: ", id)
-
-        const newNode = {
-            id,
-            position: {
-                x: x,
-                y: y,
-            },
-            data: {
-                custom: {
-/*                     nameChangeCallback: onWfNameChange,
- */                    wfName: wfName,
-                    _wfIndex: wfIndex
-                }
-            },
-            type: NodeType.WORKFLOW
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-    const createTestNode = (testName = "", initialServer = "", initialPath = "", initialMethod = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-
-        // only mandatory fields
-        let newTest = {
-            _testIndex: -1,
-            Server: "",
-            TestID: testName,
-            Path: "",
-            Method: "",
-            Verifications: [{ Code: -1 }]
-        }
-
-        const newNode = {
-            id,
-            position: {
-                x: x,
-                y: y
-            },
-            data: {
-                //label: `Node ${id}`,
-                custom: {
-                    /* nameChangeCallback: onTestIDChange,
-                    serverChangeCallback: onServerURLChange,
-                    pathChangeCallback: onPathChange,
-                    methodChangeCallback: onHttpMethodChange, */
-                    initialServer: initialServer,
-                    initialPath: initialPath,
-                    initialMethod: initialMethod,
-                    paths: apiFile.paths,
-                    servers: apiFile.servers,
-                    httpMethods: ["Get", "Delete", "Post", "Put"], //TODO: shouldnt be hardcoded here prob
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex,
-                    test: newTest,
-                    testName: testName //TODO:this info is also in test, maybe test is not necessart? idk
-                }
-            },
-            type: NodeType.TEST
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        //currTestIndex.current += 1
-
-        return id;
-    }
-
-    const createHeadersNode = (initialHeadersArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    /* keyChangeCallback: onHeaderKeyChangeCallback,
-                    valueChangeCallback: onHeaderValueChangeCallback,
-                    addHeaderCallback: onHeaderAddCallback,
-                    removeHeaderCallback: onHeaderRemoveCallback, */
-                    headers: initialHeadersArr,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex
-                }
-            },
-            type: NodeType.HEADERS
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-    const createQueryNode = (initialQueryArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    /* keyChangeCallback: onQueryKeyChangeCallback,
-                    valueChangeCallback: onQueryValueChangeCallback,
-                    addQueryCallback: onQueryAddCallback,
-                    removeQueryCallback: onQueryRemoveCallback, */
-                    query: initialQueryArr,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex
-                }
-            },
-            type: NodeType.QUERY
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-    const createBodyNode = (initialBodyText = null, initialBodyRef = null, _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-
-        //TODO: verify bodytext and bodyref?
-
-        console.log("initibodyref", initialBodyRef);
-
-        const newNode = {
-            id,
-            position: {
-                x: x,
-                y: y
-            },
-            data: {
-                custom: {
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex,
-                    /* bodyTextChangeCallback: onBodyTextChangeCallback,
-                    bodyRefChangeCallback: onBodyRefChangeCallback, */
-                    bodyText: initialBodyText,
-                    bodyRef: initialBodyRef
-                }
-            },
-            type: NodeType.BODY
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-    const createRetainNode = (initialRetainArr = [{ key: '', value: '' }], _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    /* keyChangeCallback: onRetainKeyChangeCallback,
-                    valueChangeCallback: onRetainValueChangeCallback,
-                    addRetainCallback: onRetainAddCallback,
-                    removeRetainCallback: onRetainRemoveCallback, */
-                    retains: initialRetainArr,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex
-                }
-            },
-            type: NodeType.RETAIN
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-    const createStressNode = (initialCount = -1, initialThreads = -1, initialDelay = -1, _wfIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    count: initialCount,
-                    threads: initialThreads,
-                    delay: initialDelay,
-                    _wfIndex: _wfIndex,
-                    /* countChangeCallback: onStressCountChangeCallback,
-                    threadsChangeCallback: onStressThreadsChangeCallback,
-                    delayChangeCallback: onStressDelayChangeCallback */
-                }
-            },
-            type: NodeType.STRESS
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-
-    const createStatusVerificationNode = (initialStatus = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    /* statusChangeCallback: onVerificationStatusChange, */
-                    initialStatusCode: initialStatus,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex
-                }
-            },
-            type: NodeType.STATUS
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-
-    const createContainsVerificationNode = (initialContains = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-
-        //TODO: verify contains? no i think
-
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    /* containsChangeCallback: onContainsChangeCallback, */
-                    contains: initialContains,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex
-                }
-            },
-            type: NodeType.CONTAINS
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-
-    const createCountVerificationNode = (initialCountKey = "", initialCountValue = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    /* valueChangeCallback: onCountValueChangeCallback,
-                    keyChangeCallback: onCountKeyChangeCallback, */
-                    key: initialCountKey,
-                    value: initialCountValue,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex
-                }
-            },
-            type: NodeType.COUNT
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-
-    const createMatchVerificationNode = (initialMatchKey = "", initialMatchValue = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    /* valueChangeCallback: onMatchValueChangeCallback,
-                    keyChangeCallback: onMatchKeyChangeCallback, */
-                    key: initialMatchKey,
-                    value: initialMatchValue,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex
-                }
-            },
-            type: NodeType.MATCH
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-
-
-    const createCustomVerificationNode = (inititalDllName = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    /* customVerifChangeCallback: onCustomVerificationChange, */
-                    dllName: inititalDllName,
-                    _wfIndex: _wfIndex,
-                    _testIndex: _testIndex
-                }
-            },
-            type: NodeType.CUSTOM
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
-
-    const createSchemaVerificationNode = (initialSchema = "", _wfIndex = -1, _testIndex = -1, x = Math.random() * 500, y = Math.random() * 500) => {
-        const id = `${nodeId.current}`;
-        nodeId.current += 1
-        const newNode = {
-            id,
-            position: {
-                x: Math.random() * 500,
-                y: Math.random() * 500,
-            },
-            data: {
-                custom: {
-                    /* schemaChangeCallback: onVerificationSchemaChange, */
-                    initialSchema: initialSchema,
-                    schemas: apiFile.schemas,
-                    _wfIndex: -1,
-                    _testIndex: -1
-                }
-            },
-            type: NodeType.SCHEMA
-        };
-        reactFlowInstance.addNodes(newNode);
-
-        return id;
-    }
-
 
     /**
      * Function to create a React Flow node. 
@@ -831,52 +430,104 @@ function Flow() {
         return id
     }
 
-    /* const processWorkflow = (wf, currX, currY) => {
+    const processWorkflow = (wf) => {
 
         rapiLog(level.DEBUG, "[Editor] Workflow found when recreating state. Assigned ID: ", wf._wfIndex)
 
-        const wfNodeId = createWorkflowNode(maxWfIndex.current, wf.WorkflowID, currX, currY) //WorkflowID is wf name TODO: whats the diff between yammlwfindex and maxwfindex
+        //const wfNodeId = createWorkflowNode(maxWfIndex.current, wf.WorkflowID, currX, currY) //WorkflowID is wf name TODO: whats the diff between yammlwfindex and maxwfindex
+
+        const nodeData = {
+            wfName: wf.WorkflowID,
+            _wfIndex: maxWfIndex.current        //TODO: not needed anymore?
+        }
+        const wfNodeId = createNode(NodeType.WORKFLOW, nodeData)
 
         return wfNodeId
     }
 
-    const processStress = (wf, yamlWfIndex, currX, currY) => {
+    const processStress = (wf) => {
 
-        rapiLog(level.DEBUG, "[Editor] Stress found when recreating state for workflow with ID ", yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Stress found when recreating state for workflow with ID ", yamlWfIndex)
 
-        const initialCount = wf.Stress.Count
-        const initialThreads = wf.Stress.Threads
-        const initialDelay = wf.Stress.Delay
-        const stressTestId = createStressNode(initialCount, initialThreads, initialDelay, yamlWfIndex, currX, currY)
+        //const initialCount = wf.Stress.Count
+        //const initialThreads = wf.Stress.Threads
+        //const initialDelay = wf.Stress.Delay
+        //const stressTestId = createStressNode(initialCount, initialThreads, initialDelay, yamlWfIndex, currX, currY)
+
+        const nodeData = {
+            count: wf.Stress.Count,
+            threads: wf.Stress.Threads,
+            delay: wf.Stress.Delay
+        }
+        const stressTestId = createNode(NodeType.STRESS, nodeData)
 
         return stressTestId
     }
 
-    const processTest = (test, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processTest = (test, currYamlTestIndex) => {
 
-        rapiLog(level.DEBUG, "[Editor] Test found when recreating state for workflow with ID ", yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Test found when recreating state for workflow with ID ", yamlWfIndex)
 
-        const testNodeServer = test.Server
-        const testNodePath = test.Path
-        const testNodeMethod = test.Method
+        //const testNodeServer = test.Server
+        //const testNodePath = test.Path
+        //const testNodeMethod = test.Method
 
-        const testNodeId = createTestNode(test.TestID, testNodeServer, testNodePath, testNodeMethod, yamlWfIndex, currYamlTestIndex, currX, currY) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
+        //const testNodeId = createTestNode(test.TestID, testNodeServer, testNodePath, testNodeMethod, yamlWfIndex, currYamlTestIndex, currX, currY) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
+
+        const nodeData = {
+            testName: test.TestID,
+            initialServer: test.Server,
+            initialPath: test.Path,
+            initialMethod: test.Method,
+            paths: apiFile.paths,
+            servers: apiFile.servers,
+            httpMethods: ["Get", "Delete", "Post", "Put"], //TODO: shouldnt be hardcoded here prob
+            _testIndex: currYamlTestIndex   //TODO: is this needed ?
+        }
+        const testNodeId = createNode(NodeType.TEST, nodeData)
 
         return testNodeId
     }
 
-    const processBody = (bodyText, bodyRef, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processBody = (body) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Body found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Body found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
-        const bodyNodeId = createBodyNode(bodyText, bodyRef, yamlWfIndex, currYamlTestIndex, currX, currY)
+        //const bodyNodeId = createBodyNode(bodyText, bodyRef, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        let bodyText = null
+        let bodyRef = null
+        let useBodyRef = null
+
+        if (body.startsWith("$")) {
+            useBodyRef = true
+
+            let auxbodyRef = body
+            let dictionaryIndex = auxbodyRef.indexOf("dictionary/");
+            if (dictionaryIndex !== -1) {
+                let result = auxbodyRef.substring(dictionaryIndex + "dictionary/".length);
+                bodyRef = result
+            }
+        }
+        else {
+            useBodyRef = false
+            bodyText = body
+        }
+
+        const nodeData = {
+            bodyText: bodyText,
+            bodyRef: bodyRef,
+            useBodyRef: useBodyRef
+            // TODO: missing the boolean flag?
+        }
+        const bodyNodeId = createNode(NodeType.BODY, nodeData)
 
         return bodyNodeId
     }
 
-    const processHeaders = (headers, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processHeaders = (headers) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Headers found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Headers found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //headers is array with here, like this: ["Accept:application/xml"]
         //must process it //TODO: also test with more than 1 header
@@ -889,14 +540,19 @@ function Flow() {
             };
         });
 
-        const headersNodeId = createHeadersNode(processedHeaders, yamlWfIndex, currYamlTestIndex, currX, currY)
+        //const headersNodeId = createHeadersNode(processedHeaders, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        const nodeData = {
+            headers: processedHeaders
+        }
+        const headersNodeId = createNode(NodeType.HEADERS, nodeData)
 
         return headersNodeId
     }
 
-    const processQuery = (query, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processQuery = (query) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Query found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Query found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
         //TODO: need to test this, dont have any example tsl file w query i think...
         let processedQuery = query.map(queryString => {
             let parts = queryString.split(":");
@@ -906,14 +562,19 @@ function Flow() {
             };
         });
 
-        const queryNodeId = createQueryNode(processedQuery, yamlWfIndex, currYamlTestIndex, currX, currY)
+        //const queryNodeId = createQueryNode(processedQuery, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        const nodeData = {
+            query: processedQuery
+        }
+        const queryNodeId = createNode(NodeType.QUERY, nodeData)
 
         return queryNodeId
     }
 
-    const processRetain = (retain, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processRetain = (retain) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Retain found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Retain found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         let processedRetain = retain.map(retainString => {
             let parts = retainString.split("#$.");
@@ -923,119 +584,148 @@ function Flow() {
             };
         });
 
-        const retainNodeId = createRetainNode(processedRetain, yamlWfIndex, currYamlTestIndex, currX, currY)
+        //const retainNodeId = createRetainNode(processedRetain, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        const nodeData = {
+            retains: processedRetain
+        }
+        const retainNodeId = createNode(NodeType.RETAIN, nodeData)
 
         return retainNodeId
     }
 
-    const processStatusVerif = (status, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processStatusVerif = (status) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Status verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Status verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
-        const statusVerifNodeId = createStatusVerificationNode(status, yamlWfIndex, currYamlTestIndex, currX, currY)
+        //const statusVerifNodeId = createStatusVerificationNode(status, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        const nodeData = {
+            initialStatusCode: status
+        }
+        const statusVerifNodeId = createNode(NodeType.STATUS, nodeData)
 
         return statusVerifNodeId
     }
 
-    const processSchemaVerif = (schema, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processSchemaVerif = (schema) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Schema verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Schema verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
-        const schemaVerifNodeId = createSchemaVerificationNode(schema, yamlWfIndex, currYamlTestIndex, currX, currY)
+        //const schemaVerifNodeId = createSchemaVerificationNode(schema, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        const processedSchema = schema.split("$ref/definitions/")[1] //TODO: kinda hardcoded
+
+        const nodeData = {
+            initialSchema: processedSchema,
+            schemas: apiFile.schemas
+        }
+        const schemaVerifNodeId = createNode(NodeType.SCHEMA, nodeData)
+
 
         return schemaVerifNodeId
     }
 
-    const processContainsVerif = (contains, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processContainsVerif = (contains) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Contains verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Contains verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //TODO: transform contains here or before process is called?
-        const containsVerifNodeId = createContainsVerificationNode(contains, yamlWfIndex, currYamlTestIndex, currX, currY)
+        //const containsVerifNodeId = createContainsVerificationNode(contains, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        const nodeData = {
+            contains: contains
+        }
+        const containsVerifNodeId = createNode(NodeType.CONTAINS, nodeData)
 
         return containsVerifNodeId
     }
 
-    const processCountVerif = (matchString, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processCountVerif = (matchString) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Count verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Count verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         // TODO: process key and value here or before calling processmethod?
 
-        let processedMatch = matchString.split("#");
-        let key = processedMatch[0]
-        let value = processedMatch[1]
+        const processedMatch = matchString.split("#");
+        const key = processedMatch[0]
+        const value = processedMatch[1]
 
+        //const countVerifNodeId = createCountVerificationNode(key, value, yamlWfIndex, currYamlTestIndex, currX, currY)
 
-        const countVerifNodeId = createCountVerificationNode(key, value, yamlWfIndex, currYamlTestIndex, currX, currY)
+        const nodeData = {
+            key: key,
+            value: value
+        }
+        const countVerifNodeId = createNode(NodeType.COUNT, nodeData)
 
         return countVerifNodeId
     }
 
-    const processMatchVerif = (matchString, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processMatchVerif = (matchString) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Match verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Match verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //TODO: preocess key and value here or before calling processmetdo?
 
-        let processedMatch = matchString.split("#");
-        let key = processedMatch[0]
-        let value = processedMatch[1]
+        const processedMatch = matchString.split("#");
+        const key = processedMatch[0]
+        const value = processedMatch[1]
 
-        const matchVerifNodeId = createMatchVerificationNode(key, value, yamlWfIndex, currYamlTestIndex, currX, currY)
+        //const matchVerifNodeId = createMatchVerificationNode(key, value, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        const nodeData = {
+            key: key,
+            value: value
+        }
+        const matchVerifNodeId = createNode(NodeType.MATCH, nodeData)
 
         return matchVerifNodeId
     }
 
-    const processCustomVerif = (dllName, yamlWfIndex, currYamlTestIndex, currX, currY) => {
+    const processCustomVerif = (dllName) => {
         // TODO:
-        rapiLog(level.DEBUG, "[Editor] Match verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        //rapiLog(level.DEBUG, "[Editor] Match verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //TODO: process dll name here or begore
-        const customVerifNodeId = createCustomVerificationNode(dllName, yamlWfIndex, currYamlTestIndex, currX, currY)
+        //const customVerifNodeId = createCustomVerificationNode(dllName, yamlWfIndex, currYamlTestIndex, currX, currY)
+
+        const nodeData = {
+            dllName: dllName
+        }
+        const customVerifNodeId = createNode(NodeType.CUSTOM, nodeData)
 
         return customVerifNodeId
-    } */
+    }
 
 
+    const createNodes = (newstate) => {
 
-    //TODO: improve algorithm, its kinda hardcoded atm, missing some nodes, etc
-    /* const createNodes = (newstate) => {
-
-        let yamlWfIndex = 0;
         let currYamlTestIndex = 0;
 
         let listOfEdgesLists = []
-
-        let currX = 0
-        let currY = 0
-
-        const offsetX = 200
-        const offsetY = 100
 
         newstate.forEach(wf => {
 
             let testNodeIdsList = []
             let edgesList = []
 
-            wf._wfIndex = yamlWfIndex
+            wf._wfIndex = maxWfIndex.current
             maxWfIndex.current += 1
 
-            const wfNodeID = processWorkflow(wf, currX, currY)
-
-            currX = currX + offsetX
+            const wfNodeID = processWorkflow(wf)
 
             if (wf.Stress) {
-                const stressNodeId = processStress(wf, yamlWfIndex, currX, currY)
+                const stressNodeId = processStress(wf)
 
                 const newEdgeWfStress = {
                     id: "wf:" + wfNodeID.toString() + "-stress:" + stressNodeId.toString(),
                     source: wfNodeID.toString(),
+                    sourceHandle: "leftHandle", // TODO: hardcoded
                     target: stressNodeId.toString()
                 }
 
                 edgesList.push(newEdgeWfStress)
-                currY = currY + offsetY //TODO: pensar melhor nos layputs mais complexos
             }
 
 
@@ -1043,89 +733,69 @@ function Flow() {
 
                 test._testIndex = currYamlTestIndex
 
-                // ------------ REQUEST ------------
-
-                const testNodeId = processTest(test, yamlWfIndex, currYamlTestIndex, currX, currY)
-
+                const testNodeId = processTest(test, currYamlTestIndex)
                 testNodeIdsList.push(testNodeId)
 
-                //check optional stuff
+                // ------------ REQUEST ------------
+
+                let currLeafId = testNodeId
 
                 if (test.Body) {
-                    let bodyText = null
-                    let bodyRef = null
-                    //TODO: body text and ref
-
-
-                    if (test.Body.startsWith("$")) {
-                        //ref
-                        let auxbodyRef = test.Body
-
-                        let dictionaryIndex = auxbodyRef.indexOf("dictionary/");
-                        if (dictionaryIndex !== -1) {
-
-                            let result = auxbodyRef.substring(dictionaryIndex + "dictionary/".length);
-                            bodyRef = result
-
-                        }
-                    } else {
-                        //text
-                        bodyText = test.Body
-                    }
-
-                    console.log("bodyref", bodyRef);
-                    console.log("bodytext", bodyText);
-                    const bodyNodeId = processBody(bodyText, bodyRef, yamlWfIndex, currYamlTestIndex, currX, currY)
-                    currY = currY + offsetY
+                    const bodyNodeId = processBody(test.Body)
 
                     const newEdgeTestBody = {
-                        id: "test:" + testNodeId.toString() + "-get:" + bodyNodeId.toString(),
-                        source: testNodeId.toString(),
+                        id: currLeafId.toString() + bodyNodeId.toString(),
+                        source: currLeafId.toString(),
+                        sourceHandle: "leftHandle", // TODO: hardcoded
                         target: bodyNodeId.toString()
                     }
+
+                    currLeafId = bodyNodeId
 
                     edgesList.push(newEdgeTestBody)
                 }
 
                 if (test.Headers) {
-                    rapiLog(level.WARN, "test.Headers")
-                    rapiLog(level.INFO, test)
-                    rapiLog(level.INFO, test.Headers)
-
                     const headersNodeId = processHeaders(test.Headers)
-                    currY = currY + offsetY
 
                     const newEdgeTestHeaders = {
-                        id: "test:" + testNodeId.toString() + "-get:" + headersNodeId.toString(),
-                        source: testNodeId.toString(),
+                        id: currLeafId.toString() +  headersNodeId.toString(),
+                        source: currLeafId.toString(),
+                        sourceHandle: "leftHandle", // TODO: hardcoded
                         target: headersNodeId.toString()
                     }
+
+                    currLeafId = headersNodeId
 
                     edgesList.push(newEdgeTestHeaders)
                 }
 
                 if (test.Query) {
-                    const queryNodeId = processQuery(test.Query, yamlWfIndex, currYamlTestIndex)
-                    currY = currY + offsetY
+                    const queryNodeId = processQuery(test.Query)
 
                     const newEdgeTestQuery = {
-                        id: "test:" + testNodeId.toString() + "-get:" + queryNodeId.toString(),
-                        source: testNodeId.toString(),
+                        id: currLeafId.toString() + queryNodeId.toString(),
+                        source: currLeafId.toString(),
+                        sourceHandle: "leftHandle", // TODO: hardcoded
                         target: queryNodeId.toString()
                     }
+
+                    currLeafId = queryNodeId
 
                     edgesList.push(newEdgeTestQuery)
                 }
 
                 if (test.Retain) {
-                    const retainNodeId = processRetain(test.Retain, yamlWfIndex, currYamlTestIndex)
-                    currY = currY + offsetY
+                    const retainNodeId = processRetain(test.Retain)
 
                     const newEdgeTestRetain = {
-                        id: "test:" + testNodeId.toString() + "-get:" + retainNodeId.toString(),
-                        source: testNodeId.toString(),
+                        id: currLeafId.toString() + retainNodeId.toString(),
+                        source: currLeafId.toString(),
+                        sourceHandle: "leftHandle", // TODO: hardcoded
                         target: retainNodeId.toString()
                     }
+
+                    currLeafId = retainNodeId
 
                     edgesList.push(newEdgeTestRetain)
                 }
@@ -1133,119 +803,114 @@ function Flow() {
 
                 // ----------- VERIFICATIONS ------------
 
+                //TODO: at the moment, the whole algorithm for example the status below kinda assumes a correct tsl strucuture, probably does not work and may crash with incorrect TSL
 
-                const statusNodeCode = test.Verifications[0].Code   //Verifications is an array for some reason but always 1 element
-                currY = currY + offsetY
+                const statusVerifNodeId = processStatusVerif(test.Verifications[0].Code)    //Verifications is an array for some reason but always 1 element
 
-                const statusVerifNodeId = createStatusVerificationNode(statusNodeCode, yamlWfIndex, currYamlTestIndex, currX, currY)
+                currLeafId = testNodeId
 
                 const newEdgeTestStatus = {
-                    id: "test:" + testNodeId.toString() + "-get:" + statusVerifNodeId.toString(),
-                    source: testNodeId.toString(),
+                    id: currLeafId.toString() + statusVerifNodeId.toString(),
+                    source: currLeafId.toString(),
+                    sourceHandle: "rightHandle", // TODO: hardcoded
                     target: statusVerifNodeId.toString()
                 }
 
+                currLeafId = statusVerifNodeId
+
                 edgesList.push(newEdgeTestStatus)
 
-
-                //check optional stuff TODO:falta cenas
-
                 if (test.Verifications[0].Schema) {
-                    currY = currY + offsetY
-
-                    const schema = test.Verifications[0].Schema.split("$ref/definitions/")[1] //TODO: kinda hardcoded
-                    const schemaVerifId = createSchemaVerificationNode(schema, yamlWfIndex, currYamlTestIndex, currX, currY)
-
+                    const schemaVerifId = processSchemaVerif(test.Verifications[0].Schema)
 
                     const newEdgeTestSchema = {
-                        id: "test:" + testNodeId.toString() + "-get:" + schemaVerifId.toString(),
-                        source: testNodeId.toString(),
+                        id: currLeafId.toString() + schemaVerifId.toString(),
+                        source: currLeafId.toString(),
+                        sourceHandle: "rightHandle", // TODO: hardcoded
                         target: schemaVerifId.toString()
                     }
 
-                    edgesList.push(newEdgeTestSchema)
+                    currLeafId = schemaVerifId
 
+                    edgesList.push(newEdgeTestSchema)
                 }
 
                 if (test.Verifications[0].Contains) {
-                    const containsVerifNodeId = processContainsVerif(test.Verifications[0].Contains, yamlWfIndex, currYamlTestIndex, currX, currY)
-                    currY = currY + offsetY
+                    const containsVerifNodeId = processContainsVerif(test.Verifications[0].Contains)
 
                     const newEdgeTestContains = {
-                        id: "test:" + testNodeId.toString() + "-get:" + containsVerifNodeId.toString(),
-                        source: testNodeId.toString(),
+                        id: currLeafId.toString() + containsVerifNodeId.toString(),
+                        source: currLeafId.toString(),
+                        sourceHandle: "rightHandle", // TODO: hardcoded
                         target: containsVerifNodeId.toString()
                     }
+
+                    currLeafId = containsVerifNodeId
 
                     edgesList.push(newEdgeTestContains)
                 }
 
                 if (test.Verifications[0].Count) {
-                    const countVerifNodeId = processCountVerif(test.Verifications[0].Count, yamlWfIndex, currYamlTestIndex, currX, currY)
-                    currY = currY + offsetY
+                    const countVerifNodeId = processCountVerif(test.Verifications[0].Count)
 
                     const newEdgeTestCount = {
-                        id: "test:" + testNodeId.toString() + "-get:" + countVerifNodeId.toString(),
-                        source: testNodeId.toString(),
+                        id: currLeafId.toString() + countVerifNodeId.toString(),
+                        source: currLeafId.toString(),
+                        sourceHandle: "rightHandle", // TODO: hardcoded
                         target: countVerifNodeId.toString()
                     }
+
+                    currLeafId = countVerifNodeId
 
                     edgesList.push(newEdgeTestCount)
                 }
 
                 if (test.Verifications[0].Match) {
-                    const matchVerifNodeId = processMatchVerif(test.Verifications[0].Match, yamlWfIndex, currYamlTestIndex, currX, currY)
-                    currY = currY + offsetY
+                    const matchVerifNodeId = processMatchVerif(test.Verifications[0].Match)
 
                     const newEdgeTestMatch = {
-                        id: "test:" + testNodeId.toString() + "-get:" + matchVerifNodeId.toString(),
-                        source: testNodeId.toString(),
+                        id: currLeafId.toString() + matchVerifNodeId.toString(),
+                        source: currLeafId.toString(),
+                        sourceHandle: "rightHandle", // TODO: hardcoded
                         target: matchVerifNodeId.toString()
                     }
+
+                    currLeafId = matchVerifNodeId
 
                     edgesList.push(newEdgeTestMatch)
                 }
 
                 if (test.Verifications[0].Custom) {
-                    const customVerifNodeId = processCustomVerif(test.Verifications[0].Custom, yamlWfIndex, currYamlTestIndex, currX, currY)
-                    currY = currY + offsetY
+                    const customVerifNodeId = processCustomVerif(test.Verifications[0].Custom)
 
                     const newEdgeTestCustom = {
-                        id: "test:" + testNodeId.toString() + "-get:" + customVerifNodeId.toString(),
-                        source: testNodeId.toString(),
+                        id: currLeafId.toString() + customVerifNodeId.toString(),
+                        source: currLeafId.toString(),
+                        sourceHandle: "rightHandle", // TODO: hardcoded
                         target: customVerifNodeId.toString()
                     }
+
+                    currLeafId = customVerifNodeId
 
                     edgesList.push(newEdgeTestCustom)
                 }
 
-
-
-                //create the edge for this test
-
                 const newEdgeWfTest = {
-                    id: "wf:" + wfNodeID.toString() + "-test:" + testNodeId.toString(),
+                    id: wfNodeID.toString() + testNodeId.toString(),
                     source: wfNodeID.toString(),
+                    sourceHandle: "rightHandle", // TODO: hardcoded
                     target: testNodeId.toString()
                 }
-
-
-
-
 
                 edgesList.push(newEdgeWfTest)
 
                 currYamlTestIndex = currYamlTestIndex + 1
-
 
             })
 
             currYamlTestIndex = 0
 
             listOfEdgesLists = listOfEdgesLists.concat(edgesList)
-
-            yamlWfIndex = yamlWfIndex + 1;
-
 
         });
 
@@ -1257,8 +922,7 @@ function Flow() {
         setCanCollapse(true)
         //collapseNodesWhenReady
 
-        console.log("edges set");
-    } */
+    }
 
     // when state is recreated and nodes are created and ready to be collapsed
     // the canCollapse flag is set to true
@@ -1282,97 +946,54 @@ function Flow() {
     // #region onClick in Editor
 
     const onClickWorkflowNode = () => {
-
-        //create node with wf index equal to the max current index + 1
-        //ex if there are 3 workflows currently, the maxWfIndex is 3 and will be 4 after creating wf (which will have wfIndex 4)
+        console.log("[Editor] Adding Workflow node");
         maxWfIndex.current += 1
-        console.log("dsdfs");
-        console.log(maxWfIndex.current);
-        //createWorkflowNode(maxWfIndex.current, "")
-
-
 
         const nodeData = {
             wfName: "",
             _wfIndex: maxWfIndex.current    //TODO: think this is worthless now
         }
         createNode(NodeType.WORKFLOW, nodeData)
-
-
-        /* //create the actual workflow
-        let newWf = {
-            _wfIndex: maxWfIndex.current,
-            WorkflowID: "NEW WORKFLOW",
-            Stress: null, //{Delay: 1, Count:1, Threads: 3}
-            Tests: []
-        }
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows);
-            newWorkflows.push(newWf)
-            return newWorkflows;
-        }); */
-
     }
 
     const onClickTestNode = () => {
-
-        //create node with no wfIndex and no textIndex because that will be decided on connection
-        //node is created with an empty test inside so that when connection to wfNode happens, test is put in correct position
-        //createTestNode()
-
+        console.log("[Editor] Adding Test node");
         const nodeData = {
             paths: apiFile.paths,
             servers: apiFile.servers,
             httpMethods: ["Get", "Delete", "Post", "Put"], //TODO: shouldnt be hardcoded here prob
         }
         createNode(NodeType.TEST, nodeData)
-
-
-        /*
-        setWorkflows(oldWorkflows => {
-            const newWorkflows = deepCopy(oldWorkflows);
-            newWorkflows[currWfIndex.current].Tests.push(newTest)
-            return newWorkflows;
-        });*/
-
-
-
     }
 
-
+    //TODO: all of these below are wrong???
     const onClickStatus = () => {
         console.log("[Editor] Adding Status Verification node");
-        //createStatusVerificationNode()
         createNode(NodeType.STATUS)
     }
 
     const onClickWip = () => {
         console.log("Work in progress");
         alert('wip')
-
     }
 
     const onClickCount = () => {
         console.log("[Editor] Adding Count Verification node");
-        //createCountVerificationNode()
         createNode(NodeType.COUNT)
     }
 
     const onClickContains = () => {
         console.log("[Editor] Adding Contains Verification node");
-        //createContainsVerificationNode()
         createNode(NodeType.CONTAINS)
     }
 
     const onClickMatch = () => {
         console.log("[Editor] Adding Match Verification node");
-        //createMatchVerificationNode()
         createNode(NodeType.MATCH)
     }
 
     const onClickCustom = () => {
         console.log("[Editor] Adding Custom Verification node");
-        //createCustomVerificationNode()
         createNode(NodeType.CUSTOM)
     }
 
@@ -1380,37 +1001,31 @@ function Flow() {
     //TODO:
     const onClickSchema = () => {
         console.log("[Editor] Adding Schema Verification node");
-        //createSchemaVerificationNode()
         createNode(NodeType.SCHEMA)
     }
 
     const onClickBodyNode = () => {
         console.log("[Editor] Adding Body node");
-        //createBodyNode()
         createNode(NodeType.BODY)
     }
 
     const onClickHeadersNode = () => {
         console.log("[Editor] Adding Headers node");
-        //createHeadersNode()
         createNode(NodeType.HEADERS)
     }
 
     const onClickQueryNode = () => {
         console.log("[Editor] Adding Query node");
-        //createQueryNode()
         createNode(NodeType.QUERY)
     }
 
     const onClickRetainNode = () => {
         console.log("[Editor] Adding Retain node");
-        //createRetainNode()
         createNode(NodeType.RETAIN)
     }
 
     const onClickStressTestNode = () => {
         console.log('[Editor] Adding Stress test node');
-        //createStressNode()
         createNode(NodeType.STRESS)
     }
 
@@ -1421,7 +1036,7 @@ function Flow() {
 
     const onClickChangeWf = () => {
 
-/* 
+
         //TODO: add way to upload tsl as file similar to this
         const workflowsA = [
             {
@@ -1458,9 +1073,7 @@ function Flow() {
 
         const newstate = jsYaml.load(yamlFlows)
 
-        setWorkflows(newstate)
-
-        createNodes(newstate) */
+        createNodes(newstate)
 
     }
 
@@ -1559,7 +1172,10 @@ function Flow() {
     // If there is state coming from MonitorTests, create corresponding nodes
     useEffect(() => {
         if (location?.state?.tslState) {
+            console.log('[Editor] External state has been found; creating nodes...');
             createNodes(workflows)
+            //onLayout('TB') TODO: not working
+            //onLayout('TB') // need to call twice for some reason
         } else {
             console.log('[Editor] No state has been found; no nodes will be created');
         }
@@ -1712,7 +1328,7 @@ function Flow() {
     const onTslDrop = (tslFile) => {
         //somehow recreate state
 
-        /* const reader = new FileReader();
+        const reader = new FileReader();
 
         reader.onload = (event) => {
             const fileContents = event.target.result;
@@ -1724,12 +1340,12 @@ function Flow() {
             console.log("mewstate");
             console.log(newstate);
 
-            setWorkflows(newstate)
+            //setWorkflows(newstate)
 
             createNodes(newstate)
         };
 
-        reader.readAsText(tslFile); */
+        reader.readAsText(tslFile);
 
     }
 
@@ -2113,6 +1729,7 @@ function Flow() {
         finalizeConfiguration(processedWorkflows)
     }
 
+
     return (
         <div className='editor-container'>
 
@@ -2131,10 +1748,10 @@ function Flow() {
                     { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: "Workflow tooltip", iconClass: "flow-icon" },
                     { section: "Flow-related", title: "Test", onClick: onClickTestNode, class: "test", iconClass: "flow-icon" },
                     { section: "Flow-related", title: "Stress Test", onClick: onClickStressTestNode, class: "stress", iconClass: "flow-icon" },
-                    { section: "HTTP Requests", title: "Body", onClick: onClickBodyNode, class: "http", iconClass: "test-icon" },
-                    { section: "HTTP Requests", title: "Headers", onClick: onClickHeadersNode, class: "http", iconClass: "test-icon" },
-                    { section: "HTTP Requests", title: "Query", onClick: onClickQueryNode, class: "http", iconClass: "test-icon" },
-                    { section: "HTTP Requests", title: "Retain", onClick: onClickRetainNode, class: "http", iconClass: "test-icon" },
+                    { section: "Request components", title: "Body", onClick: onClickBodyNode, class: "http", iconClass: "test-icon" },
+                    { section: "Request components", title: "Headers", onClick: onClickHeadersNode, class: "http", iconClass: "test-icon" },
+                    { section: "Request components", title: "Query", onClick: onClickQueryNode, class: "http", iconClass: "test-icon" },
+                    { section: "Request components", title: "Retain", onClick: onClickRetainNode, class: "http", iconClass: "test-icon" },
                     { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class: "verif", iconClass: "verifs-icon" },
                     { section: "Verifications", title: "Schema", onClick: onClickSchema, class: "verif", iconClass: "verifs-icon" },
                     { section: "Verifications", title: "Contains ", onClick: onClickContains, class: "verif", iconClass: "verifs-icon" },
@@ -2155,7 +1772,7 @@ function Flow() {
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
-                    nodeTypes={rf_nodeTypes}
+                    nodeTypes={nodeTypes}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
@@ -2174,7 +1791,7 @@ function Flow() {
                         <ControlButton onClick={() => { onLayout('TB'); onLayout('TB') }} title='auto layout nodes'>
                             <div className='layoutButton' ></div>
                         </ControlButton>
-                        <ControlButton onClick={() => { alert('wip'); finishSetup() }} title='open settings window'>
+                        <ControlButton onClick={() => { setSettingsVisible(true) }} title='open settings window'>
                             <div className='settingsButton' ></div>
                         </ControlButton>
                         <ControlButton title='© 2022 - RapiTest - ISEL'>
@@ -2183,7 +1800,16 @@ function Flow() {
                     </Controls>
 
                 </ReactFlow>
+            </div>
 
+            <div>
+                
+                <SimpleModalComp
+                title={"Settings"}
+                body={<Settings></Settings>}
+                cancelButtonFunc={() => {setSettingsVisible(false)}}
+                visible={settingsVisible}
+            />
             </div>
         </div>
     );

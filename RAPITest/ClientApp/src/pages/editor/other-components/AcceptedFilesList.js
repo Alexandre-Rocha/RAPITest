@@ -1,10 +1,10 @@
-﻿import React, { Component } from 'react'
+import React, { Component } from 'react'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap';
 import { ListGroup, Row, Col } from 'react-bootstrap'
-import './ListGroupComp.css';
+import './css/AcceptedFilesList.css';
 
-export default class ListGroupComp extends Component {
+export default class AcceptedFilesList extends Component {
 
     render() {
         let title = this.props.title
@@ -16,20 +16,20 @@ export default class ListGroupComp extends Component {
 
         return (
             <div>
-                <div>{files.length === 0 ? <div></div> : title}</div>
+                <div>{files.length === 0 ? <div></div> : <span style={{ fontWeight: 'bold' }}>{title}</span>}</div>
                 <ListGroup as="ol">
                     {
                         files.map((f, i) => <ListGroup.Item as="li" key={i}>
                             <Row>
                                 <Col sm={2}>
-                                    <img style={{ marginRight: "15px" }} width="35" height="35" src={symbol} alt="Logo" />
+                                    <img style={{ marginRight: "15px" }} width="32" height="32" src={symbol} alt="Logo" />
                                 </Col>
-                                <Col sm={9}>
+                                <Col sm={8}>
                                     {toShow(f)}
                                 </Col>
-                                <Col sm={1}>
+                                <Col sm={2}>
                                     <div className="removeFileIcon" onClick={() => removeFunction(f)}>
-                                        <img width="35" height="35" src={removeSymbol} alt="Logo" />
+                                        <img width="32" height="32" src={removeSymbol} alt="Logo" />
                                     </div>
                                 </Col>
                             </Row>

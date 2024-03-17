@@ -200,7 +200,7 @@ export class MonitorTest extends Component {
 
 
         this.props.history.push({
-            pathname: 'devEditor',
+            pathname: 'editor',
             state: { tslState, apiFile, APITitle }
         });
 
