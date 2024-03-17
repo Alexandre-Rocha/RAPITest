@@ -121,16 +121,16 @@ const SmallApiUpload = (props) => {
 
                 <p></p>
                 <div>
-                    <Form.Label style={{ fontWeight: 'bold' }}>Upload using URL:</Form.Label>
-                    <Form.Control id="formURL" className="nodrag" type="text" placeholder="Enter text" />
-                    
-                    <div>
-                        {settings.theme === 'light' ? <Form.Text className="text-muted">
-                        The URL of the OpenAPI Specification you want to test. Should point to a .json or .yaml file.
-                    </Form.Text> : <></>}
-                    </div>
+                    <Form.Label style={{ fontWeight: 'bold' }}>Upload using URL</Form.Label>
+                    <Form.Control id="formURL" className="nodrag" type="text" placeholder="Enter API URL" />
+                    {settings.showTips ?
+                        <Form.Text className="text-muted">
+                            The URL of the OpenAPI Specification you want to test. Should point to a .json or .yaml file.
+                        </Form.Text>
+                        :
+                        <></>}
                 </div>
-                <AwesomeButton className="buttonAdd" style={{ marginTop: '10px' }} type="primary" onPress={uploadURL}><img style={{ marginRight: "15px" }} width="50" height="50" src={uploadIcon} alt="Logo" />Upload</AwesomeButton>
+                <AwesomeButton className="buttonAdd" style={{ marginTop: '10px' }} type="primary" onPress={uploadURL}><img style={{ marginRight: "15px" }} width="36" height="36" src={uploadIcon} alt="Logo" />Upload URL</AwesomeButton>
             </div>}
             {!state.showInput && <div>
                 <div>

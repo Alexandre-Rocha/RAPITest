@@ -14,13 +14,16 @@ import successIcon from '../../../assets/tickSmall.png'
 import binIcon from '../../../assets/bin.png'
 import AcceptedFilesList from "./AcceptedFilesList"
 
+import { useSettings } from "./SettingsContext"
 
+import { Form } from "react-bootstrap"
 
 
 function AuxFilesArea(props) {
 
     const { onDictionaryDrop, onDllDrop } = props
 
+    const {settings} = useSettings()
 
     const [uploadedDic, setUploadedDic] = useState(false)
 
@@ -34,15 +37,15 @@ function AuxFilesArea(props) {
     const [files, setFiles] = useState([])
 
 
-    const fileNameFuction = (file)=>{
+    const fileNameFuction = (file) => {
         //return "file test"
         return (<div>{file.name}</div>)
     }
-    
+
     const removeFileFunction = (fileToRemove) => {
         setFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
     }
-    
+
 
     const onDropDic = (accept, reject) => {
         if (reject.length !== 0 || accept.length > 1) {
@@ -54,10 +57,10 @@ function AuxFilesArea(props) {
         onDictionaryDrop(txtFile)
         //setDic(txtFile)
         setUploadedDic(true)
-        
+
         setFiles(currentFiles => [...currentFiles, ...accept]);
 
-          
+
     }
 
     const onDropDll = (accept, reject) => {
@@ -86,82 +89,76 @@ function AuxFilesArea(props) {
 
     return (
         <div>
+            <div style={{ fontWeight: 'bold' }}>Upload a TSL file</div>
+
+            {settings.showTips ?
+                <Form.Text className="text-muted">
+                    <span> Uploading a TSL file will recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span>
+                </Form.Text>
+                :
+                <></>}
+
             <div className="root-dropzone sidebar-dropzone">
-                {(uploadedDic === false)?
-                <Dropzone className="sidebar-dropzone"
-                    accept=".txt"
-                    onDrop={onDropDic}
-                    text={
-                        <div align="center">
-                            <p>Upload Dictionary (.txt)</p>
-                        </div>}
-                />
-                        :<div>Dictionary uploaded! (WIP)</div>
-                    }
-                {/* <Dropzone accept=".txt" onDrop={onDropDic}>
-                        {({ getRootProps, getInputProps }) => (
-                                <div align="center"
-                                    {...getRootProps({
-                                        className: 'aux-dropzone'
-                                    })}
-                                >
-                                    <input {...getInputProps()} />
-                                    <p>WIP TXT </p>
-                                </div>
-                        )}
-                    </Dropzone> */}
+                {(uploadedDic === false) ?
+                    <Dropzone className="sidebar-dropzone"
+                        accept=".txt"
+                        onDrop={onDropDic}
+                        text={
+                            <div align="center">
+                                <p>Upload Dictionary (.txt)</p>
+                            </div>}
+                    />
+                    : <div>Dictionary uploaded! (WIP)</div>
+                }
             </div>
-            
+
             <p></p>
+
+
+            <div style={{ fontWeight: 'bold' }}>Upload a TSL file</div>
+
+            {settings.showTips ?
+                <Form.Text className="text-muted">
+                    <span> Uploading a TSL file will recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span>
+                </Form.Text>
+                :
+                <></>}
 
             <div className="root-dropzone">
 
-                {(uploadedDLL === false)?
-                <Dropzone className="sidebar-dropzone"
-                    accept=".dll"
-                    onDrop={onDropDll}
-                    text={
-                        <div align="center">
-                            <p>Upload Custom Verification (.dll)</p>
-                        </div>}
-                />
-                        : <div>
-                            Dll uploaded! (WIP)
-                            Upload another: (WIP)
-                            <Dropzone className="sidebar-dropzone"
-                    accept=".dll"
-                    onDrop={onDropDll}
-                    text={
-                        <div align="center">
-                            <p>Upload Custom Verification (.dll)</p>
-                        </div>}
-                />
+                {(uploadedDLL === false) ?
+                    <Dropzone className="sidebar-dropzone"
+                        accept=".dll"
+                        onDrop={onDropDll}
+                        text={
+                            <div align="center">
+                                <p>Upload Custom Verification (.dll)</p>
+                            </div>}
+                    />
+                    : <div>
+                        Dll uploaded! (WIP)
+                        Upload another: (WIP)
+                        <Dropzone className="sidebar-dropzone"
+                            accept=".dll"
+                            onDrop={onDropDll}
+                            text={
+                                <div align="center">
+                                    <p>Upload Custom Verification (.dll)</p>
+                                </div>}
+                        />
 
-                        </div>
-                    }
-                {/* <Dropzone accept=".dll" onDrop={onDropDll}>
-                        {({ getRootProps, getInputProps }) => (
-                                <div align="center"
-                                    {...getRootProps({
-                                        className: 'dropzone aux-dropzone'
-                                    })}
-                                >
-                                    <input {...getInputProps()} />
-                                    <p>WIP DLL</p>
-                                </div>
-                        )}
-                    </Dropzone> */}
+                    </div>
+                }
+
             </div>
 
-                
             <AcceptedFilesList
-                    title="Accepted Files"
-                    files={files}
-                    symbol={successIcon}
-                    toShow={fileNameFuction}
-                    removeSymbol={binIcon}
-                    removeFunction={removeFileFunction}></AcceptedFilesList>
-
+                title="Accepted Files"
+                files={files}
+                symbol={successIcon}
+                toShow={fileNameFuction}
+                removeSymbol={binIcon}
+                removeFunction={removeFileFunction}></AcceptedFilesList>
 
         </div>
     )

@@ -36,8 +36,6 @@ const ApiUploadArea = (props) => {
     }
 
     const fileNameFuction = (file) => {
-        //return "file test"
-        console.log(file);
         return file.name
     }
 
@@ -51,22 +49,17 @@ const ApiUploadArea = (props) => {
 
     //TODO: label css class instead of inline
     return (
-
         <div>
-
-            {/* <Form.Label style={{ fontWeight: 'bold' }}>Name of test configuration:</Form.Label>
-            <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter text" /> */}
-
-            {/* <input  id="text" name="text" onChange={onTestConfNameChange} value={apiTitle} className="nodrag" /> */}
-
-            {/*             <label><b>API Specification:</b></label>
- */}
-
             <SimpleAccordion header={"Test configuration"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"name-icon"}>
 
                 <Form.Label style={{ fontWeight: 'bold' }}>Name:</Form.Label>
-                <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter text" />
-                
+                <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter name" />
+                {settings.showTips ?
+                        <Form.Text className="text-muted">
+                            The name for your test configuration. For example, "Petstore test suite".
+                        </Form.Text>
+                        :
+                        <></>}
 
             </SimpleAccordion>
 
@@ -74,23 +67,24 @@ const ApiUploadArea = (props) => {
 
             <SimpleAccordion header={"API Upload"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"api-icon"}>
 
-                {/* {(uploaded === false) ?
-                    <div>
-                        <Form.Label style={{ fontWeight: 'bold' }}>API URL:</Form.Label>
-                        <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter text" />
-                    </div> : <div>API uploaded! (WIP)</div>
-                } */}
-
                 {(uploaded === false) ?
                     <div>
-                        <Form.Label style={{ fontWeight: 'bold' }}>Upload using file:</Form.Label>
+                        <Form.Label style={{ fontWeight: 'bold', display:'block' }}>Upload using file</Form.Label>
+                        {settings.showTips ?
+                        <Form.Text className="text-muted">
+                            Drag and drop the file that contains your API Specification.
+                        </Form.Text>
+                        :
+                        <></>}
                         <SmallApiUpload handlerAPI={newHandler} apiTitle={apiTitle} ></SmallApiUpload>
                     </div>
-                    : <div>
+                    : 
+                    <div>
                         <span style={{ fontWeight: 'bold' }}>API uploaded!</span> <span> If you want to upload another specification, delete the already uploaded one below.</span>
                     </div>}
 
                 <p></p>
+
                 <AcceptedFilesList
                     title="Uploaded file:"
                     files={apiFiles}
@@ -100,7 +94,6 @@ const ApiUploadArea = (props) => {
                     removeFunction={removeFileFunction}></AcceptedFilesList>
 
             </SimpleAccordion>
-
         </div>
     );
 };

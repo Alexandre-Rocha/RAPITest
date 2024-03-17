@@ -15,10 +15,11 @@ import ListGroupComp from '../../../components/ListGroupComp';
 import successIcon from '../../../assets/tickSmall.png'
 import binIcon from '../../../assets/bin.png'
 
-
+import { useSettings } from './SettingsContext';
 
 const TslUploadArea = (props) => {
 
+    const {settings} = useSettings()
 
     const [uploaded, setUploaded] = useState(props.uploaded)
 
@@ -38,9 +39,9 @@ const TslUploadArea = (props) => {
 
         //TODO: validate TSL
 
-        onDropTsl(accept,reject)
+        onDropTsl(accept, reject)
         setUploaded(true)
-        setTslFiles(accept) 
+        setTslFiles(accept)
         console.log("finished newOnDropTsl");
 
     }
@@ -64,19 +65,29 @@ const TslUploadArea = (props) => {
 
         <div>
 
-            <SimpleAccordion header={"Upload TSL file"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"tsl-icon"}>             
+            <SimpleAccordion header={"Upload TSL file"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"tsl-icon"}>
 
                 {(uploaded === false) ?
                     <div>
-                        <span style={{ fontWeight: 'bold' }}>Upload a TSL file</span> <span>  to recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span>
+                        {/* <span style={{ fontWeight: 'bold' }}>Upload a TSL file</span> <span>  to recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span> */}
+
+                        <div style={{ fontWeight: 'bold' }}>Upload a TSL file</div> 
+
+                        {settings.showTips ?
+                        <Form.Text className="text-muted">
+                            <span> Uploading a TSL file will recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span>
+                        </Form.Text>
+                        :
+                        <></>}
+                        
                         <Dropzone className="sidebar-dropzone"
-                    accept=".yaml"
-                    onDrop={newOnDropTsl}
-                    text={
-                        <div align="center">
-                            <p>Upload TSL (.yaml)</p>
-                        </div>}
-                />
+                            accept=".yaml"
+                            onDrop={newOnDropTsl}
+                            text={
+                                <div align="center">
+                                    <p>Upload TSL (.yaml)</p>
+                                </div>}
+                        />
 
                     </div>
                     : <div>
