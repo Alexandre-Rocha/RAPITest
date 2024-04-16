@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import React from 'react';
-import { Form } from 'react-bootstrap';
+import { Form, Button, InputGroup, FormControl } from 'react-bootstrap';
 
 import { LOG_LEVELS as level, rapiLog } from '../utils';
 
@@ -35,9 +35,13 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
         setWfIndex(oldWfIndex => oldWfIndex - 1)
     }
 
+    const onChange = (change) => {
+        setWfIndex(change.target.value)
+    }
+
 
     const renderWfTitle = () => {
-        let str = ( !Boolean(wfName) ? "Workflow" : wfName)
+        let str = (!Boolean(wfName) ? "Workflow" : wfName)
         return str
     }
 
@@ -58,7 +62,7 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
         accItemClass: 'workflow-item',
         accHeaderClass: 'workflow-header',
         accBodyClass: 'nodrag',
-        accIconClass:'workflow-icon',
+        accIconClass: 'workflow-icon',
         header: renderWfTitle(),
         doubleHandle: true,
         topHandle: false
@@ -70,13 +74,19 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
 
                 <label htmlFor='workflowName'>Workflow name</label>
                 <Form.Control id='workflowName' value={wfName} onChange={onWfNameChange} className="workflow-name" type="text" placeholder="Enter text" />
-
+                
+                <p></p>
 
                 <div>
-                    Wf: {wfIndex}
-                    <button onClick={onIncrement}>+1</button>
-                    <button onClick={onDecrement}>-1</button>
+                    <span style={{ fontWeight: 'bold' }}>Workflow order: </span>
+                    <Form.Control
+                    type="number"
+                    value={wfIndex}
+                    onChange={onChange}
+                    style={{ width: '54px',display:'inline-block' }} 
+                />
                 </div>
+
 
             </GeneralNode>
         </div>

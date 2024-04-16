@@ -78,7 +78,9 @@ function RetainNode({ data, isConnectable, xPos, yPos }) {
                     </div>
                 ))}
 
-                <button onClick={addRetain}>Add Retain</button>
+                <p></p>
+
+                <button className='addButton' onClick={addRetain}>+ Add Retain</button>
 
             </GeneralNode>
         </div>

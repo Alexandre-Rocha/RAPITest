@@ -77,8 +77,8 @@ function HeadersNode({ data, isConnectable, xPos, yPos }) {
 
                     </div>
                 ))}
-
-                <button onClick={addHeader}>Add Header</button>
+                <p></p>
+                <button className='addButton' onClick={addHeader}>+ Add Header</button>
 
             </GeneralNode>
         </div>

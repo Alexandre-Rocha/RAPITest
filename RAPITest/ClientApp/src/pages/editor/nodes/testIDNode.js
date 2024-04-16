@@ -91,6 +91,10 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
         setTestIndex(oldTestIndex => oldTestIndex - 1)
     }
 
+    const onChange = (change) => {
+        setTestIndex(change.target.value)
+    }
+
     const generalNodeProps = {
         data: data,
         isConnectable: isConnectable,
@@ -107,41 +111,53 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
         <div>
             <GeneralNode {...generalNodeProps}>
 
-                <label htmlFor='testName'>Test name</label>
+                <label htmlFor='testName'>Test name:</label>
                 <Form.Control id='testName' value={testName} onChange={onTestNameChange} className="test-name" type="text" placeholder="Enter text" />
 
-
-                <label htmlFor="servers">Server</label>
-                <Combobox id='servers' className='nowheel'
+                    <label htmlFor="servers">Test settings:</label>
+{/*                 <label htmlFor="servers">Server</label>
+ */}                <Combobox id='servers' className='nowheel'
                     data={data.custom.servers}
                     filter={false}
                     onChange={onChangeServer}
                     defaultValue={data.custom.initialServer || "Servers:"}
                 />
 
-                <label htmlFor="paths">Path</label>
-                <Combobox id='paths' className='nowheel'
+{/*                 <label htmlFor="paths">Path</label>
+ */}                <Combobox id='paths' className='nowheel'
                     data={data.custom.paths}
                     filter={false}
                     onChange={onChangePath}
                     defaultValue={data.custom.initialPath || "Paths:"}
                 />
 
-                <label htmlFor="methods">Method</label>
-                <Combobox id='methods' className='nowheel'
+{/*                 <label htmlFor="methods">Method</label>
+ */}                <Combobox id='methods' className='nowheel'
                     data={data.custom.httpMethods}
                     filter={false}
                     onChange={onChangeMethod}
                     defaultValue={data.custom.initialMethod || "Methods:"}
                 />
 
-                <div>
+                {/* <div>
                     Wf: {data.custom._wfIndex}
                 </div>
                 <div>
                     Test: {testIndex}
                     <button onClick={onIncrement}>+1</button>
                     <button onClick={onDecrement}>-1</button>
+                </div> */}
+
+                <p></p>
+
+                <div>
+                    <span style={{ fontWeight: 'bold' }}>Test order: </span>
+                    <Form.Control
+                    type="number"
+                    value={testIndex}
+                    onChange={onChange}
+                    style={{ width: '54px',display:'inline-block' }}
+                />
                 </div>
 
             </GeneralNode>

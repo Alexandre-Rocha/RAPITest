@@ -56,7 +56,7 @@ const ApiUploadArea = (props) => {
                 <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter name" />
                 {settings.showTips ?
                         <Form.Text className="text-muted">
-                            The name for your test configuration. For example, "Petstore test suite".
+                            The name for your test configuration.
                         </Form.Text>
                         :
                         <></>}

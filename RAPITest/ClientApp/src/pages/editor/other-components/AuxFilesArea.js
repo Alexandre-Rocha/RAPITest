@@ -23,7 +23,7 @@ function AuxFilesArea(props) {
 
     const { onDictionaryDrop, onDllDrop } = props
 
-    const {settings} = useSettings()
+    const { settings } = useSettings()
 
     const [uploadedDic, setUploadedDic] = useState(false)
 
@@ -34,16 +34,24 @@ function AuxFilesArea(props) {
     const [dllArr, setDllArr] = useState([])
 
 
-    const [files, setFiles] = useState([])
+    //const [files, setFiles] = useState([])
+
+    const [dicFiles, setDicFiles] = useState([])
+    const [dllFiles, setDllFiles] = useState([])
 
 
     const fileNameFuction = (file) => {
-        //return "file test"
         return (<div>{file.name}</div>)
     }
 
-    const removeFileFunction = (fileToRemove) => {
-        setFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
+    const removeFileFunctionDict = (fileToRemove) => {
+        setDicFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
+        setUploadedDic(false)
+    }
+
+    const removeFileFunctionDLL = (fileToRemove) => {
+        setDllFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
+        setDllArr(currentFiles => currentFiles.filter(file => file !== fileToRemove)) //TODO: this is duplicate, can remove dllArr
     }
 
 
@@ -58,9 +66,7 @@ function AuxFilesArea(props) {
         //setDic(txtFile)
         setUploadedDic(true)
 
-        setFiles(currentFiles => [...currentFiles, ...accept]);
-
-
+        setDicFiles(currentFiles => [...currentFiles, ...accept]);
     }
 
     const onDropDll = (accept, reject) => {
@@ -83,50 +89,55 @@ function AuxFilesArea(props) {
         setDllArr(newDllArr);
         setUploadedDLL(true)
 
-        setFiles(currentFiles => [...currentFiles, ...accept]);
+        setDllFiles(currentFiles => [...currentFiles, ...accept]);
     }
 
 
     return (
         <div>
-            <div style={{ fontWeight: 'bold' }}>Upload a TSL file</div>
 
-            {settings.showTips ?
-                <Form.Text className="text-muted">
-                    <span> Uploading a TSL file will recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span>
-                </Form.Text>
+            {(uploadedDic === false) ?
+
+                <div>
+                    <div style={{ fontWeight: 'bold' }}>Upload a Dictionary file</div>
+
+                    {settings.showTips ?
+                        <Form.Text className="text-muted">
+                            Dictionary files are .txt files where you can define data such as schemas or body payloads to use in the tests.
+                        </Form.Text>
+                        :
+                        <></>}
+
+                    <div className="root-dropzone sidebar-dropzone">
+                        <Dropzone className="sidebar-dropzone"
+                            accept=".txt"
+                            onDrop={onDropDic}
+                            text={
+                                <div align="center">
+                                    <p>Upload Dictionary (.txt)</p>
+                                </div>}
+                        />
+                    </div>
+                </div>
+
                 :
-                <></>}
 
-            <div className="root-dropzone sidebar-dropzone">
-                {(uploadedDic === false) ?
-                    <Dropzone className="sidebar-dropzone"
-                        accept=".txt"
-                        onDrop={onDropDic}
-                        text={
-                            <div align="center">
-                                <p>Upload Dictionary (.txt)</p>
-                            </div>}
-                    />
-                    : <div>Dictionary uploaded! (WIP)</div>
-                }
-            </div>
+                <div><span style={{ fontWeight: 'bold' }}>Dictionary uploaded!</span> <span> If you want to upload another dictionary, delete the already uploaded one below.</span></div>}
 
             <p></p>
 
 
-            <div style={{ fontWeight: 'bold' }}>Upload a TSL file</div>
+            <div style={{ fontWeight: 'bold' }}>Upload Custom Verification files</div>
 
             {settings.showTips ?
                 <Form.Text className="text-muted">
-                    <span> Uploading a TSL file will recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span>
+                    <span> If the provided verifications aren't enough, you can implement your own and use them with the Custom Verification node.</span> <span style={{ fontWeight: 'bold' }}> Make sure you trust the DLL file!</span>
                 </Form.Text>
                 :
                 <></>}
 
             <div className="root-dropzone">
 
-                {(uploadedDLL === false) ?
                     <Dropzone className="sidebar-dropzone"
                         accept=".dll"
                         onDrop={onDropDll}
@@ -135,30 +146,24 @@ function AuxFilesArea(props) {
                                 <p>Upload Custom Verification (.dll)</p>
                             </div>}
                     />
-                    : <div>
-                        Dll uploaded! (WIP)
-                        Upload another: (WIP)
-                        <Dropzone className="sidebar-dropzone"
-                            accept=".dll"
-                            onDrop={onDropDll}
-                            text={
-                                <div align="center">
-                                    <p>Upload Custom Verification (.dll)</p>
-                                </div>}
-                        />
-
-                    </div>
-                }
-
+                    
             </div>
 
             <AcceptedFilesList
-                title="Accepted Files"
-                files={files}
+                title="Dictionary File"
+                files={dicFiles}
                 symbol={successIcon}
                 toShow={fileNameFuction}
                 removeSymbol={binIcon}
-                removeFunction={removeFileFunction}></AcceptedFilesList>
+                removeFunction={removeFileFunctionDict}></AcceptedFilesList>
+
+            <AcceptedFilesList
+                title="Custom Verification Files"
+                files={dllFiles}
+                symbol={successIcon}
+                toShow={fileNameFuction}
+                removeSymbol={binIcon}
+                removeFunction={removeFileFunctionDLL}></AcceptedFilesList>
 
         </div>
     )

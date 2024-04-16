@@ -21,7 +21,7 @@
 
 /*TODO: this broke setup test*/
 .accordion-button {
-    padding: 8px;
+    padding: 0px;
     box-shadow: none !important;
 }
 

@@ -139,3 +139,26 @@
   background-repeat: no-repeat;
   background-position: center;
 }
+
+
+.editor-page .rw-widget-picker{
+  min-height: 26px;
+}
+
+.editor-page .rw-combobox-input{
+  padding: 3px 6px;
+}
+
+.editor-page .rw-list-option{
+  padding: 3px 6px;
+  overflow: visible;
+}
+
+.editor-page .rw-popup{
+  overflow: visible;
+  width: max-content;
+}
+
+.editor-page .rw-list{
+  padding: 2px;
+}

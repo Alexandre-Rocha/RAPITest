@@ -1001,7 +1001,10 @@ function Flow() {
     //TODO:
     const onClickSchema = () => {
         console.log("[Editor] Adding Schema Verification node");
-        createNode(NodeType.SCHEMA)
+        const nodeData = {
+            schemas: apiFile.schemas
+        }
+        createNode(NodeType.SCHEMA, nodeData)
     }
 
     const onClickBodyNode = () => {

@@ -11,6 +11,7 @@ import { LOG_LEVELS as level, rapiLog } from '../utils';
 
 import './css/bodyNode.css'
 import GeneralNode from './generalNode';
+import MyTextModal from '../other-components/MyTextModal';
 
 function BodyNode({ data, isConnectable, xPos, yPos }) {
 
@@ -24,16 +25,23 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
     rapiLog(level.DEBUG, "[Body node] X pos: ", xPos)
     rapiLog(level.DEBUG, "[Body node] Y pos: ", yPos)
 
-    const onBodyTextChange = (evt) => {
-        rapiLog(level.INFO, "[Body node] Body text: ", evt.target.value);
-        setBodyText(evt.target.value)
+    const onBodyTextChange = (text) => {
+        rapiLog(level.INFO, "[Body node] Body text: ", text);
+        setBodyText(text)
         //data.custom.bodyTextChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
 
     };
 
     const onBodyRefChange = (evt) => {
         rapiLog(level.INFO, "[Body node] Body ref: ", evt.target.value);
-        setBodyRef(evt.target.value)
+        if (evt.target.value == "textBox") {
+            setBodyRef(null)
+            setUseBodyRef(false)
+        }
+        else{
+            setBodyRef(evt.target.value)
+            setUseBodyRef(true)
+        }
         //data.custom.bodyRefChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
     };
 
@@ -44,7 +52,10 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
     );
 
     const renderSchemaData = () => {
-        if (data.custom.dictObj) {
+        if (!useBodyRef) {
+            return bodyText
+        }
+        else if (data.custom.dictObj) {
             return data.custom.dictObj[bodyRef]
         }
         return ""
@@ -66,6 +77,7 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
         return state
     }
 
+
     data.custom.getState = getState
 
     const generalNodeProps = {
@@ -84,18 +96,18 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
         <div>
             <GeneralNode {...generalNodeProps}>
 
-                <label htmlFor="bodyText">
+                {/* <label htmlFor="bodyText">
                     Body text WIP
                     <OverlayTrigger placement="right" overlay={tooltip}>
                         <span>  🛈</span>
                     </OverlayTrigger>
                 </label>
-                <Form.Control id='bodyText' value={bodyText} onChange={onBodyTextChange} className="body-text" type="text" placeholder="Enter text" />
+                <Form.Control id='bodyText' value={bodyText} onChange={onBodyTextChange} className="body-text" type="text" placeholder="Enter text" /> */}
 
-                <label htmlFor="bodyRef">Body ref WIP</label>
+                <label htmlFor="bodyRef">Choose Body:</label>
                 <div className='body-ref-div'>
                     <Form.Select id='bodyRef' className='body-ref' aria-label="Default select example" onChange={onBodyRefChange} >
-                        <option></option>
+                        <option value="textBox" >Use text box</option>
                         {renderSchemaList().map((item, index) => {
                             return (
                                 <option key={index} value={item}>{item}</option>
@@ -106,7 +118,12 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
                     <img className="see-more-body" onClick={() => setShowSchema(true)} width="24" height="24" src={searchIcon} alt="Logo" />
                 </div>
 
+                <p></p>
+                
+                <MyTextModal handleSave={onBodyTextChange} text="Open Body text box"></MyTextModal>
+
             </GeneralNode>
+
 
             <SimpleModalComp
                 title={"Body preview"}

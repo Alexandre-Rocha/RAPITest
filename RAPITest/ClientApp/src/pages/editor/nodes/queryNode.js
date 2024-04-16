@@ -76,8 +76,9 @@ function QueryNode({ data, isConnectable, xPos, yPos }) {
 
                     </div>
                 ))}
-
-                <button onClick={addQuery}>Add Query</button>
+                <p></p>
+                
+                <button className='addButton' onClick={addQuery}>+ Add Query</button>
 
             </GeneralNode>
         </div>

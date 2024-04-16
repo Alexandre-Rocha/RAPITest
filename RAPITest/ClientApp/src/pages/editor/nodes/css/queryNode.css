@@ -52,3 +52,35 @@
   .query-node [data-handleid="topHandle"]{
     background-color: #fff7ad !important;
   }
+
+
+  button.remove-query.btn.btn-light.btn-sm {
+    height: 31px;
+}
+
+.remove-query{
+    background-color: #fff;
+    color: #212529;
+    border: 1px solid #ced4da;
+  }
+  
+  .remove-query:hover{
+    background-color: #f7f7f7;
+    color: #212529;
+    border: 1px solid #ced4da;
+  }
+
+
+  .addButton{
+    background-color: #fff;
+    color: #212529;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+  }
+  
+  .addButton:hover{
+    background-color: #f7f7f7;
+    color: #212529;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+  }

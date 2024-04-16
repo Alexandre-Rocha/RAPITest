@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Form } from 'react-bootstrap'
+import { Form, OverlayTrigger, Tooltip} from 'react-bootstrap'
 
 function TimerSettings(props) {
 
@@ -24,10 +24,18 @@ function TimerSettings(props) {
         onRunIntervalChange(evt)
     }
 
+    const runGeneratedTooltip = (
+        <Tooltip className="custom-tooltip" id="runGeneratedTooltip">
+            Body tooltip. Body tooltip.Body tooltip.Body tooltip.Body tooltip.Body tooltip.Body tooltip.Body tooltip.
+        </Tooltip>
+    );
+
     return (
         <Form>
             <Form.Group>
-                <Form.Label style={{ fontWeight: 'bold' }}>Run Generated?</Form.Label>
+                <Form.Label style={{ fontWeight: 'bold' }}>Run Generated?<OverlayTrigger placement="right" overlay={runGeneratedTooltip}>
+                        <span>  🛈</span>
+                    </OverlayTrigger></Form.Label>
                 <div>
                     <Form.Check
                         inline
