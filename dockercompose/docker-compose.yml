@@ -21,28 +21,40 @@ services:
     environment:
         SA_PASSWORD: "Your_password123"
         ACCEPT_EULA: "Y"
+    healthcheck:
+        test: [ "CMD", "/opt/mssql-tools/bin/sqlcmd", "-U", "sa", "-P", "Your_password123", "-Q", "select 1" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 90s
     restart: always
 
   rapitest:
-    image: alexandrerocha99/rapitest:2.0
+    image: alexandrerocha99/rapitestcopy:1.0
     depends_on:
-        - db
-        - rabbitmq
+        db:
+            condition: service_healthy
+        rabbitmq:
+            condition: service_started
     ports:
         - "8080:80"
     restart: always
 
   runtestsworkerservice:
-    image: alexandrerocha99/runtestsworkerservice:2.0
+    image: alexandrerocha99/runtestsworkerservice:2.1
     depends_on:
-        - db
-        - rabbitmq
+        db:
+            condition: service_healthy
+        rabbitmq:
+            condition: service_started
     restart: always
 
 
   setuptestsworkerservice:
-    image: alexandrerocha99/setuptestsworkerservice:2.0
+    image: alexandrerocha99/setuptestsworkerservice:2.1
     depends_on:
-        - db
-        - rabbitmq
+        db:
+            condition: service_healthy
+        rabbitmq:
+            condition: service_started
     restart: always

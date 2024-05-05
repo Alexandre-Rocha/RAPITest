@@ -29,10 +29,7 @@ RUN dotnet publish "RAPITest.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-COPY RAPITest/certs/cert.pem ./certs/
+COPY RAPITest/ClientApp/ ./ClientApp/
+COPY RAPITest/certs/certificate.pfx ./certs/
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "RAPITest.dll"]
-
-
-
-
