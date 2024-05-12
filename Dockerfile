@@ -25,11 +25,11 @@ WORKDIR "/src/RAPITest"
 RUN dotnet build "RAPITest.csproj" -c Release -o /app/build
 
 FROM build AS publish
+ENV NODE_OPTIONS=--openssl-legacy-provider
 RUN dotnet publish "RAPITest.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-COPY RAPITest/ClientApp/ ./ClientApp/
 COPY RAPITest/certs/certificate.pfx ./certs/
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "RAPITest.dll"]
