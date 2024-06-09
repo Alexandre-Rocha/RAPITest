@@ -60,7 +60,6 @@ const TslUploadArea = (props) => {
         setUploaded(false)
     }
 
-    //TODO: label css class instead of inline
     return (
 
         <div>
@@ -69,7 +68,6 @@ const TslUploadArea = (props) => {
 
                 {(uploaded === false) ?
                     <div>
-                        {/* <span style={{ fontWeight: 'bold' }}>Upload a TSL file</span> <span>  to recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span> */}
 
                         <div style={{ fontWeight: 'bold' }}>Upload a TSL file</div> 
 

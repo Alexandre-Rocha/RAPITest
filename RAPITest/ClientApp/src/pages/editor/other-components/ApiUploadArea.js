@@ -98,5 +98,4 @@ const ApiUploadArea = (props) => {
     );
 };
 
-//TODO: VER a cena da location aí em cima       && location?.state?.APITitle === undefined
 export default ApiUploadArea;

@@ -242,17 +242,8 @@ export class MonitorTest extends Component {
                     <AwesomeButton className="buttonEdit" type="secondary" onPress={() => this.enableDeleteModal(item.ApiId)}><img width="50" height="50" src={deleteIcon} alt="Logo" /></AwesomeButton>
                 </div>
                 <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>
-                    {/* <button onClick={this.editInEditor}>
-                        <Link to="/devEditor">Edit in Workflow Editor</Link>
-                    </button>
-                    <button onClick={this.editInEditor}>
-                        <Link to={{ pathname: '/devEditor', state: { objectData: { a: "www" } } }}>Go to About</Link>
-                    </button> */}
-                    {/* <button onClick={() => this.editInEditor(item.ApiId, item.APITitle, item.LatestReport)}>
-                        Edit in Workflow editor
-                    </button> */}
                     <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.editInEditor(item.ApiId, item.APITitle, item.LatestReport)}><img style={{ marginRight: "15px" }} width="50" height="50" src={editIcon} alt="Logo" />Edit in Workflow editor</AwesomeButton>
-                </div>{/*  TODO:HERE */}
+                </div>
             </div>
         )
     }
@@ -273,7 +264,6 @@ export class MonitorTest extends Component {
                 </div>
             )
         }
-        //TODO:remove button editor
         return (
             <table className="table table-striped">
                 <tbody>
@@ -281,7 +271,6 @@ export class MonitorTest extends Component {
                     <tr><th>Warnings</th><td>{item.Warnings}</td></tr>
                     <tr><th>Latest Report</th><td>{item.LatestReport}</td></tr>
                     <tr><th>Next Test</th><td>{item.NextTest}</td></tr>
-                    {/* <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.editInEditor(item.ApiId, item.APITitle, item.LatestReport)}><img style={{ marginRight: "15px" }} width="50" height="50" src={editIcon} alt="Logo" />Edit in Workflow editor</AwesomeButton> */}
                 </tbody>
             </table>
         )

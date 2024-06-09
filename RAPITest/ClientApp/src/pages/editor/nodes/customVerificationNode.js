@@ -11,7 +11,7 @@ import GeneralNode from './generalNode';
 
 function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
 
-    const [dllName, setDllName] = useState(data.custom.dllName) //TODO: is this good?
+    const [dllName, setDllName] = useState(data.custom.dllName || null)
 
     rapiLog(level.DEBUG, "[Custom node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Custom node] Test ID: ", data.custom._testIndex)

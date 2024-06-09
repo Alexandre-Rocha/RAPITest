@@ -81,7 +81,7 @@ const flowNodeTypes = [NodeType.WORKFLOW, NodeType.TEST, NodeType.STRESS]
 const requestNodeTypes = [NodeType.BODY, NodeType.HEADERS, NodeType.QUERY, NodeType.RETAIN]
 const verificationNodeTypes = [NodeType.STATUS, NodeType.SCHEMA, NodeType.MATCH, NodeType.CONTAINS, NodeType.COUNT, NodeType.CUSTOM]
 
-
+const httpMethods = ["Get", "Delete", "Post", "Put"]  //TSL only supports the 4 main HTTP methods, in the future would be nice to support to more and derive them from the api as well
 
 //dagre
 const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -151,6 +151,10 @@ function Flow() {
     const [dictFile, setDictFile] = useState()
     const [dllFileArr, setDllFileArr] = useState([])
 
+
+    const NODE_LEFT_HANDLE = "leftHandle"
+    const NODE_RIGHT_HANDLE = "rightHandle"
+
     // #endregion
 
     // this is so i have more freedom applying custom css effects while making sure they dont affect the app elsewhere (as in outside the editor page)
@@ -188,8 +192,6 @@ function Flow() {
         console.log("[Editor] New test configuration name: ", newName);
         setTestConfName(newName)
     }, [])
-
-    //TODO: why is there no onApiUpload?
 
     const onRunGeneratedChange = useCallback((runGenerated) => {
         const run = runGenerated.target.value
@@ -282,7 +284,7 @@ function Flow() {
         }
 
         else {
-            //TODO: should never come here
+            //should never come here
             alert('something went wrong')
             return false
         }
@@ -481,7 +483,7 @@ function Flow() {
             initialMethod: test.Method,
             paths: apiFile.paths,
             servers: apiFile.servers,
-            httpMethods: ["Get", "Delete", "Post", "Put"], //TODO: shouldnt be hardcoded here prob
+            httpMethods: httpMethods, // TSL only supports the 4 main HTTP methods, in the future would be nice to support to more and derive them from the api as well
             _testIndex: currYamlTestIndex   //TODO: is this needed ?
         }
         const testNodeId = createNode(NodeType.TEST, nodeData)
@@ -490,8 +492,6 @@ function Flow() {
     }
 
     const processBody = (body) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Body found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //const bodyNodeId = createBodyNode(bodyText, bodyRef, yamlWfIndex, currYamlTestIndex, currX, currY)
 
@@ -526,11 +526,10 @@ function Flow() {
     }
 
     const processHeaders = (headers) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Headers found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+        
 
         //headers is array with here, like this: ["Accept:application/xml"]
-        //must process it //TODO: also test with more than 1 header
+        //must process it 
 
         let processedHeaders = headers.map(headerString => {
             let parts = headerString.split(":");
@@ -551,8 +550,7 @@ function Flow() {
     }
 
     const processQuery = (query) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Query found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
+
         //TODO: need to test this, dont have any example tsl file w query i think...
         let processedQuery = query.map(queryString => {
             let parts = queryString.split(":");
@@ -573,8 +571,6 @@ function Flow() {
     }
 
     const processRetain = (retain) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Retain found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         let processedRetain = retain.map(retainString => {
             let parts = retainString.split("#$.");
@@ -595,8 +591,6 @@ function Flow() {
     }
 
     const processStatusVerif = (status) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Status verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //const statusVerifNodeId = createStatusVerificationNode(status, yamlWfIndex, currYamlTestIndex, currX, currY)
 
@@ -609,8 +603,6 @@ function Flow() {
     }
 
     const processSchemaVerif = (schema) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Schema verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //const schemaVerifNodeId = createSchemaVerificationNode(schema, yamlWfIndex, currYamlTestIndex, currX, currY)
 
@@ -627,8 +619,6 @@ function Flow() {
     }
 
     const processContainsVerif = (contains) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Contains verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //TODO: transform contains here or before process is called?
         //const containsVerifNodeId = createContainsVerificationNode(contains, yamlWfIndex, currYamlTestIndex, currX, currY)
@@ -642,8 +632,6 @@ function Flow() {
     }
 
     const processCountVerif = (matchString) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Count verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         // TODO: process key and value here or before calling processmethod?
 
@@ -663,8 +651,6 @@ function Flow() {
     }
 
     const processMatchVerif = (matchString) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Match verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //TODO: preocess key and value here or before calling processmetdo?
 
@@ -684,8 +670,6 @@ function Flow() {
     }
 
     const processCustomVerif = (dllName) => {
-        // TODO:
-        //rapiLog(level.DEBUG, "[Editor] Match verification found when recreating state for test with ID " + currYamlTestIndex + ", workflow with ID " + yamlWfIndex)
 
         //TODO: process dll name here or begore
         //const customVerifNodeId = createCustomVerificationNode(dllName, yamlWfIndex, currYamlTestIndex, currX, currY)
@@ -721,7 +705,7 @@ function Flow() {
                 const newEdgeWfStress = {
                     id: "wf:" + wfNodeID.toString() + "-stress:" + stressNodeId.toString(),
                     source: wfNodeID.toString(),
-                    sourceHandle: "leftHandle", // TODO: hardcoded
+                    sourceHandle: NODE_LEFT_HANDLE, 
                     target: stressNodeId.toString()
                 }
 
@@ -746,7 +730,7 @@ function Flow() {
                     const newEdgeTestBody = {
                         id: currLeafId.toString() + bodyNodeId.toString(),
                         source: currLeafId.toString(),
-                        sourceHandle: "leftHandle", // TODO: hardcoded
+                        sourceHandle: NODE_LEFT_HANDLE,
                         target: bodyNodeId.toString()
                     }
 
@@ -761,7 +745,7 @@ function Flow() {
                     const newEdgeTestHeaders = {
                         id: currLeafId.toString() +  headersNodeId.toString(),
                         source: currLeafId.toString(),
-                        sourceHandle: "leftHandle", // TODO: hardcoded
+                        sourceHandle: NODE_LEFT_HANDLE,
                         target: headersNodeId.toString()
                     }
 
@@ -776,7 +760,7 @@ function Flow() {
                     const newEdgeTestQuery = {
                         id: currLeafId.toString() + queryNodeId.toString(),
                         source: currLeafId.toString(),
-                        sourceHandle: "leftHandle", // TODO: hardcoded
+                        sourceHandle: NODE_LEFT_HANDLE,
                         target: queryNodeId.toString()
                     }
 
@@ -791,7 +775,7 @@ function Flow() {
                     const newEdgeTestRetain = {
                         id: currLeafId.toString() + retainNodeId.toString(),
                         source: currLeafId.toString(),
-                        sourceHandle: "leftHandle", // TODO: hardcoded
+                        sourceHandle: NODE_LEFT_HANDLE,
                         target: retainNodeId.toString()
                     }
 
@@ -812,7 +796,7 @@ function Flow() {
                 const newEdgeTestStatus = {
                     id: currLeafId.toString() + statusVerifNodeId.toString(),
                     source: currLeafId.toString(),
-                    sourceHandle: "rightHandle", // TODO: hardcoded
+                    sourceHandle: NODE_RIGHT_HANDLE,
                     target: statusVerifNodeId.toString()
                 }
 
@@ -826,7 +810,7 @@ function Flow() {
                     const newEdgeTestSchema = {
                         id: currLeafId.toString() + schemaVerifId.toString(),
                         source: currLeafId.toString(),
-                        sourceHandle: "rightHandle", // TODO: hardcoded
+                        sourceHandle: NODE_RIGHT_HANDLE,
                         target: schemaVerifId.toString()
                     }
 
@@ -841,7 +825,7 @@ function Flow() {
                     const newEdgeTestContains = {
                         id: currLeafId.toString() + containsVerifNodeId.toString(),
                         source: currLeafId.toString(),
-                        sourceHandle: "rightHandle", // TODO: hardcoded
+                        sourceHandle: NODE_RIGHT_HANDLE,
                         target: containsVerifNodeId.toString()
                     }
 
@@ -856,7 +840,7 @@ function Flow() {
                     const newEdgeTestCount = {
                         id: currLeafId.toString() + countVerifNodeId.toString(),
                         source: currLeafId.toString(),
-                        sourceHandle: "rightHandle", // TODO: hardcoded
+                        sourceHandle: NODE_RIGHT_HANDLE,
                         target: countVerifNodeId.toString()
                     }
 
@@ -871,7 +855,7 @@ function Flow() {
                     const newEdgeTestMatch = {
                         id: currLeafId.toString() + matchVerifNodeId.toString(),
                         source: currLeafId.toString(),
-                        sourceHandle: "rightHandle", // TODO: hardcoded
+                        sourceHandle: NODE_RIGHT_HANDLE,
                         target: matchVerifNodeId.toString()
                     }
 
@@ -886,7 +870,7 @@ function Flow() {
                     const newEdgeTestCustom = {
                         id: currLeafId.toString() + customVerifNodeId.toString(),
                         source: currLeafId.toString(),
-                        sourceHandle: "rightHandle", // TODO: hardcoded
+                        sourceHandle: NODE_RIGHT_HANDLE,
                         target: customVerifNodeId.toString()
                     }
 
@@ -898,7 +882,7 @@ function Flow() {
                 const newEdgeWfTest = {
                     id: wfNodeID.toString() + testNodeId.toString(),
                     source: wfNodeID.toString(),
-                    sourceHandle: "rightHandle", // TODO: hardcoded
+                    sourceHandle: NODE_RIGHT_HANDLE,
                     target: testNodeId.toString()
                 }
 
@@ -945,7 +929,20 @@ function Flow() {
 
     // #region onClick in Editor
 
+
+    const checkIfApiFile = () => {
+        if (apiFile) {
+            return true
+        } else {
+            alert('WIP - you cant add nodes before uploading api file')
+            return false
+        }
+    }
+
     const onClickWorkflowNode = () => {
+
+        if(!checkIfApiFile()) return
+
         console.log("[Editor] Adding Workflow node");
         maxWfIndex.current += 1
 
@@ -957,6 +954,9 @@ function Flow() {
     }
 
     const onClickTestNode = () => {
+
+        if(!checkIfApiFile()) return
+
         console.log("[Editor] Adding Test node");
         const nodeData = {
             paths: apiFile.paths,
@@ -968,38 +968,44 @@ function Flow() {
 
     //TODO: all of these below are wrong???
     const onClickStatus = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Status Verification node");
         createNode(NodeType.STATUS)
     }
 
     const onClickWip = () => {
+        if(!checkIfApiFile()) return
         console.log("Work in progress");
         alert('wip')
     }
 
     const onClickCount = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Count Verification node");
         createNode(NodeType.COUNT)
     }
 
     const onClickContains = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Contains Verification node");
         createNode(NodeType.CONTAINS)
     }
 
     const onClickMatch = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Match Verification node");
         createNode(NodeType.MATCH)
     }
 
     const onClickCustom = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Custom Verification node");
         createNode(NodeType.CUSTOM)
     }
 
 
-    //TODO:
     const onClickSchema = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Schema Verification node");
         const nodeData = {
             schemas: apiFile.schemas
@@ -1008,26 +1014,31 @@ function Flow() {
     }
 
     const onClickBodyNode = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Body node");
         createNode(NodeType.BODY)
     }
 
     const onClickHeadersNode = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Headers node");
         createNode(NodeType.HEADERS)
     }
 
     const onClickQueryNode = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Query node");
         createNode(NodeType.QUERY)
     }
 
     const onClickRetainNode = () => {
+        if(!checkIfApiFile()) return
         console.log("[Editor] Adding Retain node");
         createNode(NodeType.RETAIN)
     }
 
     const onClickStressTestNode = () => {
+        if(!checkIfApiFile()) return
         console.log('[Editor] Adding Stress test node');
         createNode(NodeType.STRESS)
     }
@@ -1040,7 +1051,6 @@ function Flow() {
     const onClickChangeWf = () => {
 
 
-        //TODO: add way to upload tsl as file similar to this
         const workflowsA = [
             {
                 "WorkflowID": "wf1",
@@ -1406,6 +1416,7 @@ function Flow() {
     }
 
 
+    //TODO:no save changes (agr ja nao ]e, ver num desses embaixo) remover headers vazios
 
     const scanEditorState = () => {
         const workflows = []
@@ -1426,7 +1437,7 @@ function Flow() {
             const connectedStressNodes = getConnectedNodes(wfNode, NodeType.STRESS)
             if (connectedStressNodes.length > 1) {
                 alert('can only have 1 stress test')
-                return false //TODO: check how to leave this method bettter?
+                return false 
             }
             if (connectedStressNodes.length === 1) {
                 const stressState = connectedStressNodes[0].data.custom.getState() // {count: "", threads:"", delay:""}
@@ -1436,7 +1447,7 @@ function Flow() {
             const connectedTestNodes = getConnectedNodes(wfNode, NodeType.TEST)
             if (connectedTestNodes.length < 1) {
                 alert('workflows must have at least 1 test')
-                return false //TODO: check how to leave this method bettter?
+                return false 
             }
             connectedTestNodes.forEach(testNode => {
                 const testState = testNode.data.custom.getState() // {name: "", server:"", path:"", method:"", _testIndex: ""}
@@ -1456,19 +1467,19 @@ function Flow() {
                 if (connectedRequestNodes.length >= 1) {
                     if (connectedRequestNodes.length > 1) {
                         alert('only one request node can be connected directly to a test node')
-                        return false //TODO: check how to leave this method bettter?
+                        return false 
                     }
 
                     const connectedRequestNode = connectedRequestNodes[0]
                     if (!requestNodeTypes.includes(connectedRequestNode.type)) {
                         alert('something wrong w connection')
-                        return false //TODO: check how to leave this method bettter? 
+                        return false 
                     }
                     const restOfTheRequestNodes = getNodesInLinearChain(connectedRequestNode)
                     const allRequestNodes = connectedRequestNodes.concat(restOfTheRequestNodes)
                     if (!allRequestNodes.every(node => requestNodeTypes.includes(node.type))) {
                         alert('something wrong w connection')
-                        return false //TODO: check how to leave this method bettter?
+                        return false 
                     }
 
                     const headersNode = allRequestNodes.find(node => node.type === NodeType.HEADERS);
@@ -1506,29 +1517,29 @@ function Flow() {
                 const connectedVerificationNodes = getConnectedNodesByHandle(testNode, "rightHandle")
                 if (connectedVerificationNodes.length === 0) {
                     alert('you need at least the status verification on every test')
-                    return false //TODO: check how to leave this method bettter?
+                    return false 
                 }
 
                 if (connectedVerificationNodes.length > 1) {
                     alert('only one verification node can be connected directly to a test node')
-                    return false //TODO: check how to leave this method bettter?
+                    return false 
                 }
 
                 const connectedVerificationNode = connectedVerificationNodes[0]
                 if (!verificationNodeTypes.includes(connectedVerificationNode.type)) {
                     alert('something wrong w connection')
-                    return false //TODO: check how to leave this method bettter?
+                    return false 
                 }
                 const restOfTheVerificationNodes = getNodesInLinearChain(connectedVerificationNode)
                 const allVerificationNodes = connectedVerificationNodes.concat(restOfTheVerificationNodes)
                 if (!allVerificationNodes.every(node => verificationNodeTypes.includes(node.type))) {
                     alert('something wrong w connection')
-                    return false //TODO: check how to leave this method bettter? 
+                    return false 
                 }
 
                 if (connectedVerificationNodes.length === 0) {
                     alert('you need at least the status verification on every test')
-                    return false //TODO: check how to leave this method bettter?
+                    return false 
                 }
 
                 const statusNode = allVerificationNodes.find(node => node.type === NodeType.STATUS);
@@ -1589,7 +1600,7 @@ function Flow() {
             delete workflow._wfIndex
 
             // process Stress Test
-            // TODO: No processing required?
+            // No processing required?
 
             // process each test for this workflow
             for (let testIndex = 0; testIndex < workflow.Tests.length; testIndex++) {
@@ -1617,7 +1628,7 @@ function Flow() {
 
                 // process Body
                 if (test.Body) {
-                    //TODO: nothing needed?
+                    // No processing required?
                 }
 
 
@@ -1627,7 +1638,7 @@ function Flow() {
                     const verification = test.Verifications[ver];
 
                     // process Status
-                    // TODO: No processing required?
+                    // No processing required?
 
                     // process Schema
                     if (verification.Schema) {
@@ -1648,10 +1659,9 @@ function Flow() {
                     }
 
                     // process Contains
-                    // TODO: No processing required?
+                    // No processing required?
 
                     // process Custom
-                    // TODO:
                     if (verification.Custom) {
                         const transformedCustom = `[${verification.Custom}]`;
                         verification.Custom = transformedCustom
@@ -1685,7 +1695,7 @@ function Flow() {
 
         if (dictFile) {
             console.log("appending dictionary...");
-            data.append('dictionary.txt', dictFile); //TODO: this is file or json?
+            data.append('dictionary.txt', dictFile); 
         }
 
 

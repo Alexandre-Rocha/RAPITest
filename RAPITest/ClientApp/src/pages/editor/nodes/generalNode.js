@@ -30,7 +30,7 @@ function GeneralNode({ data, isConnectable, children, nodeClass, header, accItem
 
 
     return (
-        <div className={`${nodeClass} node`}>
+        <div className={`general-node ${nodeClass} node`}>
             {topHandle? <Handle type="target" position={Position.Top} id="topHandle" style={{ backgroundColor:"#464545" }} isConnectable={isConnectable} /> : <></>}
 
             <SimpleAccordion accItemClass={accItemClass} accHeaderClass={accHeaderClass} accBodyClass={accBodyClass} accIconClass={accIconClass} header={header} headerRef={accordionRef}>

@@ -42,8 +42,6 @@ function HeadersNode({ data, isConnectable, xPos, yPos }) {
     rapiLog(level.DEBUG, "[Headers node] X pos: ", xPos)
     rapiLog(level.DEBUG, "[Headers node] Y pos: ", yPos)
 
-    //TODO: n tem nada aver aqui mas no save changes remover headers vazios
-
     const generalNodeProps = {
         data: data,
         isConnectable: isConnectable,

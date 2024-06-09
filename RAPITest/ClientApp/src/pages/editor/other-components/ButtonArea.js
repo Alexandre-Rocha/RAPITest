@@ -8,11 +8,10 @@ import "./css/buttons.css"
 
 /* data should be an array in the form: 
 [
-    {section:"Section A", title: "Node A", onClick: onNodeAClickCallback},
+    {section:"Section A", title: "Node A", onClick: onNodeAClickCallback, class: "node-class", icon-class: "node-icon-class", tooltip: "Node A tooltip"},
     {...},
     ...
 ]
-Sections must be: "Flow" OR "HTTP" OR "Verifications" OR "Setup" OR "Others" OR "Dev" - nvm everything works now TODO:remove this comment?
 */
 const ButtonArea = (props) => {
 

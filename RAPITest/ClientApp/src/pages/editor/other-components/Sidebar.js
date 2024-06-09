@@ -27,8 +27,6 @@ function Sidebar(props) {
 
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    
-
     const { onRunGeneratedChange, onRunImmediatelyChange, onRunIntervalChange } = props
 
     const { apiTitle, handlerAPI } = props
@@ -62,7 +60,6 @@ function Sidebar(props) {
 
     const onDropTsl = (accept, reject) => {
 
-
         if (reject.length !== 0 || accept.length > 1) {
             alert("WIP- one yaml file only!")
             return
@@ -86,7 +83,11 @@ function Sidebar(props) {
                 {<img src={menu} alt="Menu Icon" width="35" height="35" />}
             </button>
 
-            {/* TODO: uploaded hardocded false */}
+            {/* TODO: uploaded hardocded false 
+            for apiupload and tsl upload
+            if coming from monitor tests it wont be always like this in theory, need to fix/do
+            
+            */}
 
             {isCollapsed ?
 

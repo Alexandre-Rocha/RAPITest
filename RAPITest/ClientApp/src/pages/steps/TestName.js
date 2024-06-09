@@ -9,18 +9,18 @@ import { AwesomeButton } from "react-awesome-button";
 import "react-awesome-button/dist/styles.css";
 import continueIcon from '../../assets/continue.png'
 
-import editIcon from '../../assets/pencil.png' //TODO: here
+import editIcon from '../../assets/pencil.png'
 
-import { withRouter } from 'react-router-dom'; //TODO: use this to navigat to editor
+import { withRouter } from 'react-router-dom'; // to allow navigating to editor
 
 import { Link } from 'react-router-dom/cjs/react-router-dom';
 import { NavLink } from 'react-bootstrap';
 
 class TestName extends Component {
 
-    constructor(props) {    // todo eu added props
+    constructor(props) {
 
-        super(props)    //todo eu added props
+        super(props) 
 
         this.state = {
             name: "",
@@ -34,10 +34,6 @@ class TestName extends Component {
 
     }
 
-    componentDidMount() {
-        console.log("propes");
-        console.log(this.props);
-      }
 
     finalizeCallback() {
         let formString = document.getElementById("formBasicEmail").value
@@ -62,8 +58,7 @@ class TestName extends Component {
     }
 
     editInEditor() {
-/*         window.location.href = '/devEditor'; //TODO: this works but can be better
- */    this.props.history.push('/editor');
+       this.props.history.push('/editor');
     }
 
     render() {

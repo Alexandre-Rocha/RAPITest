@@ -1,3 +1,4 @@
+// TODO: use this file or not? if so, must review and test first
 
 /*
 this comment is just to visualize state schema
@@ -211,21 +212,21 @@ let test = {
                 keyItem: '',
                 valueItem: ''
             }],                     
-            Query: //TODO:  
+            Query:   
             Body: '',              
-            Retain: //TODO:
+            Retain: 
             Verifications: [{
                Code: 200, 
                Schema: '' ,
-               Contains: //TODO:
-               Count: //TODO:
-               Match: //TODO:
-               Custom: //TODO:
+               Contains:
+               Count: 
+               Match: 
+               Custom: 
             }]                   //Verifications is mandatory; inside only Code is mandatory
         }
 */
 
-//TODO: missing query here
+// WARNING: missing query here
 function isValidTest(obj) {
     if (!obj) {
         return false;
