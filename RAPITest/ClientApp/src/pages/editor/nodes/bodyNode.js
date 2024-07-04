@@ -106,7 +106,8 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
 
                 <label htmlFor="bodyRef">Choose Body:</label>
                 <div className='body-ref-div'>
-                    <Form.Select id='bodyRef' className='body-ref' aria-label="Default select example" onChange={onBodyRefChange} >
+                    <Form.Select id='bodyRef' className='body-ref' aria-label="Default select example" onChange={onBodyRefChange} 
+                        value={bodyRef ? bodyRef : "Use text box"}>
                         <option value="textBox" >Use text box</option>
                         {renderSchemaList().map((item, index) => {
                             return (

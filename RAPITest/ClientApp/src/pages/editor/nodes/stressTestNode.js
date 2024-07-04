@@ -11,9 +11,9 @@ import GeneralNode from './generalNode';
 function StressTestNode({ data, isConnectable, xPos, yPos }) {
 
 
-    const [count, setCount] = useState(data.custom.count || "")
-    const [threads, setThreads] = useState(data.custom.threads || "")
-    const [delay, setDelay] = useState(data.custom.delay || "")
+    const [count, setCount] = useState(data.custom.count ?? "")
+    const [threads, setThreads] = useState(data.custom.threads ?? "")
+    const [delay, setDelay] = useState(data.custom.delay ?? "")
 
 
     rapiLog(level.DEBUG, "[Stress test node] Workflow ID: ", data.custom._wfIndex)

@@ -151,6 +151,7 @@ function Flow() {
     const [dictFile, setDictFile] = useState()
     const [dllFileArr, setDllFileArr] = useState([])
 
+    const [dllNamesArr, setDllNamesArr] = useState([])
 
     const NODE_LEFT_HANDLE = "leftHandle"
     const NODE_RIGHT_HANDLE = "rightHandle"
@@ -475,12 +476,12 @@ function Flow() {
         //const testNodeMethod = test.Method
 
         //const testNodeId = createTestNode(test.TestID, testNodeServer, testNodePath, testNodeMethod, yamlWfIndex, currYamlTestIndex, currX, currY) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
-
+        //TODO: THIS THE ISSUE, names not same as the ones in getState method
         const nodeData = {
             testName: test.TestID,
-            initialServer: test.Server,
-            initialPath: test.Path,
-            initialMethod: test.Method,
+            server: test.Server,
+            path: test.Path,
+            method: test.Method,
             paths: apiFile.paths,
             servers: apiFile.servers,
             httpMethods: httpMethods, // TSL only supports the 4 main HTTP methods, in the future would be nice to support to more and derive them from the api as well
@@ -501,6 +502,7 @@ function Flow() {
 
         if (body.startsWith("$")) {
             useBodyRef = true
+            console.log("USE BODY REF");
 
             let auxbodyRef = body
             let dictionaryIndex = auxbodyRef.indexOf("dictionary/");
@@ -517,16 +519,18 @@ function Flow() {
         const nodeData = {
             bodyText: bodyText,
             bodyRef: bodyRef,
-            useBodyRef: useBodyRef
-            // TODO: missing the boolean flag?
+            useBodyRef: useBodyRef,
+            dictObj: dict
+            // TODO: missing the dictObj
         }
+        console.log(nodeData);
         const bodyNodeId = createNode(NodeType.BODY, nodeData)
 
         return bodyNodeId
     }
 
     const processHeaders = (headers) => {
-        
+
 
         //headers is array with here, like this: ["Accept:application/xml"]
         //must process it 
@@ -552,13 +556,18 @@ function Flow() {
     const processQuery = (query) => {
 
         //TODO: need to test this, dont have any example tsl file w query i think...
+
+
         let processedQuery = query.map(queryString => {
-            let parts = queryString.split(":");
+            let parts = queryString.split("=");
             return {
                 key: parts[0],
                 value: parts[1]
             };
         });
+
+        console.log("QUERY: ", query);
+        console.log("PROCESSED QUERY: ", processedQuery);
 
         //const queryNodeId = createQueryNode(processedQuery, yamlWfIndex, currYamlTestIndex, currX, currY)
 
@@ -673,9 +682,12 @@ function Flow() {
 
         //TODO: process dll name here or begore
         //const customVerifNodeId = createCustomVerificationNode(dllName, yamlWfIndex, currYamlTestIndex, currX, currY)
-
+        console.log('bualasfa');
+        console.log(dllNamesArr);
+        console.log(dllName[0]);
         const nodeData = {
-            dllName: dllName
+            dllName: dllName[0],
+            dllNames: dllNamesArr
         }
         const customVerifNodeId = createNode(NodeType.CUSTOM, nodeData)
 
@@ -705,7 +717,7 @@ function Flow() {
                 const newEdgeWfStress = {
                     id: "wf:" + wfNodeID.toString() + "-stress:" + stressNodeId.toString(),
                     source: wfNodeID.toString(),
-                    sourceHandle: NODE_LEFT_HANDLE, 
+                    sourceHandle: NODE_LEFT_HANDLE,
                     target: stressNodeId.toString()
                 }
 
@@ -743,7 +755,7 @@ function Flow() {
                     const headersNodeId = processHeaders(test.Headers)
 
                     const newEdgeTestHeaders = {
-                        id: currLeafId.toString() +  headersNodeId.toString(),
+                        id: currLeafId.toString() + headersNodeId.toString(),
                         source: currLeafId.toString(),
                         sourceHandle: NODE_LEFT_HANDLE,
                         target: headersNodeId.toString()
@@ -941,7 +953,7 @@ function Flow() {
 
     const onClickWorkflowNode = () => {
 
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
 
         console.log("[Editor] Adding Workflow node");
         maxWfIndex.current += 1
@@ -955,7 +967,7 @@ function Flow() {
 
     const onClickTestNode = () => {
 
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
 
         console.log("[Editor] Adding Test node");
         const nodeData = {
@@ -968,44 +980,49 @@ function Flow() {
 
     //TODO: all of these below are wrong???
     const onClickStatus = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Status Verification node");
         createNode(NodeType.STATUS)
     }
 
     const onClickWip = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("Work in progress");
         alert('wip')
     }
 
     const onClickCount = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Count Verification node");
         createNode(NodeType.COUNT)
     }
 
     const onClickContains = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Contains Verification node");
         createNode(NodeType.CONTAINS)
     }
 
     const onClickMatch = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Match Verification node");
         createNode(NodeType.MATCH)
     }
 
     const onClickCustom = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Custom Verification node");
-        createNode(NodeType.CUSTOM)
+        console.log('asdasaddafsf');
+        console.log(dllNamesArr);
+        const nodeData = {
+            dllNames: dllNamesArr
+        }
+        createNode(NodeType.CUSTOM, nodeData)
     }
 
 
     const onClickSchema = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Schema Verification node");
         const nodeData = {
             schemas: apiFile.schemas
@@ -1014,31 +1031,31 @@ function Flow() {
     }
 
     const onClickBodyNode = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Body node");
         createNode(NodeType.BODY)
     }
 
     const onClickHeadersNode = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Headers node");
         createNode(NodeType.HEADERS)
     }
 
     const onClickQueryNode = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Query node");
         createNode(NodeType.QUERY)
     }
 
     const onClickRetainNode = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log("[Editor] Adding Retain node");
         createNode(NodeType.RETAIN)
     }
 
     const onClickStressTestNode = () => {
-        if(!checkIfApiFile()) return
+        if (!checkIfApiFile()) return
         console.log('[Editor] Adding Stress test node');
         createNode(NodeType.STRESS)
     }
@@ -1312,6 +1329,9 @@ function Flow() {
         let namesArr = []
 
         dllArr.forEach((ddlFile) => { console.log(namesArr.push(ddlFile.name)); })
+
+        setDllNamesArr(namesArr)
+
         console.log(namesArr);
 
         let nodesArr = reactFlowInstance.getNodes();
@@ -1437,7 +1457,7 @@ function Flow() {
             const connectedStressNodes = getConnectedNodes(wfNode, NodeType.STRESS)
             if (connectedStressNodes.length > 1) {
                 alert('can only have 1 stress test')
-                return false 
+                return false
             }
             if (connectedStressNodes.length === 1) {
                 const stressState = connectedStressNodes[0].data.custom.getState() // {count: "", threads:"", delay:""}
@@ -1447,7 +1467,7 @@ function Flow() {
             const connectedTestNodes = getConnectedNodes(wfNode, NodeType.TEST)
             if (connectedTestNodes.length < 1) {
                 alert('workflows must have at least 1 test')
-                return false 
+                return false
             }
             connectedTestNodes.forEach(testNode => {
                 const testState = testNode.data.custom.getState() // {name: "", server:"", path:"", method:"", _testIndex: ""}
@@ -1467,19 +1487,19 @@ function Flow() {
                 if (connectedRequestNodes.length >= 1) {
                     if (connectedRequestNodes.length > 1) {
                         alert('only one request node can be connected directly to a test node')
-                        return false 
+                        return false
                     }
 
                     const connectedRequestNode = connectedRequestNodes[0]
                     if (!requestNodeTypes.includes(connectedRequestNode.type)) {
                         alert('something wrong w connection')
-                        return false 
+                        return false
                     }
                     const restOfTheRequestNodes = getNodesInLinearChain(connectedRequestNode)
                     const allRequestNodes = connectedRequestNodes.concat(restOfTheRequestNodes)
                     if (!allRequestNodes.every(node => requestNodeTypes.includes(node.type))) {
                         alert('something wrong w connection')
-                        return false 
+                        return false
                     }
 
                     const headersNode = allRequestNodes.find(node => node.type === NodeType.HEADERS);
@@ -1517,29 +1537,29 @@ function Flow() {
                 const connectedVerificationNodes = getConnectedNodesByHandle(testNode, "rightHandle")
                 if (connectedVerificationNodes.length === 0) {
                     alert('you need at least the status verification on every test')
-                    return false 
+                    return false
                 }
 
                 if (connectedVerificationNodes.length > 1) {
                     alert('only one verification node can be connected directly to a test node')
-                    return false 
+                    return false
                 }
 
                 const connectedVerificationNode = connectedVerificationNodes[0]
                 if (!verificationNodeTypes.includes(connectedVerificationNode.type)) {
                     alert('something wrong w connection')
-                    return false 
+                    return false
                 }
                 const restOfTheVerificationNodes = getNodesInLinearChain(connectedVerificationNode)
                 const allVerificationNodes = connectedVerificationNodes.concat(restOfTheVerificationNodes)
                 if (!allVerificationNodes.every(node => verificationNodeTypes.includes(node.type))) {
                     alert('something wrong w connection')
-                    return false 
+                    return false
                 }
 
                 if (connectedVerificationNodes.length === 0) {
                     alert('you need at least the status verification on every test')
-                    return false 
+                    return false
                 }
 
                 const statusNode = allVerificationNodes.find(node => node.type === NodeType.STATUS);
@@ -1586,23 +1606,33 @@ function Flow() {
 
             workflows.push(workflow)
         });
-
         return workflows
     }
 
     const postProcessState = (workflows) => {
-        const newWorkflows = workflows
+        // order workflows based on _wfIndex
+        const orderedWorkflows = workflows.sort((a, b) => a._wfIndex - b._wfIndex);
 
         // process each workflow
-        for (let wfIndex = 0; wfIndex < newWorkflows.length; wfIndex++) {
+        for (let wfIndex = 0; wfIndex < orderedWorkflows.length; wfIndex++) {
 
-            const workflow = newWorkflows[wfIndex];
+            const workflow = orderedWorkflows[wfIndex];
             delete workflow._wfIndex
 
             // process Stress Test
-            // No processing required?
+            workflow.Stress.Count = workflow.Stress.count
+            workflow.Stress.Delay = workflow.Stress.delay
+            workflow.Stress.Threads = workflow.Stress.threads
+            delete workflow.Stress.count
+            delete workflow.Stress.delay
+            delete workflow.Stress.threads
+            
 
             // process each test for this workflow
+
+            const orderedTests = workflow.Tests.sort((a, b) => a._testIndex - b._testIndex);
+            workflow.Tests = orderedTests
+
             for (let testIndex = 0; testIndex < workflow.Tests.length; testIndex++) {
 
                 const test = workflow.Tests[testIndex];
@@ -1659,18 +1689,21 @@ function Flow() {
                     }
 
                     // process Contains
-                    // No processing required?
+                    if (verification.Contains) {
+                        const transformedContains = verification.Contains.contains;
+                        verification.Contains = transformedContains
+                    }
 
                     // process Custom
                     if (verification.Custom) {
-                        const transformedCustom = `[${verification.Custom}]`;
+                        const transformedCustom = [`${verification.Custom}`]; // TODO why is this array again? can it be more than1? if so this wrong.
                         verification.Custom = transformedCustom
                     }
                 }
             }
         }
 
-        return newWorkflows
+        return orderedWorkflows
     }
 
     const finalizeConfiguration = async (workflows) => {
@@ -1695,7 +1728,7 @@ function Flow() {
 
         if (dictFile) {
             console.log("appending dictionary...");
-            data.append('dictionary.txt', dictFile); 
+            data.append('dictionary.txt', dictFile);
         }
 
 
@@ -1738,7 +1771,13 @@ function Flow() {
 
     const finishSetup = async () => {
         const workflows = scanEditorState()
+        console.log('finish setup, workflows:');
+        console.log(workflows);
+
         const processedWorkflows = postProcessState(workflows)
+        console.log('finish setup, processed workflows:');
+        console.log(processedWorkflows);
+
         finalizeConfiguration(processedWorkflows)
     }
 
@@ -1816,13 +1855,12 @@ function Flow() {
             </div>
 
             <div>
-                
                 <SimpleModalComp
-                title={"Settings"}
-                body={<Settings></Settings>}
-                cancelButtonFunc={() => {setSettingsVisible(false)}}
-                visible={settingsVisible}
-            />
+                    title={"Settings"}
+                    body={<Settings></Settings>}
+                    cancelButtonFunc={() => { setSettingsVisible(false) }}
+                    visible={settingsVisible}
+                />
             </div>
         </div>
     );

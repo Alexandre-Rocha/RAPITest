@@ -84,12 +84,12 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
 
     //TODO: Think better on how to implement changing Test order; for now this works
-    const onIncrement = () => {
+    /* const onIncrement = () => {
         setTestIndex(oldTestIndex => oldTestIndex + 1)
     }
     const onDecrement = () => {
         setTestIndex(oldTestIndex => oldTestIndex - 1)
-    }
+    } */
 
     const onChange = (change) => {
         setTestIndex(change.target.value)

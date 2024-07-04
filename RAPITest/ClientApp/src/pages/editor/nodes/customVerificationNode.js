@@ -13,6 +13,8 @@ function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
 
     const [dllName, setDllName] = useState(data.custom.dllName || null)
 
+    console.log('lalau dllname',dllName);
+
     rapiLog(level.DEBUG, "[Custom node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Custom node] Test ID: ", data.custom._testIndex)
     rapiLog(level.DEBUG, "[Custom node] X pos: ", xPos)
@@ -59,7 +61,7 @@ function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
         <div>
             <GeneralNode {...generalNodeProps}>
 
-                <Form.Select aria-label="Default select example" onChange={onSelectedDllChange} >
+                <Form.Select aria-label="Default select example" onChange={onSelectedDllChange} value={dllName ? dllName : ""}>
                     <option value=""></option>
                     {getDllNames().map((item, index) => {
                         return (
