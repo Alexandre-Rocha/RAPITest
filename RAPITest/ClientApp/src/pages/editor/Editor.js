@@ -22,6 +22,11 @@ import StressTestNode from './nodes/stressTestNode';
 
 import Sidebar from './other-components/Sidebar';
 
+import Alert from 'react-bootstrap/Alert';
+
+import { Fade } from 'react-bootstrap';
+
+
 import { LOG_LEVELS as level, rapiLog } from './utils';
 
 
@@ -123,7 +128,7 @@ function Flow() {
     const [apiFile, setApiFile] = useState(location?.state?.apiFile || null)
 
     // Whether or not api spec has been uploaded //TODO: is it being set properly when throug old config?
-    const [uploaded, setUploaded] = useState(false)
+    const [apiUploaded, setApiUploaded] = useState(false)
 
     const [testConfName, setTestConfName] = useState(location?.state?.APITitle || "")
 
@@ -153,6 +158,16 @@ function Flow() {
 
     const [dllNamesArr, setDllNamesArr] = useState([])
 
+    const [showNodesAlert, setShowNodesAlert] = useState(false);
+
+    const [tslUploadedAlert, setTslUploadedAlert] = useState(false);
+    const [tslUploadedWarnings, setTslUploadedWarnings] = useState([]);
+
+    const [finishSetupAlert, setFinishSetupAlert] = useState(false);
+    const [finishSetupWarnings, setFinishSetupWarnings] = useState([]);
+
+    const [fadeClass, setFadeClass] = useState('');
+
     const NODE_LEFT_HANDLE = "leftHandle"
     const NODE_RIGHT_HANDLE = "rightHandle"
 
@@ -170,8 +185,10 @@ function Flow() {
 
 
     //dagre
-    const onLayout = useCallback(
+    const onLayout =
+        //useCallback(
         (direction) => {
+            console.log("[Editor] onLayout");
             const layouted = getLayoutedElements(nodes, edges, { direction });
 
             setNodes([...layouted.nodes]);
@@ -180,9 +197,8 @@ function Flow() {
             window.requestAnimationFrame(() => {
                 fitView();
             });
-        },
-        [nodes, edges]
-    );
+        }
+    // ,[nodes, edges]   );
 
 
 
@@ -663,8 +679,12 @@ function Flow() {
 
         //TODO: preocess key and value here or before calling processmetdo?
 
+        //TODO: i am removing the dollar so that in the node it doesnt show, then in the end i manually add dollar to tsl file
+        // does this make sense though?
+
+
         const processedMatch = matchString.split("#");
-        const key = processedMatch[0]
+        const key = processedMatch[0].replace(/^[$.]+/, '');
         const value = processedMatch[1]
 
         //const matchVerifNodeId = createMatchVerificationNode(key, value, yamlWfIndex, currYamlTestIndex, currX, currY)
@@ -700,6 +720,9 @@ function Flow() {
         let currYamlTestIndex = 0;
 
         let listOfEdgesLists = []
+
+        let isTryingToUseDictionary = false
+        let isTryingToUseDll = false
 
         newstate.forEach(wf => {
 
@@ -877,6 +900,9 @@ function Flow() {
                 }
 
                 if (test.Verifications[0].Custom) {
+
+                    isTryingToUseDll = true
+
                     const customVerifNodeId = processCustomVerif(test.Verifications[0].Custom)
 
                     const newEdgeTestCustom = {
@@ -915,6 +941,11 @@ function Flow() {
             return newEdges
         })
 
+        //TODO: remove hardcoded warning
+        if (isTryingToUseDll && dllFileArr.length === 0) {
+            setTslUploadedWarnings(tslUploadedWarnings.concat("Warning: Some nodes attempt to make use of auxiliary files that are not yet uploaded."))
+        }
+
         setCanCollapse(true)
         //collapseNodesWhenReady
 
@@ -946,7 +977,8 @@ function Flow() {
         if (apiFile) {
             return true
         } else {
-            alert('WIP - you cant add nodes before uploading api file')
+            //alert('WIP - you cant add nodes before uploading api file')
+            setShowNodesAlert(true)
             return false
         }
     }
@@ -1065,48 +1097,6 @@ function Flow() {
 
     // #region others/misc
 
-    const onClickChangeWf = () => {
-
-
-        const workflowsA = [
-            {
-                "WorkflowID": "wf1",
-                "Tests": [
-                    {
-                        "Server": "https://petstore3.swagger.io/api/v3",
-                        "TestID": "t1",
-                        "Path": "/pet/1",
-                        "Method": "Get",
-                        "Verifications": [
-                            {
-                                "Code": "200"
-                            }
-                        ]
-                    },
-                    {
-                        "Server": "https://petstore3.swagger.io/api/v3",
-                        "TestID": "t2",
-                        "Path": "/pet/2",
-                        "Method": "Get",
-                        "Verifications": [
-                            {
-                                "Code": "200"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-
-
-        const yamlFlows = YAML.stringify(workflowsA)
-
-        const newstate = jsYaml.load(yamlFlows)
-
-        createNodes(newstate)
-
-    }
-
 
 
     const collapseNodes = () => {
@@ -1194,7 +1184,7 @@ function Flow() {
     //TODO: maybe I can analyse this to see how the schemasvalues are passed to do same in MonitorTests
     const handlerAPI = function (paths, servers, schemas, schemasValues) {
         let apiContents = { paths, servers, schemas, schemasValues }
-        setUploaded(true)
+        setApiUploaded(true)
         setApiFile(apiContents)
     }
 
@@ -1361,6 +1351,9 @@ function Flow() {
     const onTslDrop = (tslFile) => {
         //somehow recreate state
 
+        setNodes([])
+        setEdges([])
+
         const reader = new FileReader();
 
         reader.onload = (event) => {
@@ -1370,16 +1363,28 @@ function Flow() {
 
             const newstate = jsYaml.load(fileContents)
 
-            console.log("mewstate");
-            console.log(newstate);
-
             //setWorkflows(newstate)
 
             createNodes(newstate)
+
+            //TODO: hardcoded
+            setTslUploadedAlert(true)
+
+
+            setTimeout(() => {
+                document.getElementById('layout-button').click();
+            }, 600)
+
+
         };
 
         reader.readAsText(tslFile);
 
+    }
+
+    function clearEditor() {
+        setNodes([])
+        setEdges([])
     }
 
 
@@ -1620,13 +1625,17 @@ function Flow() {
             delete workflow._wfIndex
 
             // process Stress Test
-            workflow.Stress.Count = workflow.Stress.count
-            workflow.Stress.Delay = workflow.Stress.delay
-            workflow.Stress.Threads = workflow.Stress.threads
-            delete workflow.Stress.count
-            delete workflow.Stress.delay
-            delete workflow.Stress.threads
-            
+
+            if (workflow.Stress) {
+                workflow.Stress.Count = workflow.Stress.count
+                workflow.Stress.Delay = workflow.Stress.delay
+                workflow.Stress.Threads = workflow.Stress.threads
+                delete workflow.Stress.count
+                delete workflow.Stress.delay
+                delete workflow.Stress.threads
+            }
+
+
 
             // process each test for this workflow
 
@@ -1765,6 +1774,8 @@ function Flow() {
                 console.error("Test setup failed...");
             } else {
                 console.log("Test setup was successful!")
+                        //TODO: remove hardcoded
+        setFinishSetupAlert(true)
             }
         })
     }
@@ -1779,8 +1790,98 @@ function Flow() {
         console.log(processedWorkflows);
 
         finalizeConfiguration(processedWorkflows)
+
+
     }
 
+    useEffect(() => {
+        let timer;
+        console.log("Checking nodes alert...");
+        if (showNodesAlert) {
+            setFadeClass('fade-in');
+
+            timer = setTimeout(() => {
+                setFadeClass('fade-out');
+                setTimeout(() => {
+                    setShowNodesAlert(false);
+                    console.log("Hiding nodes alert...");
+                }, 800)
+
+
+            }, 3000); // Adjust the duration as needed (3000ms = 3 seconds)
+        }
+        return () => clearTimeout(timer);
+    }, [showNodesAlert]);
+
+    useEffect(() => {
+        let timer;
+        console.log("Checking tsl alert...");
+
+        if (tslUploadedAlert && tslUploadedWarnings.length === 0) {
+            setFadeClass('fade-in');
+            timer = setTimeout(() => {
+                setFadeClass('fade-out');
+                setTimeout(() => {
+                    setTslUploadedAlert(false);
+                    console.log("Hiding tsl alert...");
+                }, 800)
+
+            }, 3000); // Adjust the duration as needed (3000ms = 3 seconds)
+        }
+
+        if (tslUploadedAlert && tslUploadedWarnings.length > 0) {
+            setFadeClass('fade-in');
+        }
+
+
+        return () => clearTimeout(timer);
+    }, [tslUploadedAlert]);
+
+
+
+    useEffect(() => {
+        let timer;
+        console.log("Checking finish setup alert...");
+
+        if (finishSetupAlert && finishSetupWarnings.length === 0) {
+            setFadeClass('fade-in');
+            timer = setTimeout(() => {
+                setFadeClass('fade-out');
+                setTimeout(() => {
+                    setTslUploadedAlert(false);
+                    console.log("Hiding finish setup alert...");
+                }, 800)
+
+            }, 4000); // Adjust the duration as needed (3000ms = 3 seconds)
+        }
+
+        if (finishSetupAlert && finishSetupWarnings.length > 0) {
+            setFadeClass('fade-in');
+        }
+
+
+        return () => clearTimeout(timer);
+    }, [finishSetupAlert]);
+
+
+    const workflowTooltip = "You can have one or more workflows. A workflow is essentially a sequence of one or more tests, grouped to achieve a specific testing goal."
+    const testTooltip = "A test is a request to a specific API endpoint. It can have mutiple components and verifications associated with it."
+    const stressTestTooltip = "Each workflow can have one stress test, where you can configure how the workflow will be executed."
+    
+    const bodyTooltip = "Add a body to the request."
+    const headersTooltip = "Add headers to the request."
+    const queryTooltip = "Add query parameters to the request."
+    const retainTooltip = "You can retain a value from the response in order to use it in another test."
+
+    const statusCodeTooltip = "Check the status code of the response."
+    const schemaTooltip = "Check if response body matches the given schema."
+    const containsTooltip = "Check if response body contains a given value."
+    const countTooltip = "Check how many times the response body contains a given value."
+    const matchTooltip = "Check if path in response body matches a given value."
+    const customTooltip = "Execute a custom verification provided through a .dll file."
+
+    const clearEditorTooltip = "Clear the editor (remove all nodes and connections)."
+    const finishSetupTooltip = "Save and finish the test configuration setup."
 
     return (
         <div className='editor-container'>
@@ -1791,31 +1892,33 @@ function Flow() {
                 onRunIntervalChange={onRunIntervalChange}
                 onToggleCollapse={onToggleCollapse}
                 apiTitle={testConfName}
+                apiUploaded={apiUploaded}
                 handlerAPI={handlerAPI}
                 onTestConfNameChange={onTestConfNameChange}
                 onDictionaryDrop={onDictionaryDrop}
                 onDllDrop={onDllDrop}
                 onTslDrop={onTslDrop}
                 buttonsArray={[
-                    { section: "Flow-related", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: "Workflow tooltip", iconClass: "flow-icon" },
-                    { section: "Flow-related", title: "Test", onClick: onClickTestNode, class: "test", iconClass: "flow-icon" },
-                    { section: "Flow-related", title: "Stress Test", onClick: onClickStressTestNode, class: "stress", iconClass: "flow-icon" },
-                    { section: "Request components", title: "Body", onClick: onClickBodyNode, class: "http", iconClass: "test-icon" },
-                    { section: "Request components", title: "Headers", onClick: onClickHeadersNode, class: "http", iconClass: "test-icon" },
-                    { section: "Request components", title: "Query", onClick: onClickQueryNode, class: "http", iconClass: "test-icon" },
-                    { section: "Request components", title: "Retain", onClick: onClickRetainNode, class: "http", iconClass: "test-icon" },
-                    { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class: "verif", iconClass: "verifs-icon" },
-                    { section: "Verifications", title: "Schema", onClick: onClickSchema, class: "verif", iconClass: "verifs-icon" },
-                    { section: "Verifications", title: "Contains ", onClick: onClickContains, class: "verif", iconClass: "verifs-icon" },
-                    { section: "Verifications", title: "Count ", onClick: onClickCount, class: "verif", iconClass: "verifs-icon" },
-                    { section: "Verifications", title: "Match ", onClick: onClickMatch, class: "verif", iconClass: "verifs-icon" },
-                    { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon" },
-                    { section: "Setup-related", title: "Save changes", onClick: onClickWip, class: "setup", iconClass: "gear-icon" },
-                    { section: "Setup-related", title: "Finish Setup", onClick: finishSetup, class: "setup", iconClass: "gear-icon" },
-                    { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf, class: "setup", iconClass: "gear-icon" },
+                    { section: "Flow", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: workflowTooltip, iconClass: "flow-icon" },
+                    { section: "Flow", title: "Test", onClick: onClickTestNode, class: "test", iconClass: "flow-icon" , tooltip: testTooltip},
+                    { section: "Flow", title: "Stress Test", onClick: onClickStressTestNode, class: "stress", iconClass: "flow-icon" , tooltip: stressTestTooltip},
+                    { section: "Request components", title: "Body", onClick: onClickBodyNode, class: "http", iconClass: "test-icon", tooltip: bodyTooltip },
+                    { section: "Request components", title: "Headers", onClick: onClickHeadersNode, class: "http", iconClass: "test-icon", tooltip: headersTooltip },
+                    { section: "Request components", title: "Query", onClick: onClickQueryNode, class: "http", iconClass: "test-icon" , tooltip: queryTooltip},
+                    { section: "Request components", title: "Retain", onClick: onClickRetainNode, class: "http", iconClass: "test-icon", tooltip: retainTooltip },
+                    { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class: "verif", iconClass: "verifs-icon", tooltip: statusCodeTooltip },
+                    { section: "Verifications", title: "Schema", onClick: onClickSchema, class: "verif", iconClass: "verifs-icon" , tooltip: schemaTooltip},
+                    { section: "Verifications", title: "Contains ", onClick: onClickContains, class: "verif", iconClass: "verifs-icon", tooltip: containsTooltip },
+                    { section: "Verifications", title: "Count ", onClick: onClickCount, class: "verif", iconClass: "verifs-icon" , tooltip: countTooltip},
+                    { section: "Verifications", title: "Match ", onClick: onClickMatch, class: "verif", iconClass: "verifs-icon" , tooltip: matchTooltip},
+                    { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon", tooltip: customTooltip },
+                    /* { section: "Setup", title: "Save changes", onClick: onClickWip, class: "setup", iconClass: "gear-icon" }, */
+                    { section: "Setup", title: "Clear editor", onClick: clearEditor, class: "setup", iconClass: "gear-icon", tooltip: clearEditorTooltip },
+                    { section: "Setup", title: "Finish Setup", onClick: finishSetup, class: "setup", iconClass: "gear-icon", tooltip: finishSetupTooltip },
+                    /* { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Dump state", onClick: dumpState, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Collapse nodes", onClick: collapseNodes, class: "setup", iconClass: "gear-icon" },
-                    { section: "Dev", title: "Open nodes", onClick: openNodes, class: "setup", iconClass: "gear-icon" },
+                    { section: "Dev", title: "Open nodes", onClick: openNodes, class: "setup", iconClass: "gear-icon" }, */
                 ]}>
             </Sidebar>
 
@@ -1840,15 +1943,15 @@ function Flow() {
                         <ControlButton onClick={openNodes} title='expand all nodes'>
                             <div className='expandButton' ></div>
                         </ControlButton>
-                        <ControlButton onClick={() => { onLayout('TB'); onLayout('TB') }} title='auto layout nodes'>
+                        <ControlButton id='layout-button' onClick={() => { onLayout('TB'); onLayout('TB') }} title='auto layout nodes'>
                             <div className='layoutButton' ></div>
                         </ControlButton>
                         <ControlButton onClick={() => { setSettingsVisible(true) }} title='open settings window'>
                             <div className='settingsButton' ></div>
                         </ControlButton>
-                        <ControlButton title='© 2022 - RapiTest - ISEL'>
+                        {/* <ControlButton title='© 2022 - RapiTest - ISEL'>
                             <div className='copyrightButton' ></div>
-                        </ControlButton>
+                        </ControlButton> */}
                     </Controls>
 
                 </ReactFlow>
@@ -1856,12 +1959,65 @@ function Flow() {
 
             <div>
                 <SimpleModalComp
-                    title={"Settings"}
+                    title={"Settings (WIP - not fully implemented)"}
                     body={<Settings></Settings>}
                     cancelButtonFunc={() => { setSettingsVisible(false) }}
                     visible={settingsVisible}
                 />
             </div>
+
+            <div>
+                {showNodesAlert && (
+                    <Alert className={`nodeAlert ${fadeClass}`} variant="warning" onClose={() => setShowNodesAlert(false)} dismissible>
+                        <b>You must first upload the API Specification in order to add nodes.</b>
+                    </Alert>
+                )}
+            </div>
+
+            <div>
+                {tslUploadedAlert && tslUploadedWarnings.length === 0 && (
+                    <Alert className={`nodeAlert ${fadeClass}`} variant="success" onClose={() => setTslUploadedAlert(false)} dismissible>
+                        <b>TSL uploaded successfully!</b>
+                    </Alert>
+                )}
+            </div>
+
+            <div>
+                {tslUploadedAlert && tslUploadedWarnings.length != 0 && (
+                    <Alert className='nodeAlert' variant="warning" onClose={() => setTslUploadedAlert(false)} dismissible>
+                        <b>TSL uploaded successfully, but some potential issues were found:</b>
+                        <ul>
+                            {tslUploadedWarnings.map((warning, index) => (
+                                <li key={index} style={{ textAlign: 'left' }} >{warning}</li>
+                            ))}
+                        </ul>
+                    </Alert>
+                )}
+            </div>º
+
+
+
+            <div>
+                {finishSetupAlert && finishSetupWarnings.length === 0 && (
+                    <Alert className={`nodeAlert ${fadeClass}`} variant="success" onClose={() => setFinishSetupAlert(false)} dismissible>
+                        <b>Setup completed successfully! You can check the test configuration details on the Monitor Tests page.</b>
+                    </Alert>
+                )}
+            </div>
+
+            <div>
+                {finishSetupAlert && finishSetupWarnings.length != 0 && (
+                    <Alert className='nodeAlert' variant="warning" onClose={() => setFinishSetupAlert(false)} dismissible>
+                        <b>Could not complete setup. Please address the issues below:</b>
+                        <ul>
+                            {tslUploadedWarnings.map((warning, index) => (
+                                <li key={index} style={{ textAlign: 'left' }} >{warning}</li>
+                            ))}
+                        </ul>
+                    </Alert>
+                )}
+            </div>
+
         </div>
     );
 }

@@ -124,7 +124,7 @@
 }
 
 
-.acc-icon.Flow-related{
+.acc-icon.Flow{
   background-image: url('../../../../assets/share.png');
   background-size: 32px 32px;
 }
@@ -139,7 +139,7 @@
   background-size: 32px 32px;
 }
 
-.acc-icon.Setup-related{
+.acc-icon.Setup{
   background-image: url('../../../../assets/gear.png');
   background-size: 32px 32px;
 }

@@ -29,10 +29,13 @@ const ApiUploadArea = (props) => {
 
     const { onTestConfNameChange } = props
 
+    const { setApiUploadedCallback } = props
+
     const newHandler = (paths, servers, schemas, schemasValues, files) => {
         handlerAPI(paths, servers, schemas, schemasValues)
         setUploaded(true)
         setApiFiles(files)
+        setApiUploadedCallback(true)
     }
 
     const fileNameFuction = (file) => {
@@ -45,6 +48,10 @@ const ApiUploadArea = (props) => {
         //TODO: how does this affect the backedn tho? uploading, removing, uploading, etc..
         //need to call some endpoint to cancel?
         setUploaded(false)
+
+
+        setApiUploadedCallback(false)
+        //TODO: need to set apiUploaded to false, so that it affects other compoentns
     }
 
     //TODO: label css class instead of inline
@@ -55,11 +62,11 @@ const ApiUploadArea = (props) => {
                 <Form.Label style={{ fontWeight: 'bold' }}>Name:</Form.Label>
                 <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter name" />
                 {settings.showTips ?
-                        <Form.Text className="text-muted">
-                            The name for your test configuration.
-                        </Form.Text>
-                        :
-                        <></>}
+                    <Form.Text className="text-muted">
+                        The name for your test configuration.
+                    </Form.Text>
+                    :
+                    <></>}
 
             </SimpleAccordion>
 
@@ -68,17 +75,36 @@ const ApiUploadArea = (props) => {
             <SimpleAccordion header={"API Upload"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"api-icon"}>
 
                 {(uploaded === false) ?
+
+
                     <div>
-                        <Form.Label style={{ fontWeight: 'bold', display:'block' }}>Upload using file</Form.Label>
-                        {settings.showTips ?
-                        <Form.Text className="text-muted">
-                            Drag and drop the file that contains your API Specification.
-                        </Form.Text>
-                        :
-                        <></>}
-                        <SmallApiUpload handlerAPI={newHandler} apiTitle={apiTitle} ></SmallApiUpload>
+                        {(apiTitle !== "") ?
+
+                            <div>
+                                <Form.Label style={{ fontWeight: 'bold', display: 'block' }}>Upload using file</Form.Label>
+                                {settings.showTips ?
+                                    <Form.Text className="text-muted">
+                                        Drag and drop the file that contains your API Specification.
+                                    </Form.Text>
+                                    :
+                                    <></>}
+                                <SmallApiUpload handlerAPI={newHandler} apiTitle={apiTitle} ></SmallApiUpload>
+
+                            </div>
+
+
+                            :
+
+                            <div>
+                                To upload the API specification, you must first enter the name for the test configuration.
+                            </div>
+                        }
+
                     </div>
-                    : 
+
+
+
+                    :
                     <div>
                         <span style={{ fontWeight: 'bold' }}>API uploaded!</span> <span> If you want to upload another specification, delete the already uploaded one below.</span>
                     </div>}

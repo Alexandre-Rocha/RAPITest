@@ -130,7 +130,7 @@ const SmallApiUpload = (props) => {
                         :
                         <></>}
                 </div>
-                <AwesomeButton className="buttonAdd" style={{ marginTop: '10px' }} type="primary" onPress={uploadURL}><img style={{ marginRight: "15px" }} width="36" height="36" src={uploadIcon} alt="Logo" />Upload URL</AwesomeButton>
+                <AwesomeButton className="buttonAdd" style={{ marginTop: '10px' }} type="primary" onPress={uploadURL}><img style={{ marginRight: "15px" }} width="36" height="36" src={uploadIcon} alt="Logo" />Upload URL file</AwesomeButton>
             </div>}
             {!state.showInput && <div>
                 <div>

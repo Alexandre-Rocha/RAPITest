@@ -19,7 +19,7 @@ import { useSettings } from './SettingsContext';
 
 const TslUploadArea = (props) => {
 
-    const {settings} = useSettings()
+    const { settings } = useSettings()
 
     const [uploaded, setUploaded] = useState(props.uploaded)
 
@@ -28,6 +28,8 @@ const TslUploadArea = (props) => {
     const { apiTitle, handlerAPI } = props
 
     const { onDropTsl } = props
+
+    const { apiUploaded } = props
 
 
     const newOnDropTsl = (accept, reject) => {
@@ -52,6 +54,8 @@ const TslUploadArea = (props) => {
         return file.name
     }
 
+    console.log('TSL UPLOAD AREA RERENDER; API UPLOADED: ' + apiUploaded);
+
     const removeFileFunction = (fileToRemove) => {
         setTslFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
         //if api file is removed, enable dropzone again
@@ -68,27 +72,38 @@ const TslUploadArea = (props) => {
 
                 {(uploaded === false) ?
                     <div>
+                        {
+                            (apiUploaded === true) ?
 
-                        <div style={{ fontWeight: 'bold' }}>Upload a TSL file</div> 
+                                <div>
+                                    <div style={{ fontWeight: 'bold' }}>Upload a TSL file</div>
 
-                        {settings.showTips ?
-                        <Form.Text className="text-muted">
-                            <span> Uploading a TSL file will recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span>
-                        </Form.Text>
-                        :
-                        <></>}
-                        
-                        <Dropzone className="sidebar-dropzone"
-                            accept=".yaml"
-                            onDrop={newOnDropTsl}
-                            text={
-                                <div align="center">
-                                    <p>Upload TSL (.yaml)</p>
-                                </div>}
-                        />
+                                    {settings.showTips ?
+                                        <Form.Text className="text-muted">
+                                            <span> Uploading a TSL file will recreate the Editor state. If you do this, all</span> <span style={{ fontWeight: 'bold' }}> current nodes will be deleted!</span>
+                                        </Form.Text>
+                                        :
+                                        <></>}
+
+                                    <Dropzone className="sidebar-dropzone"
+                                        accept=".yaml"
+                                        onDrop={newOnDropTsl}
+                                        text={
+                                            <div align="center">
+                                                <p>Upload TSL (.yaml)</p>
+                                            </div>}
+                                    />
+                                </div>
+
+                                :
+                                <div>To upload a TSL file, first upload the API specification.</div>
+
+                        }
 
                     </div>
-                    : <div>
+                    :
+
+                    <div>
                         <span style={{ fontWeight: 'bold' }}>TSL uploaded!</span> <span> If you want to upload another TSL file, delete the already uploaded one below.</span>
                     </div>}
 

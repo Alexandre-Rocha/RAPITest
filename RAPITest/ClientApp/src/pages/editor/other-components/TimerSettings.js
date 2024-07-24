@@ -26,7 +26,19 @@ function TimerSettings(props) {
 
     const runGeneratedTooltip = (
         <Tooltip className="custom-tooltip" id="runGeneratedTooltip">
-            Body tooltip. Body tooltip.Body tooltip.Body tooltip.Body tooltip.Body tooltip.Body tooltip.Body tooltip.
+            If enabled, the tests automatically generated from the API specification will also be executed (in addition to the TSL tests specified in the editor).
+        </Tooltip>
+    );
+
+    const runImmediatelyTooltip = (
+        <Tooltip className="custom-tooltip" id="runImmediatelyTooltip">
+            If enabled, the tests will be executed immediately after finalizing the configuration.
+        </Tooltip>
+    );
+
+    const runIntervalTooltip = (
+        <Tooltip className="custom-tooltip" id="runIntervalTooltip">
+            Tests will be executed every X hours/weeks. If set to 'Never', they will be executed only once.
         </Tooltip>
     );
 
@@ -60,7 +72,9 @@ function TimerSettings(props) {
                 </div>
             </Form.Group>
             <Form.Group>
-                <Form.Label style={{ fontWeight: 'bold' }}>Run Immediately?</Form.Label>
+                <Form.Label style={{ fontWeight: 'bold' }}>Run Immediately?<OverlayTrigger placement="right" overlay={runImmediatelyTooltip}>
+                        <span>  🛈</span>
+                    </OverlayTrigger></Form.Label>
                 <div>
                     <Form.Check
                         inline
@@ -85,7 +99,9 @@ function TimerSettings(props) {
                 </div>
             </Form.Group>
             <Form.Group>
-                <Form.Label style={{ fontWeight: 'bold' }}>Select Run Interval:</Form.Label>
+                <Form.Label style={{ fontWeight: 'bold' }}>Run Interval?<OverlayTrigger placement="right" overlay={runIntervalTooltip}>
+                        <span>  🛈</span>
+                    </OverlayTrigger></Form.Label>
                 <div>
                     {["1 hour", "12 hours", "24 hours", "1 week", "Never"].map((interval, index) => (
                         <Form.Check

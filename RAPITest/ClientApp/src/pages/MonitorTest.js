@@ -186,7 +186,7 @@ export class MonitorTest extends Component {
         const spec = await specResponse.json()
 
         apiFile.paths = Object.keys(spec.paths);
-        
+
         //TODO: methods not supported in the backend, only Delete,Get,Post,Put
         /* const httpMethods = Object.values(spec.paths).flatMap(pathObj => Object.keys(pathObj))
         const uniqueHttpMethods = Array.from(new Set(httpMethods));
@@ -209,8 +209,25 @@ export class MonitorTest extends Component {
 
     renderTestButtons(item) {
         if (item.ErrorMessages !== null) return <AwesomeButton type="secondary" onPress={() => this.enableDeleteModal(item.ApiId)}>Delete Test</AwesomeButton>
-        if ((item.LatestReport === "-" && item.NextTest === "-") || (item.RunningNow !== undefined)) {
+        if ((item.RunningNow !== undefined)) {
             return <div className="row" style={{ marginLeft: 10, marginRight: 10 }}><div style={{ marginRight: 10 }}>Running Tests..</div><Loader type="Grid" color="#00BFFF" height={35} width={35} /></div>
+        }
+        if ((item.LatestReport === "-" && item.NextTest === "-")) {
+            return <div className="row" style={{ marginLeft: 10, marginRight: 10 }}>
+                <div style={{ marginRight: 10 }}>Ababa</div>
+                <div style={{ display: "inline-block" }}>
+                        <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.RunNow(item.ApiId, item)}><img style={{ marginRight: "15px" }} width="50" height="50" src={runIcon} alt="Logo" />Run</AwesomeButton>
+                    </div>
+                    <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>
+                    <AwesomeButton className="buttonEdit" type="primary" onPress={() => this.editName(item.ApiId, item.APITitle)}><img width="50" height="50" src={editIcon} alt="Logo" /></AwesomeButton>
+                </div>
+                <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>
+                    <AwesomeButton className="buttonEdit" type="secondary" onPress={() => this.enableDeleteModal(item.ApiId)}><img width="50" height="50" src={deleteIcon} alt="Logo" /></AwesomeButton>
+                </div>
+                <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>
+                    <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.editInEditor(item.ApiId, item.APITitle, item.LatestReport)}><img style={{ marginRight: "15px" }} width="50" height="50" src={editIcon} alt="Logo" />Edit in Workflow editor</AwesomeButton>
+                </div>
+            </div>
         }
         if (item.LatestReport === "-") {
             return (

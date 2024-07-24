@@ -154,7 +154,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
                     <span style={{ fontWeight: 'bold' }}>Test order: </span>
                     <Form.Control
                     type="number"
-                    value={testIndex}
+                    value={testIndex || -1}
                     onChange={onChange}
                     style={{ width: '54px',display:'inline-block' }}
                 />

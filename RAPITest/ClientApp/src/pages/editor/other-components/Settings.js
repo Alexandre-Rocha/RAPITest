@@ -31,21 +31,21 @@ function Settings() {
         <div className='settings'>
             {/* <h4></h4> */}
             <Row >
-                <Form.Label className='settingsLabel' >Theme</Form.Label>
+                <Form.Label className='settingsLabel' >Theme (not implemented)</Form.Label>
                 <ToggleAwesomeButton textOn="Light" textOff="Dark" onPress={toggleTheme} ></ToggleAwesomeButton>
             </Row>
 
             <p></p>
 
             <Row >
-                <Form.Label className='settingsLabel' >Show Tips</Form.Label>
+                <Form.Label className='settingsLabel' >Show Tips (partially implemented)</Form.Label>
                 <ToggleAwesomeButton onPress={toggleShowTips} ></ToggleAwesomeButton>
             </Row>
 
             <p></p>
 
             <Row >
-                <Form.Label className='settingsLabel' >Show Tooltips</Form.Label>
+                <Form.Label className='settingsLabel' >Show Tooltips (partially implemented)</Form.Label>
                 <ToggleAwesomeButton onPress={toggleShowTooltips} ></ToggleAwesomeButton>
                 
             </Row>

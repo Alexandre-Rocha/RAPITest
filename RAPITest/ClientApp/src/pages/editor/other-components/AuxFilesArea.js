@@ -33,6 +33,8 @@ function AuxFilesArea(props) {
 
     const [dllArr, setDllArr] = useState([])
 
+    const { apiUploaded } = props
+
 
     //const [files, setFiles] = useState([])
 
@@ -96,74 +98,92 @@ function AuxFilesArea(props) {
     return (
         <div>
 
-            {(uploadedDic === false) ?
+            <div>
+                {(apiUploaded === true) ?
 
-                <div>
-                    <div style={{ fontWeight: 'bold' }}>Upload a Dictionary file</div>
+                    <div>
+                        {(uploadedDic === false) ?
 
-                    {settings.showTips ?
-                        <Form.Text className="text-muted">
-                            Dictionary files are .txt files where you can define data such as schemas or body payloads to use in the tests.
-                        </Form.Text>
-                        :
-                        <></>}
+                            <div>
+                                <div style={{ fontWeight: 'bold' }}>Upload a Dictionary file</div>
 
-                    <div className="root-dropzone sidebar-dropzone">
-                        <Dropzone className="sidebar-dropzone"
-                            accept=".txt"
-                            onDrop={onDropDic}
-                            text={
-                                <div align="center">
-                                    <p>Upload Dictionary (.txt)</p>
-                                </div>}
-                        />
+                                {settings.showTips ?
+                                    <Form.Text className="text-muted">
+                                        Dictionary files are .txt files where you can define data such as schemas or body payloads to use in the tests.
+                                    </Form.Text>
+                                    :
+                                    <></>}
+
+                                <div className="root-dropzone sidebar-dropzone">
+                                    <Dropzone className="sidebar-dropzone"
+                                        accept=".txt"
+                                        onDrop={onDropDic}
+                                        text={
+                                            <div align="center">
+                                                <p>Upload Dictionary (.txt)</p>
+                                            </div>}
+                                    />
+                                </div>
+                            </div>
+
+                            :
+
+                            <div><span style={{ fontWeight: 'bold' }}>Dictionary uploaded!</span> <span> If you want to upload another dictionary, delete the already uploaded one below.</span></div>}
+
+                        <p></p>
+
+
+                        <div style={{ fontWeight: 'bold' }}>Upload Custom Verification files</div>
+
+                        {settings.showTips ?
+                            <Form.Text className="text-muted">
+                                <span> If the provided verifications aren't enough, you can implement your own and use them with the Custom Verification node.</span> <span style={{ fontWeight: 'bold' }}> Make sure you trust the DLL file!</span>
+                            </Form.Text>
+                            :
+                            <></>}
+
+                        <div className="root-dropzone">
+
+                            <Dropzone className="sidebar-dropzone"
+                                accept=".dll"
+                                onDrop={onDropDll}
+                                text={
+                                    <div align="center">
+                                        <p>Upload Custom Verification (.dll)</p>
+                                    </div>}
+                            />
+
+                        </div>
+
+                        <AcceptedFilesList
+                            title="Dictionary File"
+                            files={dicFiles}
+                            symbol={successIcon}
+                            toShow={fileNameFuction}
+                            removeSymbol={binIcon}
+                            removeFunction={removeFileFunctionDict}></AcceptedFilesList>
+
+                        <AcceptedFilesList
+                            title="Custom Verification Files"
+                            files={dllFiles}
+                            symbol={successIcon}
+                            toShow={fileNameFuction}
+                            removeSymbol={binIcon}
+                            removeFunction={removeFileFunctionDLL}></AcceptedFilesList>
+
+
                     </div>
-                </div>
 
-                :
+                    :
 
-                <div><span style={{ fontWeight: 'bold' }}>Dictionary uploaded!</span> <span> If you want to upload another dictionary, delete the already uploaded one below.</span></div>}
+                    <div>
 
-            <p></p>
+                        To upload auxiliary files, first upload the API specification.
+                    </div>
 
-
-            <div style={{ fontWeight: 'bold' }}>Upload Custom Verification files</div>
-
-            {settings.showTips ?
-                <Form.Text className="text-muted">
-                    <span> If the provided verifications aren't enough, you can implement your own and use them with the Custom Verification node.</span> <span style={{ fontWeight: 'bold' }}> Make sure you trust the DLL file!</span>
-                </Form.Text>
-                :
-                <></>}
-
-            <div className="root-dropzone">
-
-                    <Dropzone className="sidebar-dropzone"
-                        accept=".dll"
-                        onDrop={onDropDll}
-                        text={
-                            <div align="center">
-                                <p>Upload Custom Verification (.dll)</p>
-                            </div>}
-                    />
-                    
+                }
             </div>
 
-            <AcceptedFilesList
-                title="Dictionary File"
-                files={dicFiles}
-                symbol={successIcon}
-                toShow={fileNameFuction}
-                removeSymbol={binIcon}
-                removeFunction={removeFileFunctionDict}></AcceptedFilesList>
-
-            <AcceptedFilesList
-                title="Custom Verification Files"
-                files={dllFiles}
-                symbol={successIcon}
-                toShow={fileNameFuction}
-                removeSymbol={binIcon}
-                removeFunction={removeFileFunctionDLL}></AcceptedFilesList>
 
         </div>
     )

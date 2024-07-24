@@ -39,6 +39,7 @@ function Sidebar(props) {
 
     const { className } = props
 
+    const [apiUploaded, setApiUploaded] = useState(props.apiUploaded);
 
     const { onDictionaryDrop, onDllDrop, onTslDrop } = props
 
@@ -57,7 +58,7 @@ function Sidebar(props) {
         setIsCollapsed((prevState) => !prevState);
     };
 
-
+    console.log("API UPLOADED SIDEBAR: ", apiUploaded);
     const onDropTsl = (accept, reject) => {
 
         if (reject.length !== 0 || accept.length > 1) {
@@ -73,6 +74,9 @@ function Sidebar(props) {
 
     }
 
+    function setApiUploadedCallback(toggle){
+        setApiUploaded(toggle)
+    }
 
 
     return (
@@ -117,6 +121,7 @@ function Sidebar(props) {
                         uploaded={false}
                         apiTitle={apiTitle}
                         handlerAPI={handlerAPI}
+                        setApiUploadedCallback={setApiUploadedCallback}
                         onTestConfNameChange={onTestConfNameChange}>
                     </ApiUploadArea>
 
@@ -124,6 +129,7 @@ function Sidebar(props) {
 
                     <TslUploadArea
                         uploaded={false}
+                        apiUploaded={apiUploaded}
                         onDropTsl={onDropTsl}>
                     </TslUploadArea> 
 
@@ -132,7 +138,7 @@ function Sidebar(props) {
 
                     <SimpleAccordion header={"Auxiliary Files"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"file-icon"}>
 
-                        <AuxFilesArea onDictionaryDrop={onDictionaryDrop} onDllDrop={onDllDrop}></AuxFilesArea>
+                        <AuxFilesArea apiUploaded={apiUploaded} onDictionaryDrop={onDictionaryDrop} onDllDrop={onDllDrop}></AuxFilesArea>
 
                     </SimpleAccordion>
 
