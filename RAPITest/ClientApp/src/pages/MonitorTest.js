@@ -213,12 +213,11 @@ export class MonitorTest extends Component {
             return <div className="row" style={{ marginLeft: 10, marginRight: 10 }}><div style={{ marginRight: 10 }}>Running Tests..</div><Loader type="Grid" color="#00BFFF" height={35} width={35} /></div>
         }
         if ((item.LatestReport === "-" && item.NextTest === "-")) {
-            return <div className="row" style={{ marginLeft: 10, marginRight: 10 }}>
-                <div style={{ marginRight: 10 }}>Ababa</div>
+            return <div style={{ marginLeft: 10, marginRight: 10 }}>
                 <div style={{ display: "inline-block" }}>
-                        <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.RunNow(item.ApiId, item)}><img style={{ marginRight: "15px" }} width="50" height="50" src={runIcon} alt="Logo" />Run</AwesomeButton>
-                    </div>
-                    <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>
+                    <AwesomeButton className="buttonAdd" type="primary" onPress={() => this.RunNow(item.ApiId, item)}><img style={{ marginRight: "15px" }} width="50" height="50" src={runIcon} alt="Logo" />Run</AwesomeButton>
+                </div>
+                <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>
                     <AwesomeButton className="buttonEdit" type="primary" onPress={() => this.editName(item.ApiId, item.APITitle)}><img width="50" height="50" src={editIcon} alt="Logo" /></AwesomeButton>
                 </div>
                 <div style={{ display: "inline-block", paddingLeft: "5px", paddingRight: "10px", paddingTop: "9px" }}>

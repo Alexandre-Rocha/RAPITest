@@ -30,7 +30,7 @@ services:
     restart: always
 
   rapitest:
-    image: alexandrerocha99/rapitest:2.3
+    image: alexandrerocha99/rapitest:2.5
     depends_on:
         db:
             condition: service_healthy
