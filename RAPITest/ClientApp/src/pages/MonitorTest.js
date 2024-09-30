@@ -163,7 +163,8 @@ export class MonitorTest extends Component {
             servers: "",
             paths: "",
             schemas: "",
-            schemasValues: ""
+            schemasValues: "",
+            fileName:""
         }
 
         console.log("trying fetch tsl");
@@ -184,6 +185,14 @@ export class MonitorTest extends Component {
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
         })
         const spec = await specResponse.json()
+
+        console.log("SPEC response");
+        console.log(specResponse);
+        console.log(specResponse.body);
+        console.log(spec);
+
+        const apiFileName = spec.info?.title ? spec.info.title : "specification" //TODO: need more testing
+        apiFile.fileName = apiFileName
 
         apiFile.paths = Object.keys(spec.paths);
 

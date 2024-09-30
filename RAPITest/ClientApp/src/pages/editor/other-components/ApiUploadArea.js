@@ -39,7 +39,7 @@ const ApiUploadArea = (props) => {
     }
 
     const fileNameFuction = (file) => {
-        return file.name
+        return file.name ? file.name : "specification" //TODO: should try a bit harder maybe
     }
 
     const removeFileFunction = (fileToRemove) => {

@@ -50,11 +50,9 @@ const TslUploadArea = (props) => {
 
     const fileNameFuction = (file) => {
         //return "file test"
-        console.log(file);
+        //console.log(file);
         return file.name
     }
-
-    console.log('TSL UPLOAD AREA RERENDER; API UPLOADED: ' + apiUploaded);
 
     const removeFileFunction = (fileToRemove) => {
         setTslFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));

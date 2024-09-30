@@ -44,21 +44,14 @@ function Sidebar(props) {
     const { onDictionaryDrop, onDllDrop, onTslDrop } = props
 
     const toggleSidebar = (dontCollapseClass) => {
-        console.log("step 1");
-        console.log(dontCollapseClass);
-        let dntClClass = "lele"
+        let dntClClass = ""
         if (typeof dontCollapseClass === "string") {
             dntClClass = dontCollapseClass
         }
-        else if (!dontCollapseClass.target.value) {
-            dntClClass = "lalala"
-        }
-        console.log(dntClClass);
         onToggleCollapse(!isCollapsed, dntClClass)
         setIsCollapsed((prevState) => !prevState);
     };
 
-    console.log("API UPLOADED SIDEBAR: ", apiUploaded);
     const onDropTsl = (accept, reject) => {
 
         if (reject.length !== 0 || accept.length > 1) {
@@ -77,7 +70,6 @@ function Sidebar(props) {
     function setApiUploadedCallback(toggle){
         setApiUploaded(toggle)
     }
-
 
     return (
         <div className={`collapsible-sidebar ${isCollapsed ? 'collapsed' : ''} `}>
@@ -101,10 +93,10 @@ function Sidebar(props) {
                     <button className="tsl-icon sidebar-icon" onClick={()=>{toggleSidebar('tsl-icon')}}/>
                     <button className="file-icon sidebar-icon" onClick={()=>{toggleSidebar('file-icon')}}/>
                     <button className="timer-icon sidebar-icon" onClick={()=>{toggleSidebar('timer-icon')}}/>
-                    <button className="flow-icon sidebar-icon" onClick={()=>{toggleSidebar('Flow-related')}}/>
-                    <button className="test-icon sidebar-icon" onClick={()=>{toggleSidebar('HTTP')}}/>
+                    <button className="flow-icon sidebar-icon" onClick={()=>{toggleSidebar('Flow')}}/>
+                    <button className="test-icon sidebar-icon" onClick={()=>{toggleSidebar('Request')}}/>
                     <button className="verifs-icon sidebar-icon" onClick={()=>{toggleSidebar('Verifications')}}/>
-                    <button className="setup-icon sidebar-icon" onClick={()=>{toggleSidebar('Setup-related')}}/>
+                    <button className="setup-icon sidebar-icon" onClick={()=>{toggleSidebar('Setup')}}/>
                 </div>
 
                 :

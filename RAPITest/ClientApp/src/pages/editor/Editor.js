@@ -24,8 +24,7 @@ import Sidebar from './other-components/Sidebar';
 
 import Alert from 'react-bootstrap/Alert';
 
-import { Fade } from 'react-bootstrap';
-
+import { Tooltips } from './editor-strings';
 
 import { LOG_LEVELS as level, rapiLog } from './utils';
 
@@ -109,54 +108,60 @@ const getLayoutedElements = (nodes, edges, options) => {
     };
 };
 
-
+const NODE_LEFT_HANDLE = "leftHandle"
+const NODE_RIGHT_HANDLE = "rightHandle"
 
 function Flow() {
 
-    rapiLog(level.INFO, "Flow component rendered")
+    //rapiLog(level.INFO, "Flow component rendered")
 
     // #region State and Hooks
 
+    const [nodesCreatedFromState, setNodesCreatedFromState] = useState(false) //TODO: organize
+
+    //#region state related to React, ReactFlow and Dagre
+
+    const location = useLocation(); // needed to enable pre-filling stuff when coming from Monitor Tests page
+    const reactFlowInstance = useReactFlow()
+    const { fitView } = useReactFlow(); // for dagre
+
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    //#endregion
 
-    const location = useLocation();
-    const reactFlowInstance = useReactFlow()
-    const { fitView } = useReactFlow(); //dagre
 
-    // This will have servers, paths, schemas and schemavalues
-    const [apiFile, setApiFile] = useState(location?.state?.apiFile || null)
+    //#region state related to API
 
-    // Whether or not api spec has been uploaded //TODO: is it being set properly when throug old config?
-    const [apiUploaded, setApiUploaded] = useState(false)
+    const [testConfName, setTestConfName] = useState(location?.state?.APITitle || "") // the test conf name is kind of bound to the api spec due to how server works //TODO: look deeper into this, improve this comment or even move this outside of this region if possible
 
-    const [testConfName, setTestConfName] = useState(location?.state?.APITitle || "")
+    const [apiFile, setApiFile] = useState(location?.state?.apiFile || null) // This will have servers, paths, schemas and schemavalues
+
+    const [apiUploaded, setApiUploaded] = useState(false) // Whether or not api spec has been uploaded //TODO: is it being set properly when throug old config?
+    //#endregion
+
+
+    //#region state related to Timer settings
 
     //TODO: cant grab from db for already conf tests...think of something
     const [runImmediately, setRunImmediatly] = useState('true')
     const [runInterval, setRunInterval] = useState('Never')
     const [runGenerated, setRunGenerated] = useState('true')
+    //#endregion
 
-    // aux variables to see current max nodeId and n of workflows
-    const nodeId = useRef(1)
-    const maxWfIndex = useRef(-1)
 
-    // Comes pre-set if from old config, otherwise empty
-    const [workflows, setWorkflows] = useState(location?.state?.tslState || []);
+    //#region state related to aux files
 
-    const [canCollapse, setCanCollapse] = useState(false)
+    const [dictObj, setDictObj] = useState({}) //js object of the dictionary (processed)
+    const [dllNamesArr, setDllNamesArr] = useState([]) //arr with names of dll files
 
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-    const [dontCollapseClass, setDontCollapseClass] = useState("")
+    const [dictFile, setDictFile] = useState() // dictionary, actual file to send to server
+    const [dllFileArr, setDllFileArr] = useState([]) // dll files, actual files to send to server
+    //#endregion
 
-    const [dict, setDict] = useState({})
 
-    const [settingsVisible, setSettingsVisible] = useState(false)
+    //#region state related to alerts
 
-    const [dictFile, setDictFile] = useState()
-    const [dllFileArr, setDllFileArr] = useState([])
-
-    const [dllNamesArr, setDllNamesArr] = useState([])
+    const [fadeClass, setFadeClass] = useState(''); //for all alerts
 
     const [showNodesAlert, setShowNodesAlert] = useState(false);
 
@@ -165,16 +170,27 @@ function Flow() {
 
     const [finishSetupAlert, setFinishSetupAlert] = useState(false);
     const [finishSetupWarnings, setFinishSetupWarnings] = useState([]);
+    //#endregion
 
-    const [fadeClass, setFadeClass] = useState('');
 
-    const NODE_LEFT_HANDLE = "leftHandle"
-    const NODE_RIGHT_HANDLE = "rightHandle"
+    //#region state related to UI (collapse, expand, visible, etc)
+
+    const [canCollapse, setCanCollapse] = useState(false) // if nodes can be collapsed
+
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false) // controls if sidebar is collapsed
+    const [dontCollapseClass, setDontCollapseClass] = useState("")  // when clicking in an icon when sidebar is collapsed, take note of which icon user wants to go to here; that zone will not be collapsed when sidebar opens
+
+    const [settingsVisible, setSettingsVisible] = useState(false) // controls if settings are visible
+    //#endregion
 
     // #endregion
 
-    // this is so i have more freedom applying custom css effects while making sure they dont affect the app elsewhere (as in outside the editor page)
-    // adds custom class to body and removes it when component unmounts
+    // aux variables to see current max nodeId and n of workflows
+    const nodeId = useRef(1)
+    const maxWfIndex = useRef(-1)
+
+    /* adds custom class to body and removes it when component unmounts
+    this is so i have more freedom applying custom css effects while making sure they dont affect the app elsewhere (as in outside the editor page)*/
     useEffect(() => {
         document.body.classList.add('editor-page');
 
@@ -184,22 +200,18 @@ function Flow() {
     }, []);
 
 
-    //dagre
-    const onLayout =
-        //useCallback(
-        (direction) => {
-            console.log("[Editor] onLayout");
-            const layouted = getLayoutedElements(nodes, edges, { direction });
+    //for dagre (layout algorithm)
+    const onLayout = (direction) => {
+        console.log("[Editor] onLayout");
+        const layouted = getLayoutedElements(nodes, edges, { direction });
 
-            setNodes([...layouted.nodes]);
-            setEdges([...layouted.edges]);
+        setNodes([...layouted.nodes]);
+        setEdges([...layouted.edges]);
 
-            window.requestAnimationFrame(() => {
-                fitView();
-            });
-        }
-    // ,[nodes, edges]   );
-
+        window.requestAnimationFrame(() => {
+            fitView();
+        });
+    }
 
 
     // #region onChange in Editor
@@ -231,7 +243,6 @@ function Flow() {
     }, [])
 
     // #endregion
-
 
 
     // #region Connection logic
@@ -536,7 +547,7 @@ function Flow() {
             bodyText: bodyText,
             bodyRef: bodyRef,
             useBodyRef: useBodyRef,
-            dictObj: dict
+            dictObj: dictObj
             // TODO: missing the dictObj
         }
         console.log(nodeData);
@@ -961,9 +972,9 @@ function Flow() {
     useEffect(() => {
         if (canCollapse) {
             setTimeout(() => {
-                collapseNodes(); // Call collapseNodes after 1 second
+                collapseNodes();
                 setCanCollapse(false)
-            }, 100); //this is not optimal...
+            }, 100);
         }
     }, [canCollapse]);
 
@@ -1095,91 +1106,7 @@ function Flow() {
     // #endregion
 
 
-    // #region others/misc
-
-
-
-    const collapseNodes = () => {
-        console.log("collapsing nodes");
-        let nodesArr = reactFlowInstance.getNodes();
-        nodesArr.forEach(
-            e => {
-                if (e.data.custom.collapseAccordion) {
-                    console.log("collapse");
-                    e.data.custom.collapseAccordion()
-                }
-                else {
-                    console.log("no collapse");
-                    console.log(e);
-                }
-            }
-        )
-        console.log("nodes collapsed");
-
-    }
-
-    const openNodes = () => {
-        let nodesArr = reactFlowInstance.getNodes();
-        nodesArr.forEach(
-            e => {
-                if (e.data.custom.openAccordion) {
-                    console.log("open");
-                    e.data.custom.openAccordion()
-                }
-                console.log("no open");
-                console.log(e);
-            }
-        )
-    }
-
-    const collapseSidebarAccordions = () => {
-        console.log("collapse sidebar accordions");
-        const elements = document.querySelectorAll('.sidebar-simple-header .accordion-button');
-
-        console.log("step 3");
-        console.log(dontCollapseClass)
-
-        elements.forEach((element) => {
-            const isNotCollapsed = !element.classList.contains('collapsed')
-
-            const children = element.children
-
-            let childHasDntClpsClass = false
-
-            Array.from(children).forEach(child => {
-                if (child.classList.contains(dontCollapseClass)) {
-                    childHasDntClpsClass = true
-                }
-            });
-
-            if (isNotCollapsed && !childHasDntClpsClass) {
-                element.click()
-            }
-            else {
-                element.scrollIntoView({
-                    behavior: 'smooth', // Optional: Defines the transition animation
-                    block: 'nearest' // Scrolls so that the targetItem is aligned to the top of the sidebar
-                });
-            }
-
-            childHasDntClpsClass = false
-
-        });
-    }
-
-    const onToggleCollapse = (newCollapsedState, dontCollapseClass = "") => {
-        setSidebarCollapsed(newCollapsedState)
-        console.log(" step 2 dontCollapseClass");
-        console.log(dontCollapseClass);
-        setDontCollapseClass(dontCollapseClass)
-    }
-
-    // whenever the sidebar is collapsed, the accordions inside should collapse too
-    // the dependency is triggered 
-    // TODO: isto é necessário? nao posso simplesmente passar collapseSidebarAccordions como callback à sidebar?
-    useEffect(() => {
-        collapseSidebarAccordions()
-    }, [sidebarCollapsed])
+    //#region other callbacks to other components
 
     //TODO: maybe I can analyse this to see how the schemasvalues are passed to do same in MonitorTests
     const handlerAPI = function (paths, servers, schemas, schemasValues) {
@@ -1188,49 +1115,12 @@ function Flow() {
         setApiFile(apiContents)
     }
 
-    /* eslint-disable */
-    // If there is state coming from MonitorTests, create corresponding nodes
-    useEffect(() => {
-        if (location?.state?.tslState) {
-            console.log('[Editor] External state has been found; creating nodes...');
-            createNodes(workflows)
-            //onLayout('TB') TODO: not working
-            //onLayout('TB') // need to call twice for some reason
-        } else {
-            console.log('[Editor] No state has been found; no nodes will be created');
-        }
-    }, []); // Empty dependency array ensures the effect runs only once -> THIS IS WHY ESLINT IS DISABLED (dependencies dont matter)
-    /* eslint-enable */
+    //#endregion
 
 
-    const dumpState = () => {
-        console.log("Logging the state...")
-        //console.log("API file: ", apiFile);
+    //#region file management
 
-        //console.log("Run Generated:", runGenerated);
-        //console.log("Run Immediatly:", runImmediately);
-        //console.log("Run Interval:", runInterval);
-
-        console.log("----------------------------");
-        console.log("Workflows: ");
-        console.log(workflows);
-
-        //console.log("----------------------------");
-        //console.log("Nodes: ");
-        //console.log(nodes);
-
-        //console.log("----------------------------");
-        //console.log("Edges: ");
-        //console.log(edges);
-
-        //console.log("----------------------------");
-        //console.log("Dictionary file:");
-        //console.log(dict);
-    }
-
-    // #endregion
-
-
+    // process the dictionary file, turn into js dictionary
     function parseDictionary(dictString) {
         const lines = dictString.split('\n');
         const dictionary = {};
@@ -1240,16 +1130,20 @@ function Flow() {
         lines.forEach((line) => {
             if (line.startsWith('dictionaryID:')) {
                 if (currentKey && currentExample) {
+                    //if new entry is not the first one, trim text of previous entry
                     dictionary[currentKey] = currentExample.trim();
                 }
+                //new entry, so set new key and start new example(value)
                 currentKey = line.split('dictionaryID:')[1].trim();
                 currentExample = '';
             } else {
+                //if line is not new entry, add to current with line separator
                 currentExample += line + '\n';
             }
         });
 
         if (currentKey && currentExample) {
+            // trim example of last entry
             dictionary[currentKey] = currentExample.trim();
         }
 
@@ -1257,12 +1151,9 @@ function Flow() {
     }
 
     const onDictionaryDrop = (txtFile) => {
-        //somehow relay info to bodyNode
-        console.log("dic drop received, now need to relay");
-        let nodesArr = reactFlowInstance.getNodes();
-
         if (txtFile) {
 
+            let nodesArr = reactFlowInstance.getNodes();
             setDictFile(txtFile)
 
             const reader = new FileReader();
@@ -1270,20 +1161,13 @@ function Flow() {
             reader.onload = (event) => {
                 const fileContents = event.target.result;
 
-                console.log(fileContents);
-                //here i have file contents. what do?
-                //gotta send all info to body node
-
                 let dictObj = parseDictionary(fileContents)
 
-                console.log("setting dicitonary");
-                console.log(dictObj);
-                setDict(dictObj)
+                setDictObj(dictObj)
 
                 nodesArr.forEach(
                     node => {
                         if (node.type === "body") {
-                            console.log("found body node with id:", node.id);
                             node.data = {
                                 ...node.data,
                                 custom: {
@@ -1292,17 +1176,11 @@ function Flow() {
                                 }
 
                             }
-
-                            console.log("new node data:");
-                            console.log(node.data);
                         }
                     }
                 )
-
                 setNodes(nodesArr)
-
             };
-
             reader.readAsText(txtFile);
         }
     }
@@ -1361,11 +1239,32 @@ function Flow() {
 
             console.log(fileContents);
 
+
+            // file load will start
+            const startTotal = performance.now();
+
+
             const newstate = jsYaml.load(fileContents)
+
+            const endFile = performance.now();
 
             //setWorkflows(newstate)
 
+            const startEditor = performance.now();
+
             createNodes(newstate)
+
+            //after this nodes are created so operation ends
+            const endTotal = performance.now();
+            //log time taken to load file and create nodes
+            console.log(`[TOTAL] Time taken: ${endTotal - startTotal}ms`);
+
+            console.log(`[EDITOR] Time taken: ${endTotal - startEditor}ms`);
+
+            console.log(`[FILE] Time taken: ${endFile - startTotal}ms`);
+
+
+
 
             //TODO: hardcoded
             setTslUploadedAlert(true)
@@ -1382,11 +1281,115 @@ function Flow() {
 
     }
 
+    //#endregion
+
+
+    // #region others/misc
+
+    const collapseNodes = () => {
+        const nodesArr = reactFlowInstance.getNodes();
+        nodesArr.forEach(
+            e => {
+                if (e.data.custom.collapseAccordion) {
+                    e.data.custom.collapseAccordion()
+                }
+            }
+        )
+    }
+
+    const openNodes = () => {
+        const nodesArr = reactFlowInstance.getNodes();
+        nodesArr.forEach(
+            e => {
+                if (e.data.custom.openAccordion) {
+                    e.data.custom.openAccordion()
+                }
+            }
+        )
+    }
+
+
+    // collapse the accordions inside the sidebar, except those with the "dontCollapseClass"
+    const collapseSidebarAccordions = () => {
+        const elements = document.querySelectorAll('.sidebar-simple-header .accordion-button'); //TODO: kinda hardcoded
+
+        elements.forEach((element) => {
+            const isNotCollapsed = !element.classList.contains('collapsed')
+
+            const children = element.children
+
+            let childHasDntClpsClass = false
+
+            Array.from(children).forEach(child => {
+                if (child.classList.contains(dontCollapseClass)) {
+                    childHasDntClpsClass = true
+                }
+            });
+
+            if (isNotCollapsed && !childHasDntClpsClass) {
+                element.click()
+            }
+            else {
+                element.scrollIntoView({
+                    behavior: 'smooth', // Optional: Defines the transition animation
+                    block: 'nearest' // Scrolls so that the targetItem is aligned to the top of the sidebar
+                });
+            }
+
+            childHasDntClpsClass = false
+
+        });
+    }
+
+    const onToggleCollapse = (newCollapsedState, dontCollapseClass = "") => {
+        setSidebarCollapsed(newCollapsedState)
+        setDontCollapseClass(dontCollapseClass)
+    }
+
+    // whenever the sidebar is opened or closed, collapse accordions inside
+    useEffect(() => {
+        collapseSidebarAccordions()
+    }, [sidebarCollapsed])
+
+    /* eslint-disable */
+    // If there is state coming from MonitorTests, create corresponding nodes
+    useEffect(() => {
+        if (location?.state?.tslState) {
+            console.log('[Editor] External state has been found; creating nodes...');
+            //createNodes(workflows)
+            createNodes(location?.state?.tslState) // was above line before but like this can remove state var
+            //setTimeout(()=>onLayout('TB'),2000) // TODO: not working
+            setNodesCreatedFromState(true)
+        } else {
+            console.log('[Editor] No state has been found; no nodes will be created');
+        }
+    }, []); // Empty dependency array ensures the effect runs only once -> THIS IS WHY ESLINT IS DISABLED (dependencies dont matter)
+    /* eslint-enable */
+
+    useEffect(() => {
+        if (nodesCreatedFromState) {
+            console.log("created from state use effect");
+
+            setTimeout(() => {
+                document.getElementById('layout-button').click()
+                //onLayout('TB')
+                //onLayout('TB') // TODO: not working
+            }, 1200);
+            setNodesCreatedFromState(false)
+        }
+    }, [nodesCreatedFromState])
+
+    // TODO: improve to clean files/etc (full reset)?
     function clearEditor() {
         setNodes([])
         setEdges([])
     }
 
+
+    // #endregion
+
+
+    //#region Finish Setup
 
     /**
      * Aux function to get connected nodes of a specific type given a single root node
@@ -1439,7 +1442,6 @@ function Flow() {
 
         return result;
     }
-
 
     //TODO:no save changes (agr ja nao ]e, ver num desses embaixo) remover headers vazios
 
@@ -1774,8 +1776,8 @@ function Flow() {
                 console.error("Test setup failed...");
             } else {
                 console.log("Test setup was successful!")
-                        //TODO: remove hardcoded
-        setFinishSetupAlert(true)
+                //TODO: remove hardcoded
+                setFinishSetupAlert(true)
             }
         })
     }
@@ -1790,10 +1792,14 @@ function Flow() {
         console.log(processedWorkflows);
 
         finalizeConfiguration(processedWorkflows)
-
-
     }
 
+    //#endregion
+
+
+    //#region Alerts
+
+    // control timer of showNodesAlert (for fade and auto close)
     useEffect(() => {
         let timer;
         console.log("Checking nodes alert...");
@@ -1808,17 +1814,21 @@ function Flow() {
                 }, 800)
 
 
-            }, 3000); // Adjust the duration as needed (3000ms = 3 seconds)
+            }, 3000);
         }
         return () => clearTimeout(timer);
     }, [showNodesAlert]);
 
+
+    // control timer of tslUploadedAlert (for fade and auto close)
     useEffect(() => {
         let timer;
         console.log("Checking tsl alert...");
 
         if (tslUploadedAlert && tslUploadedWarnings.length === 0) {
             setFadeClass('fade-in');
+
+            // only set timeout to auto close alert if setup is successfull
             timer = setTimeout(() => {
                 setFadeClass('fade-out');
                 setTimeout(() => {
@@ -1826,25 +1836,25 @@ function Flow() {
                     console.log("Hiding tsl alert...");
                 }, 800)
 
-            }, 3000); // Adjust the duration as needed (3000ms = 3 seconds)
+            }, 3000);
         }
 
         if (tslUploadedAlert && tslUploadedWarnings.length > 0) {
             setFadeClass('fade-in');
         }
 
-
         return () => clearTimeout(timer);
     }, [tslUploadedAlert]);
 
-
-
+    //control timer of finishSetupAlert (for fade and auto close)
     useEffect(() => {
         let timer;
         console.log("Checking finish setup alert...");
 
         if (finishSetupAlert && finishSetupWarnings.length === 0) {
             setFadeClass('fade-in');
+
+            // only set timeout to auto close alert if setup is successfull
             timer = setTimeout(() => {
                 setFadeClass('fade-out');
                 setTimeout(() => {
@@ -1852,36 +1862,26 @@ function Flow() {
                     console.log("Hiding finish setup alert...");
                 }, 800)
 
-            }, 4000); // Adjust the duration as needed (3000ms = 3 seconds)
+            }, 4000);
         }
 
         if (finishSetupAlert && finishSetupWarnings.length > 0) {
             setFadeClass('fade-in');
         }
 
-
         return () => clearTimeout(timer);
+
     }, [finishSetupAlert]);
 
+    //#endregion
 
-    const workflowTooltip = "You can have one or more workflows. A workflow is essentially a sequence of one or more tests, grouped to achieve a specific testing goal."
-    const testTooltip = "A test is a request to a specific API endpoint. It can have mutiple components and verifications associated with it."
-    const stressTestTooltip = "Each workflow can have one stress test, where you can configure how the workflow will be executed."
-    
-    const bodyTooltip = "Add a body to the request."
-    const headersTooltip = "Add headers to the request."
-    const queryTooltip = "Add query parameters to the request."
-    const retainTooltip = "You can retain a value from the response in order to use it in another test."
-
-    const statusCodeTooltip = "Check the status code of the response."
-    const schemaTooltip = "Check if response body matches the given schema."
-    const containsTooltip = "Check if response body contains a given value."
-    const countTooltip = "Check how many times the response body contains a given value."
-    const matchTooltip = "Check if path in response body matches a given value."
-    const customTooltip = "Execute a custom verification provided through a .dll file."
-
-    const clearEditorTooltip = "Clear the editor (remove all nodes and connections)."
-    const finishSetupTooltip = "Save and finish the test configuration setup."
+    const memoryCheck = () => {
+        console.log("Memory check...");
+        const memoryInfo = performance.memory;
+        console.log(`JS Heap Size Limit: ${memoryInfo.jsHeapSizeLimit}`);
+        console.log(`Total JS Heap Size: ${memoryInfo.totalJSHeapSize}`);
+        console.log(`Used JS Heap Size: ${memoryInfo.usedJSHeapSize}`);
+    }
 
     return (
         <div className='editor-container'>
@@ -1899,22 +1899,23 @@ function Flow() {
                 onDllDrop={onDllDrop}
                 onTslDrop={onTslDrop}
                 buttonsArray={[
-                    { section: "Flow", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: workflowTooltip, iconClass: "flow-icon" },
-                    { section: "Flow", title: "Test", onClick: onClickTestNode, class: "test", iconClass: "flow-icon" , tooltip: testTooltip},
-                    { section: "Flow", title: "Stress Test", onClick: onClickStressTestNode, class: "stress", iconClass: "flow-icon" , tooltip: stressTestTooltip},
-                    { section: "Request components", title: "Body", onClick: onClickBodyNode, class: "http", iconClass: "test-icon", tooltip: bodyTooltip },
-                    { section: "Request components", title: "Headers", onClick: onClickHeadersNode, class: "http", iconClass: "test-icon", tooltip: headersTooltip },
-                    { section: "Request components", title: "Query", onClick: onClickQueryNode, class: "http", iconClass: "test-icon" , tooltip: queryTooltip},
-                    { section: "Request components", title: "Retain", onClick: onClickRetainNode, class: "http", iconClass: "test-icon", tooltip: retainTooltip },
-                    { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class: "verif", iconClass: "verifs-icon", tooltip: statusCodeTooltip },
-                    { section: "Verifications", title: "Schema", onClick: onClickSchema, class: "verif", iconClass: "verifs-icon" , tooltip: schemaTooltip},
-                    { section: "Verifications", title: "Contains ", onClick: onClickContains, class: "verif", iconClass: "verifs-icon", tooltip: containsTooltip },
-                    { section: "Verifications", title: "Count ", onClick: onClickCount, class: "verif", iconClass: "verifs-icon" , tooltip: countTooltip},
-                    { section: "Verifications", title: "Match ", onClick: onClickMatch, class: "verif", iconClass: "verifs-icon" , tooltip: matchTooltip},
-                    { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon", tooltip: customTooltip },
+                    { section: "Flow", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: Tooltips.workflowTooltip, iconClass: "flow-icon" },
+                    { section: "Flow", title: "Test", onClick: onClickTestNode, class: "test", iconClass: "flow-icon", tooltip: Tooltips.testTooltip },
+                    { section: "Flow", title: "Stress Test", onClick: onClickStressTestNode, class: "stress", iconClass: "flow-icon", tooltip: Tooltips.stressTestTooltip },
+                    { section: "Request components", title: "Body", onClick: onClickBodyNode, class: "http", iconClass: "test-icon", tooltip: Tooltips.bodyTooltip },
+                    { section: "Request components", title: "Headers", onClick: onClickHeadersNode, class: "http", iconClass: "test-icon", tooltip: Tooltips.headersTooltip },
+                    { section: "Request components", title: "Query", onClick: onClickQueryNode, class: "http", iconClass: "test-icon", tooltip: Tooltips.queryTooltip },
+                    { section: "Request components", title: "Retain", onClick: onClickRetainNode, class: "http", iconClass: "test-icon", tooltip: Tooltips.retainTooltip },
+                    { section: "Verifications", title: "Status Code ", onClick: onClickStatus, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.statusCodeTooltip },
+                    { section: "Verifications", title: "Schema", onClick: onClickSchema, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.schemaTooltip },
+                    { section: "Verifications", title: "Contains ", onClick: onClickContains, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.containsTooltip },
+                    { section: "Verifications", title: "Count ", onClick: onClickCount, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.countTooltip },
+                    { section: "Verifications", title: "Match ", onClick: onClickMatch, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.matchTooltip },
+                    { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.customTooltip },
                     /* { section: "Setup", title: "Save changes", onClick: onClickWip, class: "setup", iconClass: "gear-icon" }, */
-                    { section: "Setup", title: "Clear editor", onClick: clearEditor, class: "setup", iconClass: "gear-icon", tooltip: clearEditorTooltip },
-                    { section: "Setup", title: "Finish Setup", onClick: finishSetup, class: "setup", iconClass: "gear-icon", tooltip: finishSetupTooltip },
+                    { section: "Setup", title: "Clear editor", onClick: clearEditor, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.clearEditorTooltip },
+                    { section: "Setup", title: "Finish Setup", onClick: finishSetup, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.finishSetupTooltip },
+                    { section: "Dev", title: "Memory Check", onClick: memoryCheck, class: "setup", iconClass: "gear-icon" }
                     /* { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Dump state", onClick: dumpState, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Collapse nodes", onClick: collapseNodes, class: "setup", iconClass: "gear-icon" },
@@ -1957,65 +1958,65 @@ function Flow() {
                 </ReactFlow>
             </div>
 
-            <div>
-                <SimpleModalComp
-                    title={"Settings (WIP - not fully implemented)"}
-                    body={<Settings></Settings>}
-                    cancelButtonFunc={() => { setSettingsVisible(false) }}
-                    visible={settingsVisible}
-                />
-            </div>
+            <SimpleModalComp className='settings'
+                title={"Settings (WIP - not fully implemented)"}
+                body={<Settings></Settings>}
+                cancelButtonFunc={() => { setSettingsVisible(false) }}
+                visible={settingsVisible}
+            />
 
-            <div>
-                {showNodesAlert && (
-                    <Alert className={`nodeAlert ${fadeClass}`} variant="warning" onClose={() => setShowNodesAlert(false)} dismissible>
-                        <b>You must first upload the API Specification in order to add nodes.</b>
-                    </Alert>
-                )}
-            </div>
+            <div className='alerts'>
+                <div className='showNodesNoSpec'>
+                    {showNodesAlert && (
+                        <Alert className={`nodeAlert ${fadeClass}`} variant="warning" onClose={() => setShowNodesAlert(false)} dismissible>
+                            <b>You must first upload the API Specification in order to add nodes.</b>
+                        </Alert>
+                    )}
+                </div>
 
-            <div>
-                {tslUploadedAlert && tslUploadedWarnings.length === 0 && (
-                    <Alert className={`nodeAlert ${fadeClass}`} variant="success" onClose={() => setTslUploadedAlert(false)} dismissible>
-                        <b>TSL uploaded successfully!</b>
-                    </Alert>
-                )}
-            </div>
+                <div className='tslUploadSuccess'>
+                    {tslUploadedAlert && tslUploadedWarnings.length === 0 && (
+                        <Alert className={`nodeAlert ${fadeClass}`} variant="success" onClose={() => setTslUploadedAlert(false)} dismissible>
+                            <b>TSL uploaded successfully!</b>
+                        </Alert>
+                    )}
+                </div>
 
-            <div>
-                {tslUploadedAlert && tslUploadedWarnings.length != 0 && (
-                    <Alert className='nodeAlert' variant="warning" onClose={() => setTslUploadedAlert(false)} dismissible>
-                        <b>TSL uploaded successfully, but some potential issues were found:</b>
-                        <ul>
-                            {tslUploadedWarnings.map((warning, index) => (
-                                <li key={index} style={{ textAlign: 'left' }} >{warning}</li>
-                            ))}
-                        </ul>
-                    </Alert>
-                )}
-            </div>
-
+                <div className='tslUploadWarnings'>
+                    {tslUploadedAlert && tslUploadedWarnings.length != 0 && (
+                        <Alert className='nodeAlert' variant="warning" onClose={() => setTslUploadedAlert(false)} dismissible>
+                            <b>TSL uploaded successfully, but some potential issues were found:</b>
+                            <ul>
+                                {tslUploadedWarnings.map((warning, index) => (
+                                    <li key={index} style={{ textAlign: 'left' }} >{warning}</li>
+                                ))}
+                            </ul>
+                        </Alert>
+                    )}
+                </div>
 
 
-            <div>
-                {finishSetupAlert && finishSetupWarnings.length === 0 && (
-                    <Alert className={`nodeAlert ${fadeClass}`} variant="success" onClose={() => setFinishSetupAlert(false)} dismissible>
-                        <b>Setup completed successfully! You can check the test configuration details on the Monitor Tests page.</b>
-                    </Alert>
-                )}
-            </div>
 
-            <div>
-                {finishSetupAlert && finishSetupWarnings.length != 0 && (
-                    <Alert className='nodeAlert' variant="warning" onClose={() => setFinishSetupAlert(false)} dismissible>
-                        <b>Could not complete setup. Please address the issues below:</b>
-                        <ul>
-                            {tslUploadedWarnings.map((warning, index) => (
-                                <li key={index} style={{ textAlign: 'left' }} >{warning}</li>
-                            ))}
-                        </ul>
-                    </Alert>
-                )}
+                <div className='setupFinishSuccess'>
+                    {finishSetupAlert && finishSetupWarnings.length === 0 && (
+                        <Alert className={`nodeAlert ${fadeClass}`} variant="success" onClose={() => setFinishSetupAlert(false)} dismissible>
+                            <b>Setup completed successfully! You can check the test configuration details on the Monitor Tests page.</b>
+                        </Alert>
+                    )}
+                </div>
+
+                <div className='setupFinishError'>
+                    {finishSetupAlert && finishSetupWarnings.length != 0 && (
+                        <Alert className='nodeAlert' variant="warning" onClose={() => setFinishSetupAlert(false)} dismissible>
+                            <b>Could not complete setup. Please address the issues below:</b>
+                            <ul>
+                                {tslUploadedWarnings.map((warning, index) => (
+                                    <li key={index} style={{ textAlign: 'left' }} >{warning}</li>
+                                ))}
+                            </ul>
+                        </Alert>
+                    )}
+                </div>
             </div>
 
         </div>

@@ -61,7 +61,6 @@ namespace DataAnnotation.Controllers
 		{
 			List<IFormFile> files = data.Files.ToList();
 
-            Console.WriteLine("datalala");
             foreach (var key in data.Keys)
             {
                 Console.WriteLine($"{key}: {data[key]}");
@@ -173,7 +172,6 @@ namespace DataAnnotation.Controllers
 			List<IFormFile> files = data.Files.ToList();
 
 
-            Console.WriteLine("datale");
             foreach (var key in data.Keys)
             {
                 Console.WriteLine($"{key}: {data[key]}");
@@ -220,7 +218,6 @@ namespace DataAnnotation.Controllers
             List<IFormFile> files = data.Files.ToList();
 
 
-            Console.WriteLine("datale");
             foreach (var key in data.Keys)
             {
                 Console.WriteLine($"{key}: {data[key]}");
