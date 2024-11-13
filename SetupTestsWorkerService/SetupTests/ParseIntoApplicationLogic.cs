@@ -62,7 +62,12 @@ namespace SetupTestsWorkerService.SetupTests
 
 					if (test_D.Body != null)
 					{
-						if (test_D.Body.StartsWith("$ref/dictionary/"))
+                        Console.WriteLine("Logging Dictionary Contents:");
+                        foreach (var kvp in firstTestSetup.Dictionary)
+                        {
+                            Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
+                        }
+                        if (test_D.Body.StartsWith("$ref/dictionary/"))
 						{
 							string key = test_D.Body.Substring(16, test_D.Body.Length - 16);
 							if (!firstTestSetup.Dictionary.TryGetValue(key, out string value))

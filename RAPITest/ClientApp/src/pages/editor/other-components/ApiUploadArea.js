@@ -23,7 +23,7 @@ const ApiUploadArea = (props) => {
 
     const [uploaded, setUploaded] = useState(props.uploaded)
 
-    const [apiFiles, setApiFiles] = useState([]) //only 1 allowed, this is for ease for display because of listgroup component
+    const [apiFiles, setApiFiles] = useState(props.apiFile ? [props.apiFile] : []) //only 1 allowed, this is for ease for display because of listgroup component
 
     const { apiTitle, handlerAPI } = props
 

@@ -70,7 +70,12 @@ namespace DataAnnotation.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
 			using (_context)
 			{
-				Api newApi = _context.Api.OrderByDescending(x => x.ApiId).FirstOrDefault();
+
+                Console.WriteLine("-##-----");
+                Console.WriteLine(data);
+                Console.WriteLine("-##-----");
+
+                Api newApi = _context.Api.OrderByDescending(x => x.ApiId).FirstOrDefault();
 
 				newApi.RunGenerated = data["rungenerated"] == "true";
 

@@ -39,6 +39,18 @@ function Sidebar(props) {
 
     const { className } = props
 
+    const { apiFile } = props
+
+    const {dllFiles} = props
+
+    console.log("dll files sidebar: ",dllFiles);
+
+    const { dictFile } = props
+
+    const  {uploadedDic} = props
+
+    const { uploadedDll } = props
+
     const [apiUploaded, setApiUploaded] = useState(props.apiUploaded);
 
     const { onDictionaryDrop, onDllDrop, onTslDrop } = props
@@ -70,6 +82,8 @@ function Sidebar(props) {
     function setApiUploadedCallback(toggle){
         setApiUploaded(toggle)
     }
+
+    console.log("sidebar uploaded dic: ", uploadedDic);
 
     return (
         <div className={`collapsible-sidebar ${isCollapsed ? 'collapsed' : ''} `}>
@@ -110,8 +124,9 @@ function Sidebar(props) {
                     <p></p>
                     
                     <ApiUploadArea
-                        uploaded={false}
+                        uploaded={apiUploaded}
                         apiTitle={apiTitle}
+                        apiFile={apiFile}
                         handlerAPI={handlerAPI}
                         setApiUploadedCallback={setApiUploadedCallback}
                         onTestConfNameChange={onTestConfNameChange}>
@@ -130,7 +145,7 @@ function Sidebar(props) {
 
                     <SimpleAccordion header={"Auxiliary Files"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"file-icon"}>
 
-                        <AuxFilesArea apiUploaded={apiUploaded} onDictionaryDrop={onDictionaryDrop} onDllDrop={onDllDrop}></AuxFilesArea>
+                        <AuxFilesArea uploadedDic={uploadedDic} uploadedDll={uploadedDll} dictFile={dictFile} dllFiles={dllFiles} apiUploaded={apiUploaded} onDictionaryDrop={onDictionaryDrop} onDllDrop={onDllDrop}></AuxFilesArea>
 
                     </SimpleAccordion>
 

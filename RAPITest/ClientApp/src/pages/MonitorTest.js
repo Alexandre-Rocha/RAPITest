@@ -17,6 +17,34 @@ import runIcon from '../assets/play.png'
 
 const jsYaml = require('js-yaml')
 
+function parseDictionary(dictString) {
+    const lines = dictString.split('\n');
+    const dictionary = {};
+    let currentKey = '';
+    let currentExample = '';
+
+    lines.forEach((line) => {
+        if (line.startsWith('dictionaryID:')) {
+            if (currentKey && currentExample) {
+                //if new entry is not the first one, trim text of previous entry
+                dictionary[currentKey] = currentExample.trim();
+            }
+            //new entry, so set new key and start new example(value)
+            currentKey = line.split('dictionaryID:')[1].trim();
+            currentExample = '';
+        } else {
+            //if line is not new entry, add to current with line separator
+            currentExample += line + '\n';
+        }
+    });
+
+    if (currentKey && currentExample) {
+        // trim example of last entry
+        dictionary[currentKey] = currentExample.trim();
+    }
+
+    return dictionary;
+}
 export class MonitorTest extends Component {
 
     static displayName = MonitorTest.name;
@@ -164,7 +192,7 @@ export class MonitorTest extends Component {
             paths: "",
             schemas: "",
             schemasValues: "",
-            fileName:""
+            fileName: ""
         }
 
         console.log("trying fetch tsl");
@@ -207,14 +235,66 @@ export class MonitorTest extends Component {
         apiFile.schemas = Object.keys(spec.components.schemas);
         apiFile.schemasValues = Object.values(spec.components.schemas).map((obj) => JSON.stringify(obj));
 
+        console.log("passing");
+        console.log(ApiId);
+
+        //------
+
+        const dictResponse = await fetch(`MonitorTest/ReturnDictionary?apiId=${ApiId}`, {
+            method: 'GET',
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        })
+        const dictString = await dictResponse.text() //TODO: here change , json will be wong
+        const dictObj = parseDictionary(dictString)
+        console.log(dictObj);
+
+        const dictFile = new File([dictObj], "dictionary.txt", {
+            type: "text/plain",
+            lastModified: new Date().getTime()
+        });
+
+        console.log(dictFile);
+
+        //---dlllll
+
+        const dllResponse = await fetch(`MonitorTest/ReturnDll?apiId=${ApiId}`, {
+            method: 'GET',
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+        })
+        const dllNamesAndFilesArr = await dllResponse.json()
+
+        const dllFileArr = []
+        dllNamesAndFilesArr.forEach(element => {
+            const dllContentBase64 = element.DllContent; // The DLL content is in Base64
+            const dllContentBinary = atob(dllContentBase64); // Decode Base64 to binary string
+
+            // Convert binary string to an array of bytes
+            const byteNumbers = new Array(dllContentBinary.length);
+            for (let i = 0; i < dllContentBinary.length; i++) {
+                byteNumbers[i] = dllContentBinary.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+
+            // Create a File object for each DLL
+            const dllFile = new File([byteArray], element.FileName, {
+                type: "application/octet-stream", // Typical MIME type for binary files
+                lastModified: new Date().getTime() // Use current timestamp or set to a specific date if needed
+            });
+
+            // Add each DLL file to the array
+            dllFileArr.push(dllFile);
+        })
+        
+        console.log(dllFileArr);
+
+        //------
 
         this.props.history.push({
             pathname: 'editor',
-            state: { tslState, apiFile, APITitle }
+            state: { tslState, apiFile, APITitle, ApiId, dictObj, dictFile, dllFileArr }
         });
 
     }
-
 
     renderTestButtons(item) {
         if (item.ErrorMessages !== null) return <AwesomeButton type="secondary" onPress={() => this.enableDeleteModal(item.ApiId)}>Delete Test</AwesomeButton>

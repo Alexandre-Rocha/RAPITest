@@ -49,7 +49,9 @@ namespace SetupTestsWorkerService.SetupTests
 				if (obj != null)
 				{
 					dynamic v = obj as Verification ?? (dynamic)obj;
-					externalVerirications.Add(external.FileName, v);
+					if (!externalVerirications.ContainsKey(external.FileName)) { //added if clause
+						externalVerirications.Add(external.FileName, v);
+					}
 				}
 			}
 			firstTestSetup.ExternalVerifications = externalVerirications;

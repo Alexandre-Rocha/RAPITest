@@ -22,6 +22,9 @@ import StressTestNode from './nodes/stressTestNode';
 
 import Sidebar from './other-components/Sidebar';
 
+import { onCLS, onFCP, onLCP, onINP, onTTFB } from 'web-vitals';
+
+
 import Alert from 'react-bootstrap/Alert';
 
 import { Tooltips } from './editor-strings';
@@ -88,12 +91,16 @@ const verificationNodeTypes = [NodeType.STATUS, NodeType.SCHEMA, NodeType.MATCH,
 const httpMethods = ["Get", "Delete", "Post", "Put"]  //TSL only supports the 4 main HTTP methods, in the future would be nice to support to more and derive them from the api as well
 
 //dagre
-const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+
+let g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+
 
 const getLayoutedElements = (nodes, edges, options) => {
+    g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({})); //to "reset" graph otherwise old values can mess it up; possibly there's a more efficient way to do this
     g.setGraph({ rankdir: options.direction });
 
     edges.forEach((edge) => g.setEdge(edge.source, edge.target));
+    //nodes.forEach((node) => g.setNode(node.id, node));
     nodes.forEach((node) => g.setNode(node.id, node));
 
     Dagre.layout(g);
@@ -136,7 +143,9 @@ function Flow() {
 
     const [apiFile, setApiFile] = useState(location?.state?.apiFile || null) // This will have servers, paths, schemas and schemavalues
 
-    const [apiUploaded, setApiUploaded] = useState(false) // Whether or not api spec has been uploaded //TODO: is it being set properly when throug old config?
+    const [apiId, setApiId] = useState(location?.state?.ApiId || null) //TODO: add comment
+
+    const [apiUploaded, setApiUploaded] = useState(location?.state?.ApiId ? true : false) // Whether or not api spec has been uploaded //TODO: is it being set properly when throug old config?
     //#endregion
 
 
@@ -151,11 +160,14 @@ function Flow() {
 
     //#region state related to aux files
 
-    const [dictObj, setDictObj] = useState({}) //js object of the dictionary (processed)
-    const [dllNamesArr, setDllNamesArr] = useState([]) //arr with names of dll files
+    const [dictObj, setDictObj] = useState(location?.state?.dictObj || {}) //js object of the dictionary (processed)
+    const [dllNamesArr, setDllNamesArr] = useState(location?.state?.dllFileArr ? location?.state?.dllFileArr.map(file => file.name) : []) //arr with names of dll files
 
-    const [dictFile, setDictFile] = useState() // dictionary, actual file to send to server
-    const [dllFileArr, setDllFileArr] = useState([]) // dll files, actual files to send to server
+    const [dictFile, setDictFile] = useState(location?.state?.dictFile) // dictionary, actual file to send to server
+    const [dllFileArr, setDllFileArr] = useState(location?.state?.dllFileArr || []) // dll files, actual files to send to server
+
+    const [dictUploaded, setDictUploaded] = useState(location?.state?.dictFile ? true : false) // whether or not dictionary has been uploaded
+    const [dllUploaded, setDllUploaded] = useState(location?.state?.dllFileArr?.length > 0 ? true : false) // whether or not dll files have been uploaded
     //#endregion
 
 
@@ -187,7 +199,7 @@ function Flow() {
 
     // aux variables to see current max nodeId and n of workflows
     const nodeId = useRef(1)
-    const maxWfIndex = useRef(-1)
+    const maxWfIndex = useRef(0)
 
     /* adds custom class to body and removes it when component unmounts
     this is so i have more freedom applying custom css effects while making sure they dont affect the app elsewhere (as in outside the editor page)*/
@@ -644,6 +656,9 @@ function Flow() {
 
         const processedSchema = schema.split("$ref/definitions/")[1] //TODO: kinda hardcoded
 
+        const schemas = apiFile.schemas.concat(Object.keys(dictObj))
+        console.log("schemas: ", schemas);
+
         const nodeData = {
             initialSchema: processedSchema,
             schemas: apiFile.schemas
@@ -728,7 +743,7 @@ function Flow() {
 
     const createNodes = (newstate) => {
 
-        let currYamlTestIndex = 0;
+        let currYamlTestIndex = 1;
 
         let listOfEdgesLists = []
 
@@ -762,7 +777,6 @@ function Flow() {
             wf.Tests.forEach(test => {
 
                 test._testIndex = currYamlTestIndex
-
                 const testNodeId = processTest(test, currYamlTestIndex)
                 testNodeIdsList.push(testNodeId)
 
@@ -974,7 +988,7 @@ function Flow() {
             setTimeout(() => {
                 collapseNodes();
                 setCanCollapse(false)
-            }, 100);
+            }, 200); //100
         }
     }, [canCollapse]);
 
@@ -1356,6 +1370,7 @@ function Flow() {
     useEffect(() => {
         if (location?.state?.tslState) {
             console.log('[Editor] External state has been found; creating nodes...');
+
             //createNodes(workflows)
             createNodes(location?.state?.tslState) // was above line before but like this can remove state var
             //setTimeout(()=>onLayout('TB'),2000) // TODO: not working
@@ -1447,6 +1462,7 @@ function Flow() {
 
     const scanEditorState = () => {
         const workflows = []
+        let error = false
 
         const nodes = reactFlowInstance.getNodes()
         const wfNodes = nodes.filter(node => node.type === NodeType.WORKFLOW);
@@ -1464,6 +1480,7 @@ function Flow() {
             const connectedStressNodes = getConnectedNodes(wfNode, NodeType.STRESS)
             if (connectedStressNodes.length > 1) {
                 alert('can only have 1 stress test')
+                error = true
                 return false
             }
             if (connectedStressNodes.length === 1) {
@@ -1474,6 +1491,7 @@ function Flow() {
             const connectedTestNodes = getConnectedNodes(wfNode, NodeType.TEST)
             if (connectedTestNodes.length < 1) {
                 alert('workflows must have at least 1 test')
+                error = true
                 return false
             }
             connectedTestNodes.forEach(testNode => {
@@ -1544,28 +1562,33 @@ function Flow() {
                 const connectedVerificationNodes = getConnectedNodesByHandle(testNode, "rightHandle")
                 if (connectedVerificationNodes.length === 0) {
                     alert('you need at least the status verification on every test')
+                    error = true
                     return false
                 }
 
                 if (connectedVerificationNodes.length > 1) {
                     alert('only one verification node can be connected directly to a test node')
+                    error = true
                     return false
                 }
 
                 const connectedVerificationNode = connectedVerificationNodes[0]
                 if (!verificationNodeTypes.includes(connectedVerificationNode.type)) {
                     alert('something wrong w connection')
+                    error = true
                     return false
                 }
                 const restOfTheVerificationNodes = getNodesInLinearChain(connectedVerificationNode)
                 const allVerificationNodes = connectedVerificationNodes.concat(restOfTheVerificationNodes)
                 if (!allVerificationNodes.every(node => verificationNodeTypes.includes(node.type))) {
                     alert('something wrong w connection')
+                    error = true
                     return false
                 }
 
                 if (connectedVerificationNodes.length === 0) {
                     alert('you need at least the status verification on every test')
+                    error = true
                     return false
                 }
 
@@ -1613,6 +1636,9 @@ function Flow() {
 
             workflows.push(workflow)
         });
+        if (error) {
+            return false
+        }
         return workflows
     }
 
@@ -1717,8 +1743,7 @@ function Flow() {
         return orderedWorkflows
     }
 
-    const finalizeConfiguration = async (workflows) => {
-
+    const finalizeDataSetup = (workflows) => {
         let newFile = YAML.stringify(workflows);
         console.log(newFile);
         var blob = new Blob([newFile], {
@@ -1765,6 +1790,13 @@ function Flow() {
         data.append('interval', runInterval);
         data.append('rungenerated', runGenerated);
 
+        return data
+    }
+
+    const finalizeConfiguration = async (data) => {
+
+        //const data = finalizeDataSetup(workflows) //processedWorkflows
+
         const token = await authService.getAccessToken();
 
         fetch(`SetupTest/UploadFile`, {
@@ -1783,15 +1815,64 @@ function Flow() {
     }
 
     const finishSetup = async () => {
+
+        /*
+        //check for invalid timer settings
+        console.log("whaaaat");
+        console.log(runImmediately);
+        console.log(runInterval);
+        console.log(runInterval.includes('Never'));
+        debugger
+
+
+        const cond1 = !runImmediately // this will be true when run immeditaly is false
+        console.log("cond1: ",cond1);
+        const cond2 = runInterval.includes('Never') // this will be true when run interval is never
+        console.log("cond2: ",cond2);
+
+        const invalidTimerSettings = cond1 && cond2 // this will be true when run immeditaly is false and run interval is never
+        console.log("flag: ",invalidTimerSettings);
+
+        debugger*/
+
+        if(runInterval.includes('Never') && runImmediately.includes('false')) {
+            console.log("why??");
+            alert('Invalid Timer settings - Please select either "Run Immediately" or one of the timed "Run Intervals"')
+            return false
+        }
+        else {
+            console.log("valid timer settings");
+        }
+
         const workflows = scanEditorState()
         console.log('finish setup, workflows:');
         console.log(workflows);
+
+        if (!workflows) {
+            console.log('Something still wrong with workflows, cannot finish setup');
+            return
+        }
 
         const processedWorkflows = postProcessState(workflows)
         console.log('finish setup, processed workflows:');
         console.log(processedWorkflows);
 
-        finalizeConfiguration(processedWorkflows)
+        if (!processedWorkflows) {
+            console.log('Something still wrong with workflows, cannot finish setup');
+            return
+        }
+
+        const data = finalizeDataSetup(processedWorkflows)
+
+        const isNewConfiguration = location?.state == null ? true : false // depending on if new or old, create or edit in backend
+        if (isNewConfiguration){ //create
+            finalizeConfiguration(data)
+        }
+        else { //edit
+            editTestConfiguration(data)
+        }
+
+        //finalizeConfiguration(processedWorkflows)
     }
 
     //#endregion
@@ -1875,12 +1956,64 @@ function Flow() {
 
     //#endregion
 
+
+    const logMetric = ({ name, value }) => {
+        console.log(`${name}: ${value}`);
+      };
+      
+      
+
     const memoryCheck = () => {
         console.log("Memory check...");
         const memoryInfo = performance.memory;
         console.log(`JS Heap Size Limit: ${memoryInfo.jsHeapSizeLimit}`);
         console.log(`Total JS Heap Size: ${memoryInfo.totalJSHeapSize}`);
         console.log(`Used JS Heap Size: ${memoryInfo.usedJSHeapSize}`);
+
+        console.log("Web vitals...");
+        // Hooking up Web Vitals metrics with log function
+      onCLS(logMetric);    // Logs Cumulative Layout Shift (CLS)
+      onFCP(logMetric);    // Logs First Contentful Paint (FCP)
+      onLCP(logMetric);    // Logs Largest Contentful Paint (LCP)
+      onINP(logMetric);    // Logs Interaction to Next Paint (INP)
+      onTTFB(logMetric);   // Logs Time to First Byte (TTFB)
+
+    }
+
+    const editTestConfiguration = async (data) => {
+        const token = await authService.getAccessToken();
+
+        //const workflows = scanEditorState()
+        //const processedWorkflows = postProcessState(workflows)
+
+        //const data = finalizeDataSetup(processedWorkflows)
+
+        fetch(`MonitorTest/ChangeApi?` + new URLSearchParams({
+            apiId: apiId,
+            newTitle: testConfName
+        }), {
+            method: 'PUT',
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}`},
+            body:data
+        }).then(resp => {
+            if (resp.ok) {
+                console.log("Test configuration edited sucessfully"); 
+            }
+            else{
+                console.log("An error occurred while editing the test configuration");
+            } 
+        })
+    }
+
+    const logFunction = () => {
+        console.log("-------------------");
+        console.log("dll file arr:");
+        console.log(dllFileArr);
+
+        console.log("dll names arr:");
+        console.log(dllNamesArr);
+
+        console.log("-------------------");
     }
 
     return (
@@ -1893,6 +2026,11 @@ function Flow() {
                 onToggleCollapse={onToggleCollapse}
                 apiTitle={testConfName}
                 apiUploaded={apiUploaded}
+                apiFile={apiFile}
+                dictFile={dictFile}
+                uploadedDic={dictUploaded}
+                uploadedDll={dllUploaded}
+                dllFiles={dllFileArr}
                 handlerAPI={handlerAPI}
                 onTestConfNameChange={onTestConfNameChange}
                 onDictionaryDrop={onDictionaryDrop}
@@ -1914,8 +2052,10 @@ function Flow() {
                     { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.customTooltip },
                     /* { section: "Setup", title: "Save changes", onClick: onClickWip, class: "setup", iconClass: "gear-icon" }, */
                     { section: "Setup", title: "Clear editor", onClick: clearEditor, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.clearEditorTooltip },
-                    { section: "Setup", title: "Finish Setup", onClick: finishSetup, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.finishSetupTooltip },
-                    { section: "Dev", title: "Memory Check", onClick: memoryCheck, class: "setup", iconClass: "gear-icon" }
+                    { section: "Setup", title:  location?.state == null ? "Finish Setup" : "Save changes", onClick: finishSetup, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.finishSetupTooltip },
+                    { section: "Dev", title: "Memory Check", onClick: memoryCheck, class: "setup", iconClass: "gear-icon" },
+                    { section: "Dev", title: "Test edit", onClick: editTestConfiguration, class: "setup", iconClass: "gear-icon" },
+                    { section: "Dev", title: "log", onClick: logFunction, class: "setup", iconClass: "gear-icon" }
                     /* { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Dump state", onClick: dumpState, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Collapse nodes", onClick: collapseNodes, class: "setup", iconClass: "gear-icon" },
@@ -1944,7 +2084,7 @@ function Flow() {
                         <ControlButton onClick={openNodes} title='expand all nodes'>
                             <div className='expandButton' ></div>
                         </ControlButton>
-                        <ControlButton id='layout-button' onClick={() => { onLayout('TB'); onLayout('TB') }} title='auto layout nodes'>
+                        <ControlButton id='layout-button' onClick={() => { onLayout('TB'); onLayout('TB'); }} title='auto layout nodes'>
                             <div className='layoutButton' ></div>
                         </ControlButton>
                         <ControlButton onClick={() => { setSettingsVisible(true) }} title='open settings window'>

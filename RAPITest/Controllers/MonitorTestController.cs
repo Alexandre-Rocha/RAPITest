@@ -22,6 +22,8 @@ using Newtonsoft.Json;
 using ModelsLibrary.Models.AppSpecific;
 using RAPITest.Utils;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
+using System.Threading;
 
 namespace RAPITest.Controllers
 {
@@ -111,7 +113,210 @@ namespace RAPITest.Controllers
 			return Ok();
 		}
 
-		[HttpGet]
+        [HttpPut]
+        [DisableRequestSizeLimit]
+        [DisableFormValueModelBinding]
+        public IActionResult ChangeApi(IFormCollection data, [FromQuery] int apiId, [FromQuery] string newTitle )
+
+        //public IActionResult ChangeApi([FromQuery] int apiId, [FromQuery] string newTitle, [FromBody] Dictionary<string, string> body, IFormCollection data)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+            using (_context)
+            {
+                ModelsLibrary.Models.EFModels.Api api = _context.Api.Where(a => a.ApiId == apiId).FirstOrDefault();
+                if (api == null) return NotFound();
+
+                Console.WriteLine("ChangeApi");
+
+                Console.WriteLine("--------");
+                Console.WriteLine(data);
+                Console.WriteLine("--------");
+
+                //string tslString = body.ContainsKey("tslString") ? body["tslString"] : null;
+                //string specString = body.ContainsKey("specString") ? body["specString"] : null;
+
+                Console.WriteLine(newTitle);
+
+                //byte[] tslStringBytes = tslString != null ? Encoding.Default.GetBytes(tslString) : null;
+                //byte[] specStringBytes = specString != null ? Encoding.Default.GetBytes(specString) : null;
+
+                api.ApiTitle = newTitle;
+                //api.ApiSpecification = specStringBytes;
+                //api.Tsl = tslStringBytes;
+
+                //_context.SaveChanges();
+
+
+
+
+                //--------
+
+                List<IFormFile> files = data.Files.ToList();
+
+                foreach (var key in data.Keys)
+                {
+                    Console.WriteLine($"{key}: {data[key]}");
+                }
+
+
+                //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+                using (_context)
+                {
+                    //Api newApi = _context.Api.OrderByDescending(x => x.ApiId).FirstOrDefault();
+
+                    api.RunGenerated = data["rungenerated"] == "true";
+
+                    List<IFormFile> tsls = new List<IFormFile>();
+                    List<IFormFile> externalDlls = new List<IFormFile>();
+
+                    foreach (var formFile in files)
+                    {
+                        if (formFile.Length > 0)
+                        {
+                            if (formFile.Name.Contains("tsl_"))
+                            {
+                                tsls.Add(formFile);
+                            }
+                            else if (formFile.Name.Contains("apiSpecification"))
+                            {
+                                using (var ms = new MemoryStream())
+                                {
+                                    formFile.CopyTo(ms);
+                                    api.ApiSpecification = ms.ToArray();
+                                }
+                            }
+                            else if (formFile.Name.Contains("dictionary"))
+                            {
+                                using (var ms = new MemoryStream())
+                                {
+                                    formFile.CopyTo(ms);
+                                    api.Dictionary = ms.ToArray();
+                                }
+                            }
+                            else
+                            {
+                                externalDlls.Add(formFile);
+                            }
+                        }
+                    }
+
+                    string filesConcatenated = "";
+                    using (var ms = new MemoryStream())
+                    {
+                        foreach (IFormFile tsl in tsls)
+                        {
+                            using (var reader = new StreamReader(tsl.OpenReadStream()))
+                            {
+                                filesConcatenated += reader.ReadToEnd();
+                            }
+                        }
+                    }
+
+                    api.Tsl = Encoding.Default.GetBytes(filesConcatenated);
+
+                    //radioButtons: [button1H, button12H, button24H, button1W, button1M, buttonNever] 
+                    switch (data["interval"])
+                    {
+                        case "1 hour":
+                            api.NextTest = DateTime.Now.AddHours(1);
+                            api.TestTimeLoop = 1;
+                            break;
+                        case "12 hours":
+                            api.NextTest = DateTime.Now.AddHours(12);
+                            api.TestTimeLoop = 12;
+                            break;
+                        case "24 hours":
+                            api.NextTest = DateTime.Now.AddDays(1);
+                            api.TestTimeLoop = 24;
+                            break;
+                        case "1 week":
+                            api.NextTest = DateTime.Now.AddDays(7);
+                            api.TestTimeLoop = 168;
+                            break;
+                        default:  //Never
+                            break;
+                    }
+                    int identityId = api.ApiId;
+
+                    foreach (IFormFile external in externalDlls)
+                    {
+                        ExternalDll externalDll = new ExternalDll();
+                        externalDll.ApiId = identityId;
+                        using var ms = new MemoryStream();
+                        external.CopyTo(ms);
+                        externalDll.Dll = ms.ToArray();
+                        externalDll.FileName = external.FileName;
+
+                        _context.ExternalDll.Add(externalDll);
+                    }
+                    _context.SaveChanges();
+
+                    Sender1(identityId, data["runimmediately"] == "true");
+
+                    //--------
+
+
+
+
+                }
+                return Ok();
+            }
+        }
+
+        //-------
+
+        public void Sender1(int apiId, bool runImmediately)
+        {
+            var factory = new ConnectionFactory() { HostName = RabbitMqHostName, Port = RabbitMqPort };   //as longs as it is running in the same machine
+            using (var connection = CreateConnection1(factory))
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: "setup",
+                                     durable: false,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                string message = apiId + "|" + runImmediately;
+                var body = Encoding.UTF8.GetBytes(message);
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: "setup",
+                                     basicProperties: null,
+                                     body: body);
+
+                _logger.LogInformation("[x] Sent {0} ", message);
+            }
+        }
+
+        private IConnection CreateConnection1(ConnectionFactory connectionFactory)
+        {
+            while (true)
+            {
+                try
+                {
+                    _logger.LogInformation("Attempting to connect to RabbitMQ....");
+                    IConnection connection = connectionFactory.CreateConnection();
+                    return connection;
+                }
+                catch (BrokerUnreachableException e)
+                {
+                    _logger.LogInformation("RabbitMQ Connection Unreachable, sleeping 5 seconds....");
+                    Thread.Sleep(5000);
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+        //-------
+
+        [HttpGet]
 		public IActionResult ReturnReport([FromQuery] int apiId) 
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
@@ -155,6 +360,69 @@ namespace RAPITest.Controllers
 
             return Ok(tslS);
         }
+
+        //----
+
+        [HttpGet]
+        public IActionResult ReturnDictionary([FromQuery] int apiId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+
+            IOrderedQueryable<ModelsLibrary.Models.EFModels.Report> reports = _context.Report.Include(report => report.Api).Where(r => r.ApiId == apiId).OrderByDescending(r => r.ReportDate);
+            ModelsLibrary.Models.EFModels.Report report = reports.FirstOrDefault();
+            if (report == null) return NotFound();
+
+            ModelsLibrary.Models.EFModels.Api api = report.Api;
+
+            if (api.Dictionary == null || api.Dictionary.Length == 0)
+            {
+                return NotFound();
+            }
+
+            string dict = Encoding.Default.GetString(api.Dictionary);
+            Console.WriteLine(dict);
+
+            String dictS = new String(dict);
+
+            IActionResult ok = Ok(dictS);
+
+            Console.WriteLine(ok.ToString());
+
+
+            return Ok(dictS);
+        }
+
+        [HttpGet]
+        public IActionResult ReturnDll([FromQuery] int apiId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+
+            IOrderedQueryable<ModelsLibrary.Models.EFModels.Report> reports = _context.Report.Include(report => report.Api).Where(r => r.ApiId == apiId).OrderByDescending(r => r.ReportDate);
+            ModelsLibrary.Models.EFModels.Report report = reports.FirstOrDefault();
+            if (report == null) return NotFound();
+
+            ModelsLibrary.Models.EFModels.Api api = report.Api;
+
+            var dllEntries = _context.ExternalDll
+                            .Where(dll => dll.ApiId == apiId)
+                            .Select(dll => new
+                            {
+                                dll.FileName,
+                                DllContent = Convert.ToBase64String(dll.Dll) // Convert binary data to Base64
+                            })
+                            .ToList();
+
+            // Check if any entries were found
+            if (dllEntries == null || !dllEntries.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(dllEntries);
+        }
+
+
+        //----
 
         [HttpGet]
         public IActionResult ReturnSpec([FromQuery] int apiId)

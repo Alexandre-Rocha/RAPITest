@@ -40,7 +40,8 @@
     "reactstrap": "^8.4.1",
     "recharts": "2.1.9",
     "rimraf": "^2.6.2",
-    "styled-components": "5.1.1"
+    "styled-components": "5.1.1",
+    "web-vitals": "^4.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.16.10",

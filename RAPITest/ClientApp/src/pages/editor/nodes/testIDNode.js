@@ -11,7 +11,7 @@ import { LOG_LEVELS as level, rapiLog } from '../utils';
 
 function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
-    const [testIndex, setTestIndex] = useState(data.custom._testIndex || -1)
+    const [testIndex, setTestIndex] = useState(data.custom._testIndex || 1)
     const [testName, setTestName] = useState(data.custom.testName || "");
     const [server, setServer] = useState(data.custom.server || "");
     const [path, setPath] = useState(data.custom.path || "");
@@ -21,6 +21,11 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
     rapiLog(level.DEBUG, "[Test node] Test ID: ", testIndex)
     rapiLog(level.DEBUG, "[Test node] X pos: ", xPos)
     rapiLog(level.DEBUG, "[Test node] Y pos: ", yPos)
+
+    rapiLog(level.DEBUG, "[Test node] Test name: ", testName)
+    rapiLog(level.DEBUG, "[Test node] Server: ", server)
+    rapiLog(level.DEBUG, "[Test node] Path: ", path)
+    rapiLog(level.DEBUG, "[Test node] Method: ", method)
 
 
     const onTestNameChange = (evt) => {
@@ -92,7 +97,8 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
     } */
 
     const onChange = (change) => {
-        setTestIndex(change.target.value)
+        const value = Math.max(1, change.target.value)
+        setTestIndex(value)
     }
 
     const generalNodeProps = {
@@ -120,7 +126,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
                     data={data.custom.servers}
                     filter={false}
                     onChange={onChangeServer}
-                    defaultValue={data.custom.initialServer || "Servers:"}
+                    defaultValue={data.custom.server || "Servers:"}
                 />
 
 {/*                 <label htmlFor="paths">Path</label>
@@ -128,7 +134,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
                     data={data.custom.paths}
                     filter={false}
                     onChange={onChangePath}
-                    defaultValue={data.custom.initialPath || "Paths:"}
+                    defaultValue={data.custom.path || "Paths:"}
                 />
 
 {/*                 <label htmlFor="methods">Method</label>
@@ -136,7 +142,7 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
                     data={data.custom.httpMethods}
                     filter={false}
                     onChange={onChangeMethod}
-                    defaultValue={data.custom.initialMethod || "Methods:"}
+                    defaultValue={data.custom.method || "Methods:"}
                 />
 
                 {/* <div>
@@ -154,9 +160,10 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
                     <span style={{ fontWeight: 'bold' }}>Test order: </span>
                     <Form.Control
                     type="number"
-                    value={testIndex || -1}
+                    value={testIndex || 1}
                     onChange={onChange}
                     style={{ width: '54px',display:'inline-block' }}
+                    min={1}
                 />
                 </div>
 

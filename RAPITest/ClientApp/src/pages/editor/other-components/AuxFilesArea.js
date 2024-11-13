@@ -25,9 +25,9 @@ function AuxFilesArea(props) {
 
     const { settings } = useSettings()
 
-    const [uploadedDic, setUploadedDic] = useState(false)
+    const [uploadedDic, setUploadedDic] = useState(props.uploadedDic)
 
-    const [uploadedDLL, setUploadedDLL] = useState(false)
+    const [uploadedDLL, setUploadedDLL] = useState(props.uploadedDll)
 
     //const [dic, setDic] = useState()
 
@@ -38,8 +38,10 @@ function AuxFilesArea(props) {
 
     //const [files, setFiles] = useState([])
 
-    const [dicFiles, setDicFiles] = useState([])
-    const [dllFiles, setDllFiles] = useState([])
+    const [dicFiles, setDicFiles] = useState(props.dictFile ? [props.dictFile] : [])
+    const [dllFiles, setDllFiles] = useState(props.dllFiles || [])
+
+    console.log("aux area dll files: ", dllFiles);
 
 
     const fileNameFuction = (file) => {
@@ -94,6 +96,7 @@ function AuxFilesArea(props) {
         setDllFiles(currentFiles => [...currentFiles, ...accept]);
     }
 
+    console.log("auxarea uploadedDic: ", uploadedDic);
 
     return (
         <div>
