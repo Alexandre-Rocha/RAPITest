@@ -16,6 +16,16 @@
 }
  */
 
+ .see-more-schema {
+  display: inline;
+  margin-left: 5%;
+}
+
+.schema-select {
+  display: inline;
+  width: 80%;
+}
+
  .schema-node [data-handleid="bottomHandle"]{
     background-color: #d5ffae !important;
   }

@@ -205,8 +205,6 @@ export class MonitorTest extends Component {
 
         tslState = jsYaml.load(tslString)
 
-        console.log(tslState);
-
         // Grab the Spec from the DB and turn into JS obj
         const specResponse = await fetch(`MonitorTest/ReturnSpec?apiId=${ApiId}`, {
             method: 'GET',
@@ -214,78 +212,81 @@ export class MonitorTest extends Component {
         })
         const spec = await specResponse.json()
 
-        console.log("SPEC response");
-        console.log(specResponse);
-        console.log(specResponse.body);
-        console.log(spec);
 
-        const apiFileName = spec.info?.title ? spec.info.title : "specification" //TODO: need more testing
+        const apiFileName = spec.info?.title ? spec.info.title : "specification"
         apiFile.fileName = apiFileName
 
         apiFile.paths = Object.keys(spec.paths);
 
-        //TODO: methods not supported in the backend, only Delete,Get,Post,Put
+        //TODO: methods not supported in the backend, only Delete,Get,Post,Put ; the below code is therefore not useful
         /* const httpMethods = Object.values(spec.paths).flatMap(pathObj => Object.keys(pathObj))
         const uniqueHttpMethods = Array.from(new Set(httpMethods));
-        const sortedHttpMethods = uniqueHttpMethods.sort();
- */
+        const sortedHttpMethods = uniqueHttpMethods.sort();*/
+
         apiFile.servers = spec.servers.map((obj) => obj.url);
 
-        // TODO: Schema and schema values need to be checked again
         apiFile.schemas = Object.keys(spec.components.schemas);
         apiFile.schemasValues = Object.values(spec.components.schemas).map((obj) => JSON.stringify(obj));
 
-        console.log("passing");
-        console.log(ApiId);
-
-        //------
+        // Grab dictionary
 
         const dictResponse = await fetch(`MonitorTest/ReturnDictionary?apiId=${ApiId}`, {
             method: 'GET',
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
         })
-        const dictString = await dictResponse.text() //TODO: here change , json will be wong
-        const dictObj = parseDictionary(dictString)
-        console.log(dictObj);
 
-        const dictFile = new File([dictObj], "dictionary.txt", {
-            type: "text/plain",
-            lastModified: new Date().getTime()
-        });
+        let dictObj
+        let dictFile
+        if (!dictResponse.ok) {
+            //dictionary doesnt exist (or other error)
+        }
+        else {
+            const dictString = await dictResponse.text()
+            dictObj = parseDictionary(dictString)
 
-        console.log(dictFile);
+            dictFile = new File([dictObj], "dictionary.txt", {
+                type: "text/plain",
+                lastModified: new Date().getTime()
+            });
 
-        //---dlllll
+            console.log(dictFile);
+        }
+
+
+        // Grab dlls
 
         const dllResponse = await fetch(`MonitorTest/ReturnDll?apiId=${ApiId}`, {
             method: 'GET',
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
         })
-        const dllNamesAndFilesArr = await dllResponse.json()
 
-        const dllFileArr = []
-        dllNamesAndFilesArr.forEach(element => {
-            const dllContentBase64 = element.DllContent; // The DLL content is in Base64
-            const dllContentBinary = atob(dllContentBase64); // Decode Base64 to binary string
+        let dllFileArr = []
+        if (!dllResponse.ok) {
+            //dlls doesnt exist (or other error)
+        }
+        else {
+            const dllNamesAndFilesArr = await dllResponse.json()
 
-            // Convert binary string to an array of bytes
-            const byteNumbers = new Array(dllContentBinary.length);
-            for (let i = 0; i < dllContentBinary.length; i++) {
-                byteNumbers[i] = dllContentBinary.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
+            dllNamesAndFilesArr.forEach(element => {
+                const dllContentBase64 = element.DllContent;
+                const dllContentBinary = atob(dllContentBase64);
 
-            // Create a File object for each DLL
-            const dllFile = new File([byteArray], element.FileName, {
-                type: "application/octet-stream", // Typical MIME type for binary files
-                lastModified: new Date().getTime() // Use current timestamp or set to a specific date if needed
-            });
+                const byteNumbers = new Array(dllContentBinary.length);
+                for (let i = 0; i < dllContentBinary.length; i++) {
+                    byteNumbers[i] = dllContentBinary.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
 
-            // Add each DLL file to the array
-            dllFileArr.push(dllFile);
-        })
-        
-        console.log(dllFileArr);
+                const dllFile = new File([byteArray], element.FileName, {
+                    type: "application/octet-stream", // Typical MIME type for binary files
+                    lastModified: new Date().getTime()
+                });
+
+                dllFileArr.push(dllFile);
+            })
+        }
+
+
 
         //------
 

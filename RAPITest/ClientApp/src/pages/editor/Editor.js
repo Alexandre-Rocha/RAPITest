@@ -656,12 +656,18 @@ function Flow() {
 
         const processedSchema = schema.split("$ref/definitions/")[1] //TODO: kinda hardcoded
 
-        const schemas = apiFile.schemas.concat(Object.keys(dictObj))
-        console.log("schemas: ", schemas);
+        //const schemas = apiFile.schemas.concat(Object.keys(dictObj))
+        
+        const schemaMap = {};
+        apiFile.schemas.forEach((schema, index) => {
+            schemaMap[schema] = apiFile.schemasValues[index];
+        });
 
         const nodeData = {
             initialSchema: processedSchema,
-            schemas: apiFile.schemas
+            schemas: apiFile.schemas,
+            schemasValues: apiFile.schemasValues,
+            schemaMap: schemaMap
         }
         const schemaVerifNodeId = createNode(NodeType.SCHEMA, nodeData)
 
@@ -1081,8 +1087,16 @@ function Flow() {
     const onClickSchema = () => {
         if (!checkIfApiFile()) return
         console.log("[Editor] Adding Schema Verification node");
+        
+        const schemaMap = {};
+        apiFile.schemas.forEach((schema, index) => {
+            schemaMap[schema] = apiFile.schemasValues[index];
+        });
+
         const nodeData = {
-            schemas: apiFile.schemas
+            schemas: apiFile.schemas,
+            schemasValues: apiFile.schemasValues,
+            schemaMap: schemaMap
         }
         createNode(NodeType.SCHEMA, nodeData)
     }
@@ -1835,7 +1849,7 @@ function Flow() {
 
         debugger*/
 
-        if(runInterval.includes('Never') && runImmediately.includes('false')) {
+        if (runInterval.includes('Never') && runImmediately.includes('false')) {
             console.log("why??");
             alert('Invalid Timer settings - Please select either "Run Immediately" or one of the timed "Run Intervals"')
             return false
@@ -1865,7 +1879,7 @@ function Flow() {
         const data = finalizeDataSetup(processedWorkflows)
 
         const isNewConfiguration = location?.state == null ? true : false // depending on if new or old, create or edit in backend
-        if (isNewConfiguration){ //create
+        if (isNewConfiguration) { //create
             finalizeConfiguration(data)
         }
         else { //edit
@@ -1959,9 +1973,9 @@ function Flow() {
 
     const logMetric = ({ name, value }) => {
         console.log(`${name}: ${value}`);
-      };
-      
-      
+    };
+
+
 
     const memoryCheck = () => {
         console.log("Memory check...");
@@ -1972,11 +1986,11 @@ function Flow() {
 
         console.log("Web vitals...");
         // Hooking up Web Vitals metrics with log function
-      onCLS(logMetric);    // Logs Cumulative Layout Shift (CLS)
-      onFCP(logMetric);    // Logs First Contentful Paint (FCP)
-      onLCP(logMetric);    // Logs Largest Contentful Paint (LCP)
-      onINP(logMetric);    // Logs Interaction to Next Paint (INP)
-      onTTFB(logMetric);   // Logs Time to First Byte (TTFB)
+        onCLS(logMetric);    // Logs Cumulative Layout Shift (CLS)
+        onFCP(logMetric);    // Logs First Contentful Paint (FCP)
+        onLCP(logMetric);    // Logs Largest Contentful Paint (LCP)
+        onINP(logMetric);    // Logs Interaction to Next Paint (INP)
+        onTTFB(logMetric);   // Logs Time to First Byte (TTFB)
 
     }
 
@@ -1993,25 +2007,26 @@ function Flow() {
             newTitle: testConfName
         }), {
             method: 'PUT',
-            headers: !token ? {} : { 'Authorization': `Bearer ${token}`},
-            body:data
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
+            body: data
         }).then(resp => {
             if (resp.ok) {
-                console.log("Test configuration edited sucessfully"); 
+                console.log("Test configuration edited sucessfully");
             }
-            else{
+            else {
                 console.log("An error occurred while editing the test configuration");
-            } 
+            }
         })
     }
 
     const logFunction = () => {
         console.log("-------------------");
-        console.log("dll file arr:");
-        console.log(dllFileArr);
+        console.log("schemas:");
+        console.log(apiFile.schemas);
 
-        console.log("dll names arr:");
-        console.log(dllNamesArr);
+        console.log("schemasValues:");
+        console.log(apiFile.schemasValues);
+
 
         console.log("-------------------");
     }
@@ -2052,7 +2067,7 @@ function Flow() {
                     { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.customTooltip },
                     /* { section: "Setup", title: "Save changes", onClick: onClickWip, class: "setup", iconClass: "gear-icon" }, */
                     { section: "Setup", title: "Clear editor", onClick: clearEditor, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.clearEditorTooltip },
-                    { section: "Setup", title:  location?.state == null ? "Finish Setup" : "Save changes", onClick: finishSetup, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.finishSetupTooltip },
+                    { section: "Setup", title: location?.state == null ? "Finish Setup" : "Save changes", onClick: finishSetup, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.finishSetupTooltip },
                     { section: "Dev", title: "Memory Check", onClick: memoryCheck, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Test edit", onClick: editTestConfiguration, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "log", onClick: logFunction, class: "setup", iconClass: "gear-icon" }

@@ -34,6 +34,13 @@ const ApiUploadArea = (props) => {
     const newHandler = (paths, servers, schemas, schemasValues, files) => {
         handlerAPI(paths, servers, schemas, schemasValues)
         setUploaded(true)
+        if (!files || files.length === 0) { // this happens when upload done by url
+            const fakeFile = new File([], "specification (url)", {
+                type: "text/plain",
+                lastModified: new Date().getTime()
+            });
+            files = [fakeFile]
+        }
         setApiFiles(files)
         setApiUploadedCallback(true)
     }

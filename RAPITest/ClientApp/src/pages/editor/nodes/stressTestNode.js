@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import React from 'react';
-import { Form } from 'react-bootstrap';
+import { Form, Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 import { LOG_LEVELS as level, rapiLog } from '../utils';
 
@@ -39,6 +39,24 @@ function StressTestNode({ data, isConnectable, xPos, yPos }) {
         //data.custom.delayChangeCallback(evt.target.value, data.custom._wfIndex)
     };
 
+    const countTooltip = (
+        <Tooltip className="custom-tooltip" id="count-tooltip">
+            The number of times this workflow will be distributed across the different threads.
+        </Tooltip>
+    );
+
+    const threadsTooltip = (
+        <Tooltip className="custom-tooltip" id="threads-tooltip">
+            The number of threads that will concurrentely execute this workflow.
+        </Tooltip>
+    );
+
+    const delayTooltip = (
+        <Tooltip className="custom-tooltip" id="delay-tooltip">
+            The delay in milliseconds between each execution of this workflow.
+        </Tooltip>
+    );
+
     const generalNodeProps = {
         data: data,
         isConnectable: isConnectable,
@@ -66,13 +84,19 @@ function StressTestNode({ data, isConnectable, xPos, yPos }) {
         <div>
             <GeneralNode {...generalNodeProps}>
 
-                <label htmlFor="count">Count</label>
+                <label htmlFor="count">Count <OverlayTrigger placement="right" overlay={countTooltip}>
+                        <span>  🛈</span>
+                    </OverlayTrigger></label>
                 <Form.Control id='count' value={count} onChange={onCountChange} className="test-name" type="text" placeholder="Enter text" />
 
-                <label htmlFor="threads">Threads</label>
+                <label htmlFor="threads">Threads <OverlayTrigger placement="right" overlay={threadsTooltip}>
+                        <span>  🛈</span>
+                    </OverlayTrigger></label>
                 <Form.Control id='threads' value={threads} onChange={onThreadsChange} className="test-name" type="text" placeholder="Enter text" />
 
-                <label htmlFor="delay">Delay</label>
+                <label htmlFor="delay">Delay<OverlayTrigger placement="right" overlay={delayTooltip}>
+                        <span>  🛈</span>
+                    </OverlayTrigger></label>
                 <Form.Control id='delay' value={delay} onChange={onDelayChange} className="test-name" type="text" placeholder="Enter text" />
 
             </GeneralNode>
