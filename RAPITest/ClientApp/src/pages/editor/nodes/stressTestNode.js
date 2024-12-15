@@ -24,19 +24,16 @@ function StressTestNode({ data, isConnectable, xPos, yPos }) {
     const onCountChange = (evt) => {
         rapiLog(level.INFO, "[Stress test node] Count: ", evt.target.value)
         setCount(evt.target.value)
-        //data.custom.countChangeCallback(evt.target.value, data.custom._wfIndex)
     };
 
     const onThreadsChange = (evt) => {
         rapiLog(level.INFO, "[Stress test node] Threads: ", evt.target.value)
         setThreads(evt.target.value)
-        //data.custom.threadsChangeCallback(evt.target.value, data.custom._wfIndex)
     };
 
     const onDelayChange = (evt) => {
         rapiLog(level.INFO, "[Stress test node] Delay: ", evt.target.value)
         setDelay(evt.target.value)
-        //data.custom.delayChangeCallback(evt.target.value, data.custom._wfIndex)
     };
 
     const countTooltip = (

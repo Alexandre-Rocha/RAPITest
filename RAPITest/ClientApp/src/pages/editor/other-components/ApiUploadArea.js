@@ -5,11 +5,9 @@ import SmallApiUpload from './SmallApiUpload';
 
 import SimpleAccordion from './SimpleAccordion';
 
-
 import { Form } from 'react-bootstrap';
 
 import AcceptedFilesList from './AcceptedFilesList';
-import ListGroupComp from '../../../components/ListGroupComp';
 
 import successIcon from '../../../assets/tickSmall.png'
 import binIcon from '../../../assets/bin.png'
@@ -46,22 +44,17 @@ const ApiUploadArea = (props) => {
     }
 
     const fileNameFuction = (file) => {
-        return file.name ? file.name : "specification" //TODO: should try a bit harder maybe
+        return file.name ? file.name : "specification"
     }
 
     const removeFileFunction = (fileToRemove) => {
         setApiFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
-        //if api file is removed, enable dropzone again
-        //TODO: how does this affect the backedn tho? uploading, removing, uploading, etc..
-        //need to call some endpoint to cancel?
+        // TODO: Check how does this affect the backend - I believe we need to call a cancel endpoint to ensure everything works smoohtly.
         setUploaded(false)
 
-
         setApiUploadedCallback(false)
-        //TODO: need to set apiUploaded to false, so that it affects other compoentns
     }
 
-    //TODO: label css class instead of inline
     return (
         <div>
             <SimpleAccordion header={"Test configuration"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"name-icon"}>
@@ -83,7 +76,6 @@ const ApiUploadArea = (props) => {
 
                 {(uploaded === false) ?
 
-
                     <div>
                         {(apiTitle !== "") ?
 
@@ -99,7 +91,6 @@ const ApiUploadArea = (props) => {
 
                             </div>
 
-
                             :
 
                             <div>
@@ -108,8 +99,6 @@ const ApiUploadArea = (props) => {
                         }
 
                     </div>
-
-
 
                     :
                     <div>

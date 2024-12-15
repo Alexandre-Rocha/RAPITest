@@ -21,12 +21,10 @@ function MatchVerificationNode({ data, isConnectable, xPos, yPos }) {
 
     const handleKeyChange = (key) => {
         setKey(key)
-        //data.custom.keyChangeCallback(key, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const handleValueChange = (value) => {
         setValue(value)
-        //data.custom.valueChangeCallback(value, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const getState = () => {

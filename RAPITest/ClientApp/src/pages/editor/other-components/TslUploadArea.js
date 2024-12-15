@@ -1,8 +1,6 @@
 import React from 'react';
 import { useState } from "react"
 
-import { SmallApiUpload } from './SmallApiUpload';
-
 import SimpleAccordion from './SimpleAccordion';
 
 import Dropzone from "../../../components/Dropzone"
@@ -10,7 +8,6 @@ import Dropzone from "../../../components/Dropzone"
 import { Form } from 'react-bootstrap';
 
 import AcceptedFilesList from './AcceptedFilesList';
-import ListGroupComp from '../../../components/ListGroupComp';
 
 import successIcon from '../../../assets/tickSmall.png'
 import binIcon from '../../../assets/bin.png'
@@ -25,8 +22,6 @@ const TslUploadArea = (props) => {
 
     const [tslFiles, setTslFiles] = useState([]) //only 1 allowed, this is for ease for display because of listgroup component
 
-    const { apiTitle, handlerAPI } = props
-
     const { onDropTsl } = props
 
     const { apiUploaded } = props
@@ -35,30 +30,28 @@ const TslUploadArea = (props) => {
     const newOnDropTsl = (accept, reject) => {
 
         if (reject.length !== 0 || accept.length > 1) {
-            alert("WIP- one yaml file only!")
+            alert("Invalid - Please upload a single .yaml file")
             return
         }
 
-        //TODO: validate TSL
+        /*
+        TODO: It would probably be a good idea to validate the TSL here.
+        It is already validated in the backend, but validation here would be useful as well.
+        The utils file has functions that should be useful for this, but they are incomplete and require more testing so we are not doing it for now.
+        */
 
         onDropTsl(accept, reject)
         setUploaded(true)
         setTslFiles(accept)
-        console.log("finished newOnDropTsl");
 
     }
 
     const fileNameFuction = (file) => {
-        //return "file test"
-        //console.log(file);
         return file.name
     }
 
     const removeFileFunction = (fileToRemove) => {
         setTslFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
-        //if api file is removed, enable dropzone again
-        //TODO: how does this affect the backedn tho? uploading, removing, uploading, etc..
-        //need to call some endpoint to cancel?
         setUploaded(false)
     }
 

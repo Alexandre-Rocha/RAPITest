@@ -506,7 +506,6 @@ export class CreateTSL extends Component {
         })
 
         let newFile = YAML.stringify(aux);
-        console.log(newFile);
         var blob = new Blob([newFile], {
             type: 'text/plain'
         });

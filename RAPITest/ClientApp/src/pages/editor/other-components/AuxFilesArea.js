@@ -5,10 +5,7 @@ import { useState } from "react"
 import '../nodes/css/workflowNode.css'
 import '../nodes/css/generalNode.css'
 
-import './css/sidebar.css'; // Create this CSS file for styling
-
-
-import ListGroupComp from '../../../components/ListGroupComp';
+import './css/sidebar.css';
 
 import successIcon from '../../../assets/tickSmall.png'
 import binIcon from '../../../assets/bin.png'
@@ -27,21 +24,13 @@ function AuxFilesArea(props) {
 
     const [uploadedDic, setUploadedDic] = useState(props.uploadedDic)
 
-    const [uploadedDLL, setUploadedDLL] = useState(props.uploadedDll)
-
-    //const [dic, setDic] = useState()
-
-    const [dllArr, setDllArr] = useState([])
+    const [dllArr, setDllArr] = useState([]) //this is now kind of a duplicate of dllFiles, think the code can be refactored to remove this
 
     const { apiUploaded } = props
 
 
-    //const [files, setFiles] = useState([])
-
     const [dicFiles, setDicFiles] = useState(props.dictFile ? [props.dictFile] : [])
     const [dllFiles, setDllFiles] = useState(props.dllFiles || [])
-
-    console.log("aux area dll files: ", dllFiles);
 
 
     const fileNameFuction = (file) => {
@@ -55,19 +44,18 @@ function AuxFilesArea(props) {
 
     const removeFileFunctionDLL = (fileToRemove) => {
         setDllFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
-        setDllArr(currentFiles => currentFiles.filter(file => file !== fileToRemove)) //TODO: this is duplicate, can remove dllArr
+        setDllArr(currentFiles => currentFiles.filter(file => file !== fileToRemove))
     }
 
 
     const onDropDic = (accept, reject) => {
         if (reject.length !== 0 || accept.length > 1) {
-            alert("WIP- one txt file only!")
+            alert("Invalid - Please upload a single .txt file")
         }
 
         const txtFile = accept[0];
 
         onDictionaryDrop(txtFile)
-        //setDic(txtFile)
         setUploadedDic(true)
 
         setDicFiles(currentFiles => [...currentFiles, ...accept]);
@@ -75,7 +63,7 @@ function AuxFilesArea(props) {
 
     const onDropDll = (accept, reject) => {
         if (reject.length !== 0) {
-            alert("WIP- dll files only!")
+            alert("Invalid - Only .dll files are allowed")
             return
         }
 
@@ -83,7 +71,7 @@ function AuxFilesArea(props) {
         let fileName = dllFile.name
 
         if (dllArr.some(file => file.name === fileName)) {
-            alert("already exists!")
+            alert("Invalid - Duplicate file detected")
             return
         }
 
@@ -91,16 +79,12 @@ function AuxFilesArea(props) {
 
         onDllDrop(newDllArr)
         setDllArr(newDllArr);
-        setUploadedDLL(true)
 
         setDllFiles(currentFiles => [...currentFiles, ...accept]);
     }
 
-    console.log("auxarea uploadedDic: ", uploadedDic);
-
     return (
         <div>
-
             <div>
                 {(apiUploaded === true) ?
 

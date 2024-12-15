@@ -9,7 +9,6 @@ export const SettingsProvider = ({ children }) => {
         theme: 'light',
         showTips: true,
         showTooltips: true,
-        // Add other settings as needed
     });
 
     const updateSetting = (key, value) => {

@@ -1,21 +1,9 @@
-// TODO: use this file or not? if so, must review and test first
-
 /*
-this comment is just to visualize state schema
+This file contains utility functions.
+Mainly it contains a logging function and validations.
 
-workflows = [wf1,wf2,...]
-wf = {WorkflowID,Stress,Tests[t1,t2,...]}
-Tests = {
-    Server,TestID,Path,Method,Headers[h1,h2...],Body,Verifications[v1,v2...]
-}
-Headers = {
-    keyItem,valueItem
-}
-Verifications = {
-    Code,Schema //missing some verifications
-}
+As of writing this, the log function is used across the editor files, but there are still some places in which default console.log is used instead. The validation functions are not used yet. Both the log and validation functions can likely be improved further.
 
-workflows[currWorkflow].Tests[currTest].Path
 */
 
 
@@ -54,8 +42,6 @@ export function rapiLog(level, ...message) {
     }
 
 }
-
-
 
 
 
@@ -118,7 +104,7 @@ export function rapiLog(level, ...message) {
 } 
     // all mandatory fields
 */
-function isValidTimerSettings(obj) {
+/* function isValidTimerSettings(obj) {
     if (!obj) {
         return false;
     }
@@ -141,21 +127,21 @@ function isValidTimerSettings(obj) {
     }
 
     return true;
-}
+} */
 
 
 
 /*
 let stress = { Delay: 1, Count: 1, Threads: 3 };  //all mandatory fields
 */
-function isValidStress(obj) {
+/* function isValidStress(obj) {
     if (typeof obj != 'object' || obj == null) return false;
     if (typeof obj.Delay != 'number') return false;
     if (typeof obj.Count != 'number') return false;
     if (typeof obj.Threads != 'number') return false;
     return true;
 }
-
+ */
 
 
 /*
@@ -165,7 +151,7 @@ let verifications =  [{
             }]                   //Verifications is mandatory; inside only Code is mandatory
                                   //OU SEJA, aqui basta verificar Code e Schema, sendo que só Code é obrigatorio, no futuro acrecentar as outras
 */
-function isValidVerification(verification) {
+/* function isValidVerification(verification) {
     if (!verification || !verification.hasOwnProperty('Code')) {
         return false;
     }
@@ -175,7 +161,7 @@ function isValidVerification(verification) {
     }
 
     return true;
-}
+} */
 
 /*
 let header = [{   
@@ -183,7 +169,7 @@ let header = [{
                 valueItem: ''
             }],                     // headers are OPTIONAL  //não ha headers obrigatorios 
 */
-function isValidHeaders(headers) {
+/* function isValidHeaders(headers) {
     if (!Array.isArray(headers)) {
         return false;
     }
@@ -199,7 +185,7 @@ function isValidHeaders(headers) {
     }
 
     return true;
-}
+} */
 
 
 /*
@@ -227,7 +213,7 @@ let test = {
 */
 
 // WARNING: missing query here
-function isValidTest(obj) {
+/* function isValidTest(obj) {
     if (!obj) {
         return false;
     }
@@ -252,9 +238,9 @@ function isValidTest(obj) {
         return false;
     }
 
-    /* if (!isValidVerifications(obj.Verifications)) {
+    if (!isValidVerifications(obj.Verifications)) {
       return false;
-    } */
+    }
 
     return true;
-}
+} */

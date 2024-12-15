@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import React from 'react';
-import { Form, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { Form} from 'react-bootstrap';
 
 import { LOG_LEVELS as level, rapiLog } from '../utils';
 
@@ -23,17 +23,7 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
         rapiLog(level.INFO, "[Workflow node] Workflow name: ", evt.target.value)
 
         setWfName(evt.target.value)
-        //data.custom.nameChangeCallback(evt.target.value)
     };
-
-
-    //TODO: Think better on how to implement changing WF order; for now this works
-    const onIncrement = () => {
-        setWfIndex(oldWfIndex => oldWfIndex + 1)
-    }
-    const onDecrement = () => {
-        setWfIndex(oldWfIndex => oldWfIndex - 1)
-    }
 
     const onChange = (change) => {
         setWfIndex(change.target.value)

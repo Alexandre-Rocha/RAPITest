@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import React from 'react';
 
 
@@ -6,7 +5,7 @@ import { useSettings } from './SettingsContext';
 
 import ToggleAwesomeButton from './ToggleAwesomeButton';
 
-import { Row, Col, Form } from 'react-bootstrap';
+import { Row, Form } from 'react-bootstrap';
 
 
 import './css/Settings.css'

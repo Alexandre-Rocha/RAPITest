@@ -58,8 +58,6 @@ export class UploadApiSpecification extends Component {
                         res.json().then(response => {
                             this.props.handlerAPI(response.Paths, response.Servers, response.Schemas, response.SchemasValues)
                         })
-                        console.log("eyo spec ok")
-                        console.log(res)
                     }
                 })
             })

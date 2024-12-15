@@ -119,23 +119,13 @@ export class SetupTest extends Component {
                 data.append(file.name, file)
             }
         }
-        console.log("test spec");
-        console.log(this.state.testSpecification);
 
         data.append('runimmediately', this.state.timeSpecification.runimmediately);
         data.append('interval', this.state.timeSpecification.interval);
         data.append('rungenerated', this.state.timeSpecification.rungenerated);
 
         const token = await authService.getAccessToken();
-        console.log("lalala")
-        console.log(data)
-        for (const [key, value] of data.entries()) {
-            if (typeof value === 'object') {
-              console.log(`${key}:`, value);
-            } else {
-              console.log(`${key}: ${value}`);
-            }
-          }
+
         fetch(`SetupTest/UploadFile`, {
             method: 'POST',
             headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
@@ -144,16 +134,6 @@ export class SetupTest extends Component {
             if (!res.ok) {
                 res.text().then(text => this.setState({ step: 6, errorMessage: text}))
             } else {
-                console.log("lelele")
-                console.log(data)
-                for (const [key, value] of data.entries()) {
-                    if (typeof value === 'object') {
-                      console.log(`${key}:`, value);
-                    } else {
-                      console.log(`${key}: ${value}`);
-                    }
-                  }
-                console.log("over");
                 this.setState({ step: 5 })
             }
         })

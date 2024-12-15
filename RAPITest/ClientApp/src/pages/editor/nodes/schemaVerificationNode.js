@@ -28,10 +28,7 @@ function SchemaVerificationNode({ data, isConnectable, xPos, yPos }) {
     const onSchemaChange = (evt) => {
         const schema = evt.target.value
         setSchema(schema)
-        //data.custom.schemaChangeCallback(schema, data.custom._wfIndex, data.custom._testIndex)
         console.log("[Schema node] Schema: ", schema);
-
-
     }
 
     const renderSchemaPreview = () => {

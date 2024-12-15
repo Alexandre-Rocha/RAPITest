@@ -9,8 +9,6 @@ function MyTextModal(props) {
   const handleShow = () => setShow(true);
 
   const handleSave = () => {
-    // Here you could handle the text, e.g., send it in an HTTP request
-    //console.log(text);
 
     props.handleSave(text)
     handleClose();
@@ -24,12 +22,12 @@ function MyTextModal(props) {
 
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Enter Your Text</Modal.Title>
+          <Modal.Title>{props.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{maxHeight: '560px', overflowY: 'auto'}}>
           <Form>
             <Form.Group>
-              <Form.Label>Text Input</Form.Label>
+              <Form.Label>{props.label}</Form.Label>
               <Form.Control 
                 as="textarea" 
                 rows={6} 

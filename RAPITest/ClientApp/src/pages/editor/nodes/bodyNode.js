@@ -3,7 +3,7 @@ import React from 'react';
 
 import SimpleModalComp from '../../../components/SimpleModalComp';
 
-import { Form, Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
 import searchIcon from '../../../assets/search.png'
 
@@ -28,13 +28,11 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
     const onBodyTextChange = (text) => {
         rapiLog(level.INFO, "[Body node] Body text: ", text);
         setBodyText(text)
-        //data.custom.bodyTextChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
-
     };
 
     const onBodyRefChange = (evt) => {
         rapiLog(level.INFO, "[Body node] Body ref: ", evt.target.value);
-        if (evt.target.value == "textBox") {
+        if (evt.target.value === "textBox") {
             setBodyRef(null)
             setUseBodyRef(false)
         }
@@ -42,14 +40,7 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
             setBodyRef(evt.target.value)
             setUseBodyRef(true)
         }
-        //data.custom.bodyRefChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
     };
-
-    const tooltip = (
-        <Tooltip className="custom-tooltip" id="tooltip">
-            <strong>WIP</strong> Body tooltip.
-        </Tooltip>
-    );
 
     const renderSchemaData = () => {
         if (!useBodyRef) {
@@ -96,14 +87,6 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
         <div>
             <GeneralNode {...generalNodeProps}>
 
-                {/* <label htmlFor="bodyText">
-                    Body text WIP
-                    <OverlayTrigger placement="right" overlay={tooltip}>
-                        <span>  🛈</span>
-                    </OverlayTrigger>
-                </label>
-                <Form.Control id='bodyText' value={bodyText} onChange={onBodyTextChange} className="body-text" type="text" placeholder="Enter text" /> */}
-
                 <label htmlFor="bodyRef">Choose Body:</label>
                 <div className='body-ref-div'>
                     <Form.Select id='bodyRef' className='body-ref' aria-label="Default select example" onChange={onBodyRefChange} 
@@ -121,7 +104,7 @@ function BodyNode({ data, isConnectable, xPos, yPos }) {
 
                 <p></p>
                 
-                <MyTextModal handleSave={onBodyTextChange} text="Open Body text box"></MyTextModal>
+                <MyTextModal handleSave={onBodyTextChange} text="Open Body text box" title="Body" label=""></MyTextModal>
 
             </GeneralNode>
 

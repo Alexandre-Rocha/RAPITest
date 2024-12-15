@@ -1,7 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
 
-
 import { Form } from 'react-bootstrap';
 
 import { LOG_LEVELS as level, rapiLog } from '../utils';
@@ -13,8 +12,6 @@ function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
 
     const [dllName, setDllName] = useState(data.custom.dllName || null)
 
-    console.log('lalau dllname',dllName);
-
     rapiLog(level.DEBUG, "[Custom node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Custom node] Test ID: ", data.custom._testIndex)
     rapiLog(level.DEBUG, "[Custom node] X pos: ", xPos)
@@ -24,7 +21,6 @@ function CustomVerificationNode({ data, isConnectable, xPos, yPos }) {
     const onSelectedDllChange = (evt) => {
         const newSelectedDll = evt.target.value
         setDllName(newSelectedDll)
-        //data.custom.customVerifChangeCallback(newSelectedDll, data.custom._wfIndex, data.custom._testIndex)
     };
 
 

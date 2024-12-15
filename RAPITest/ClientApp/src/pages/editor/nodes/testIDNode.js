@@ -8,7 +8,6 @@ import GeneralNode from './generalNode';
 import { LOG_LEVELS as level, rapiLog } from '../utils';
 
 
-
 function TestIDNode({ data, isConnectable, xPos, yPos }) {
 
     const [testIndex, setTestIndex] = useState(data.custom._testIndex || 1)
@@ -17,7 +16,6 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
     const [path, setPath] = useState(data.custom.path || "");
     const [method, setMethod] = useState(data.custom.method || "");
 
-    //rapiLog(level.DEBUG, "[Test node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Test node] Test ID: ", testIndex)
     rapiLog(level.DEBUG, "[Test node] X pos: ", xPos)
     rapiLog(level.DEBUG, "[Test node] Y pos: ", yPos)
@@ -32,28 +30,24 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
         const _testName = evt.target.value
         rapiLog(level.INFO, "[Test node] Test name: ", _testName)
         setTestName(_testName)
-        //data.custom.nameChangeCallback(_testName, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const onChangeServer = (event) => {
         const _server = event
         rapiLog(level.INFO, "[Test node] Selected server: ", _server)
         setServer(_server)
-        //data.custom.serverChangeCallback(_server, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const onChangePath = (event) => {
         const _path = event
         rapiLog(level.INFO, "[Test node] Selected path: ", _path)
         setPath(_path)
-        //data.custom.pathChangeCallback(_path, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const onChangeMethod = (event) => {
         const _method = event
         rapiLog(level.INFO, "[Test node] Selected method: ", _method)
         setMethod(_method)
-        //data.custom.methodChangeCallback(_method, data.custom._wfIndex, data.custom._testIndex)
     };
 
 
@@ -64,7 +58,6 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
             setTestIndex(data.custom._testIndex);
         }
     }, [data.custom._testIndex]); //we dont want testIndex here because it will lead to infinite rerender-> THIS IS WHY ESLINT IS DISABLED
-    //TODO: do i really need state? maybe
     /* eslint-enable */
 
 
@@ -86,15 +79,6 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
     }
 
     data.custom.getState = getState
-
-
-    //TODO: Think better on how to implement changing Test order; for now this works
-    /* const onIncrement = () => {
-        setTestIndex(oldTestIndex => oldTestIndex + 1)
-    }
-    const onDecrement = () => {
-        setTestIndex(oldTestIndex => oldTestIndex - 1)
-    } */
 
     const onChange = (change) => {
         const value = Math.max(1, change.target.value)
@@ -120,51 +104,40 @@ function TestIDNode({ data, isConnectable, xPos, yPos }) {
                 <label htmlFor='testName'>Test name:</label>
                 <Form.Control id='testName' value={testName} onChange={onTestNameChange} className="test-name" type="text" placeholder="Enter text" />
 
-                    <label htmlFor="servers">Test settings:</label>
-{/*                 <label htmlFor="servers">Server</label>
- */}                <Combobox id='servers' className='nowheel'
+                <label htmlFor="servers">Test settings:</label>
+                <Combobox id='servers' className='nowheel'
                     data={data.custom.servers}
                     filter={false}
                     onChange={onChangeServer}
                     defaultValue={data.custom.server || "Servers:"}
                 />
 
-{/*                 <label htmlFor="paths">Path</label>
- */}                <Combobox id='paths' className='nowheel'
+                <Combobox id='paths' className='nowheel'
                     data={data.custom.paths}
                     filter={false}
                     onChange={onChangePath}
                     defaultValue={data.custom.path || "Paths:"}
                 />
 
-{/*                 <label htmlFor="methods">Method</label>
- */}                <Combobox id='methods' className='nowheel'
+                <Combobox id='methods' className='nowheel'
                     data={data.custom.httpMethods}
                     filter={false}
                     onChange={onChangeMethod}
                     defaultValue={data.custom.method || "Methods:"}
                 />
 
-                {/* <div>
-                    Wf: {data.custom._wfIndex}
-                </div>
-                <div>
-                    Test: {testIndex}
-                    <button onClick={onIncrement}>+1</button>
-                    <button onClick={onDecrement}>-1</button>
-                </div> */}
 
                 <p></p>
 
                 <div>
                     <span style={{ fontWeight: 'bold' }}>Test order: </span>
                     <Form.Control
-                    type="number"
-                    value={testIndex || 1}
-                    onChange={onChange}
-                    style={{ width: '54px',display:'inline-block' }}
-                    min={1}
-                />
+                        type="number"
+                        value={testIndex || 1}
+                        onChange={onChange}
+                        style={{ width: '54px', display: 'inline-block' }}
+                        min={1}
+                    />
                 </div>
 
             </GeneralNode>

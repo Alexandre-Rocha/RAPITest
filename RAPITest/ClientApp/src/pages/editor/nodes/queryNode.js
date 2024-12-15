@@ -17,26 +17,22 @@ function QueryNode({ data, isConnectable, xPos, yPos }) {
         const updatedQuery = [...query];
         updatedQuery[index].key = value;
         setQuery(updatedQuery);
-        //data.custom.keyChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex);
     };
 
     const handleValueChange = (index, value) => {
         const updatedQuery = [...query];
         updatedQuery[index].value = value;
         setQuery(updatedQuery);
-        //data.custom.valueChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex);
     };
 
     const addQuery = () => {
         setQuery([...query, { key: '', value: '' }]);
-        //data.custom.addQueryCallback(data.custom._wfIndex, data.custom._testIndex)
     };
 
     const removeQuery = (index) => {
         const updatedQuery = [...query];
         updatedQuery.splice(index, 1);
         setQuery(updatedQuery);
-        //data.custom.removeQueryCallback(index, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const getState = () => {

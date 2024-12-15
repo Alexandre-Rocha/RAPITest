@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import React from 'react';
 
-import SimpleModalComp from '../../../components/SimpleModalComp';
-
-import { useSettings } from './SettingsContext';
-
 import {AwesomeButton} from 'react-awesome-button';
 
 import './css/ToggleAwesomeButton.css'
@@ -24,14 +20,14 @@ function ToggleAwesomeButton(props) {
     };
     
     const renderTextOn = () => {
-        if (textOn != undefined && textOn != null) {
+        if (textOn !== undefined && textOn !== null) {
             return textOn
         }
         else return "On"
     }
 
     const renderTextOff = () => {
-        if (textOff != undefined && textOff != null) {
+        if (textOff !== undefined && textOff !== null) {
             return textOff
         }
         else return "Off"

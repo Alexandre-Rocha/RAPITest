@@ -3,14 +3,10 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap';
 import { Row, Col, Form } from 'react-bootstrap';
 import Dropzone from '../../../components/Dropzone';
-// import './UploadFile.css';
 import { warningMessage, dangerMessage } from '../../../components/AlertComp';
 import authService from '../../api-authorization/AuthorizeService';
 import Loader from 'react-loader-spinner';
 import { AwesomeButton } from 'react-awesome-button';
-import ListGroupComp from '../../../components/ListGroupComp';
-import successIcon from '../../../assets/tickSmall.png';
-import binIcon from '../../../assets/bin.png';
 import uploadIcon from '../../../assets/uploadSmall.png';
 
 import { useSettings } from './SettingsContext';
@@ -30,7 +26,6 @@ const SmallApiUpload = (props) => {
     });
 
     const onDrop = async (accept, reject) => {
-        console.log("DropCallback");
         if (reject.length !== 0 || accept.length > 1) {
             setState({ ...state, showWarning: true, warningMessage: "Please upload only one yaml or json file" });
         } else {
@@ -39,9 +34,7 @@ const SmallApiUpload = (props) => {
             let data = new FormData();
             data.append('apiSpecification', accept[0]);
             data.append('title', props.apiTitle);
-            console.log("gonna get auth token");
             const token = await authService.getAccessToken();
-            console.log("gonna fetch");
             fetch(`SetupTest/GetSpecificationDetails`, {
                 method: 'POST',
                 headers: !token ? {} : { 'Authorization': `Bearer ${token}` },

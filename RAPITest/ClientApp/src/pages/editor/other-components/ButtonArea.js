@@ -53,7 +53,3 @@ const ButtonArea = (props) => {
 
 export default ButtonArea;
 
-
-/* <button key={buttonIndex} onClick={buttonData.onClick} className="node-button">
-                {buttonData.title}
-              </button> */

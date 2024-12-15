@@ -195,7 +195,6 @@ export class MonitorTest extends Component {
             fileName: ""
         }
 
-        console.log("trying fetch tsl");
         // Grab the TSL from the DB and turn into string that can be processed
         const tslResponse = await fetch(`MonitorTest/ReturnTsl?apiId=${ApiId}`, {
             method: 'GET',
@@ -218,7 +217,9 @@ export class MonitorTest extends Component {
 
         apiFile.paths = Object.keys(spec.paths);
 
-        //TODO: methods not supported in the backend, only Delete,Get,Post,Put ; the below code is therefore not useful
+        /*
+        In the backend currently only Get, Delete, Post, Put methods are supported, so there is no use in fetching this information from the specification. The code below would be for this, but is therefore commented out. In the future it would be nice to support more methods and get them from specification.
+        */
         /* const httpMethods = Object.values(spec.paths).flatMap(pathObj => Object.keys(pathObj))
         const uniqueHttpMethods = Array.from(new Set(httpMethods));
         const sortedHttpMethods = uniqueHttpMethods.sort();*/
@@ -249,7 +250,6 @@ export class MonitorTest extends Component {
                 lastModified: new Date().getTime()
             });
 
-            console.log(dictFile);
         }
 
 
@@ -278,14 +278,13 @@ export class MonitorTest extends Component {
                 const byteArray = new Uint8Array(byteNumbers);
 
                 const dllFile = new File([byteArray], element.FileName, {
-                    type: "application/octet-stream", // Typical MIME type for binary files
+                    type: "application/octet-stream", 
                     lastModified: new Date().getTime()
                 });
 
                 dllFileArr.push(dllFile);
             })
         }
-
 
 
         //------

@@ -16,26 +16,22 @@ function HeadersNode({ data, isConnectable, xPos, yPos }) {
         const updatedHeaders = [...headers];
         updatedHeaders[index].key = value;
         setHeaders(updatedHeaders);
-        //data.custom.keyChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const handleValueChange = (index, value) => {
         const updatedHeaders = [...headers];
         updatedHeaders[index].value = value;
         setHeaders(updatedHeaders);
-        //data.custom.valueChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const addHeader = () => {
         setHeaders([...headers, { key: '', value: '' }]);
-        //data.custom.addHeaderCallback(data.custom._wfIndex, data.custom._testIndex)
     };
 
     const removeHeader = (index) => {
         const updatedHeaders = [...headers];
         updatedHeaders.splice(index, 1);
         setHeaders(updatedHeaders);
-        //data.custom.removeHeaderCallback(index, data.custom._wfIndex, data.custom._testIndex)
     };
 
     rapiLog(level.DEBUG, "[Headers node] Workflow ID: ", data.custom._wfIndex)

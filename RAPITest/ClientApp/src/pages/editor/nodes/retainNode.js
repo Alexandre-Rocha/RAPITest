@@ -16,26 +16,22 @@ function RetainNode({ data, isConnectable, xPos, yPos }) {
         const updatedRetains = [...retains];
         updatedRetains[index].key = value;
         setRetains(updatedRetains);
-        //data.custom.keyChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const handleValueChange = (index, value) => {
         const updatedRetains = [...retains];
         updatedRetains[index].value = value;
         setRetains(updatedRetains);
-        //data.custom.valueChangeCallback(index, value, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const addRetain = () => {
         setRetains([...retains, { key: '', value: '' }]);
-        //data.custom.addRetainCallback(data.custom._wfIndex, data.custom._testIndex)
     };
 
     const removeRetain = (index) => {
         const updatedRetains = [...retains];
         updatedRetains.splice(index, 1);
         setRetains(updatedRetains);
-        //data.custom.removeRetainCallback(index, data.custom._wfIndex, data.custom._testIndex)
     };
 
 

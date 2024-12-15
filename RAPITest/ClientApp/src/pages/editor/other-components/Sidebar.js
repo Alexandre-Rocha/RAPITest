@@ -3,15 +3,9 @@ import TimerSettings from "./TimerSettings"
 import ApiUploadArea from "./ApiUploadArea"
 import ButtonArea from "./ButtonArea"
 
-
-//import Dropzone from "react-dropzone"
-
-import Dropzone from "../../../components/Dropzone"
-
 import { useState } from "react"
 
 import AuxFilesArea from "./AuxFilesArea"
-
 
 import '../nodes/css/workflowNode.css'
 import '../nodes/css/generalNode.css'
@@ -43,8 +37,6 @@ function Sidebar(props) {
 
     const {dllFiles} = props
 
-    console.log("dll files sidebar: ",dllFiles);
-
     const { dictFile } = props
 
     const  {uploadedDic} = props
@@ -67,14 +59,12 @@ function Sidebar(props) {
     const onDropTsl = (accept, reject) => {
 
         if (reject.length !== 0 || accept.length > 1) {
-            alert("WIP- one yaml file only!")
+            alert("Invalid - Please upload a single .yaml file")
             return
         }
 
         const tslFile = accept[0]
-        console.log("tsl uploaded");
-
-        //TODO: more verifs? idk
+        
         onTslDrop(tslFile)
 
     }
@@ -83,21 +73,13 @@ function Sidebar(props) {
         setApiUploaded(toggle)
     }
 
-    console.log("sidebar uploaded dic: ", uploadedDic);
 
     return (
         <div className={`collapsible-sidebar ${isCollapsed ? 'collapsed' : ''} `}>
 
             <button className="toggle-button" onClick={toggleSidebar}>
-                {/* {isCollapsed? "+" : "-"} */}
                 {<img src={menu} alt="Menu Icon" width="35" height="35" />}
             </button>
-
-            {/* TODO: uploaded hardocded false 
-            for apiupload and tsl upload
-            if coming from monitor tests it wont be always like this in theory, need to fix/do
-            
-            */}
 
             {isCollapsed ?
 
@@ -175,6 +157,5 @@ function Sidebar(props) {
     )
 }
 
-//TODO: check class names in all acordions from everywhere!
 
 export default Sidebar

@@ -12,7 +12,6 @@ function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
 
     const [contains, setContains] = useState(data.custom.contains || "");
 
-
     rapiLog(level.DEBUG, "[Contains node] Workflow ID: ", data.custom._wfIndex)
     rapiLog(level.DEBUG, "[Contains node] Test ID: ", data.custom._testIndex)
     rapiLog(level.DEBUG, "[Contains node] X pos: ", xPos)
@@ -22,7 +21,6 @@ function ContainsVerificationNode({ data, isConnectable, xPos, yPos }) {
     const onContainsChange = (evt) => {
         rapiLog(level.INFO, "[Contains node] Contains: ", evt.target.value)
         setContains(evt.target.value)
-        //data.custom.containsChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const getState = () => {

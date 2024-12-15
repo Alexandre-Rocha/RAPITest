@@ -13,8 +13,6 @@ import editIcon from '../../assets/pencil.png'
 
 import { withRouter } from 'react-router-dom'; // to allow navigating to editor
 
-import { Link } from 'react-router-dom/cjs/react-router-dom';
-import { NavLink } from 'react-bootstrap';
 
 class TestName extends Component {
 

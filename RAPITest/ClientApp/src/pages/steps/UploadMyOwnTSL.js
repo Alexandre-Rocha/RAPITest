@@ -54,9 +54,6 @@ export class UploadMyOwnTSL extends Component {
             if (this.state.acceptTSL !== null) {
                 aux = accept.concat(this.state.acceptTSL)
             }
-
-            console.log("tsçkkyf");
-            console.log(aux);
             this.setState({ acceptTSL: aux, transitionTSL: true })
         }
     }

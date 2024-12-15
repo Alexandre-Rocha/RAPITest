@@ -1,14 +1,15 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom';
-import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider, Panel, ControlButton } from 'reactflow';
+import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider,  ControlButton } from 'reactflow';
 import 'reactflow/dist/style.css';
-import StatusVerificationNode from './nodes/statusVerificationNode';
 
 import authService from '../api-authorization/AuthorizeService';
-import TestIDNode from './nodes/testIDNode';
-import WorkflowNode from './nodes/workflowNode';
-import SchemaVerificationNode from './nodes/schemaVerificationNode';
 
+import WorkflowNode from './nodes/workflowNode';
+import TestIDNode from './nodes/testIDNode';
+
+import StatusVerificationNode from './nodes/statusVerificationNode';
+import SchemaVerificationNode from './nodes/schemaVerificationNode';
 import CustomVerificationNode from './nodes/customVerificationNode';
 import CountVerificationNode from './nodes/countVerificationNode';
 import MatchVerificationNode from './nodes/matchVerificationNode';
@@ -22,18 +23,15 @@ import StressTestNode from './nodes/stressTestNode';
 
 import Sidebar from './other-components/Sidebar';
 
-import { onCLS, onFCP, onLCP, onINP, onTTFB } from 'web-vitals';
-
+//import { onCLS, onFCP, onLCP, onINP, onTTFB } from 'web-vitals';
 
 import Alert from 'react-bootstrap/Alert';
 
 import { Tooltips } from './editor-strings';
 
-import { LOG_LEVELS as level, rapiLog } from './utils';
-
+//import { LOG_LEVELS as level, rapiLog } from './utils';
 
 import Dagre from 'dagre';
-
 
 import './Editor.css'
 
@@ -41,16 +39,13 @@ import SimpleModalComp from '../../components/SimpleModalComp';
 import Settings from './other-components/Settings';
 
 
-
 const YAML = require('json-to-pretty-yaml');
 const jsYaml = require('js-yaml')
-
 
 const initialNodes = []
 const initialEdges = []
 
 const proOptions = { hideAttribution: true };
-
 
 const NodeType = Object.freeze({
     WORKFLOW: "workflow",
@@ -84,11 +79,15 @@ const nodeTypes = {
     [NodeType.CUSTOM]: CustomVerificationNode,
 }
 
-const flowNodeTypes = [NodeType.WORKFLOW, NodeType.TEST, NodeType.STRESS]
+//const flowNodeTypes = [NodeType.WORKFLOW, NodeType.TEST, NodeType.STRESS]
 const requestNodeTypes = [NodeType.BODY, NodeType.HEADERS, NodeType.QUERY, NodeType.RETAIN]
 const verificationNodeTypes = [NodeType.STATUS, NodeType.SCHEMA, NodeType.MATCH, NodeType.CONTAINS, NodeType.COUNT, NodeType.CUSTOM]
 
 const httpMethods = ["Get", "Delete", "Post", "Put"]  //TSL only supports the 4 main HTTP methods, in the future would be nice to support to more and derive them from the api as well
+
+const tslSchemaPrefix = "$ref/definitions/" // aux var to help process schema coming from premade TSL
+
+const sidebarAccordionClass = '.sidebar-simple-header .accordion-button' // aux var to help collapse sidebar sections
 
 //dagre
 
@@ -120,11 +119,7 @@ const NODE_RIGHT_HANDLE = "rightHandle"
 
 function Flow() {
 
-    //rapiLog(level.INFO, "Flow component rendered")
-
     // #region State and Hooks
-
-    const [nodesCreatedFromState, setNodesCreatedFromState] = useState(false) //TODO: organize
 
     //#region state related to React, ReactFlow and Dagre
 
@@ -139,19 +134,24 @@ function Flow() {
 
     //#region state related to API
 
-    const [testConfName, setTestConfName] = useState(location?.state?.APITitle || "") // the test conf name is kind of bound to the api spec due to how server works //TODO: look deeper into this, improve this comment or even move this outside of this region if possible
+    const [testConfName, setTestConfName] = useState(location?.state?.APITitle || "") // the name of the test configuration
 
     const [apiFile, setApiFile] = useState(location?.state?.apiFile || null) // This will have servers, paths, schemas and schemavalues
 
-    const [apiId, setApiId] = useState(location?.state?.ApiId || null) //TODO: add comment
-
-    const [apiUploaded, setApiUploaded] = useState(location?.state?.ApiId ? true : false) // Whether or not api spec has been uploaded //TODO: is it being set properly when throug old config?
+    const [apiId, setApiId] = useState(location?.state?.ApiId || null) // Id of the test configuration (used when editing a configuration, instead of creating a new one)
+ 
+    const [apiUploaded, setApiUploaded] = useState(location?.state?.ApiId ? true : false) // Whether or not api spec has been uploaded 
+    
     //#endregion
 
 
     //#region state related to Timer settings
 
-    //TODO: cant grab from db for already conf tests...think of something
+    /*For already configured tests, it's not simple to get these 3 values from the database.
+    The values are not saved there, we would have to do some math and other logic with timestamps to extract based on the value of the next text execution in DB
+    For now this is not done, and instead we present the default values (user can still change them when editing)
+    So it requires a deeper look to have the functionality be "ideal", but in any case this is not critical and current behavior is fine also
+    */
     const [runImmediately, setRunImmediatly] = useState('true')
     const [runInterval, setRunInterval] = useState('Never')
     const [runGenerated, setRunGenerated] = useState('true')
@@ -193,6 +193,9 @@ function Flow() {
     const [dontCollapseClass, setDontCollapseClass] = useState("")  // when clicking in an icon when sidebar is collapsed, take note of which icon user wants to go to here; that zone will not be collapsed when sidebar opens
 
     const [settingsVisible, setSettingsVisible] = useState(false) // controls if settings are visible
+
+    const [nodesCreatedFromState, setNodesCreatedFromState] = useState(false)
+
     //#endregion
 
     // #endregion
@@ -214,7 +217,6 @@ function Flow() {
 
     //for dagre (layout algorithm)
     const onLayout = (direction) => {
-        console.log("[Editor] onLayout");
         const layouted = getLayoutedElements(nodes, edges, { direction });
 
         setNodes([...layouted.nodes]);
@@ -236,14 +238,12 @@ function Flow() {
 
     const onRunGeneratedChange = useCallback((runGenerated) => {
         const run = runGenerated.target.value
-        //const run = aux === "true" ? "true" : "false"
         console.log("[Editor] Run generated: ", run);
         setRunGenerated(run)
     }, [])
 
     const onRunImmediatelyChange = useCallback((runImmediately) => {
         const run = runImmediately.target.value
-        //const run = aux === "true" ? "true" : "false"
         console.log("[Editor] Run immediately: ", run);
         setRunImmediatly(run)
     }, [])
@@ -325,7 +325,7 @@ function Flow() {
 
         else {
             //should never come here
-            alert('something went wrong')
+            alert('Something went wrong')
             return false
         }
 
@@ -336,14 +336,14 @@ function Flow() {
         // this method is called if sourceNode is workflow node
 
         if (targetNode.type === NodeType.WORKFLOW) {
-            alert("you cant do that")
+            alert("Invalid connection")
             return false
         }
 
         else if (targetNode.type === NodeType.TEST) {
 
             if (connection.sourceHandle !== "rightHandle") { //rightHandle is the one for tests, so others arent allowed
-                alert("you cant do that")
+                alert("Invalid connection")
                 return false
             }
         }
@@ -351,13 +351,13 @@ function Flow() {
         else if (targetNode.type === NodeType.STRESS) {
 
             if (connection.sourceHandle !== "leftHandle") { //leftHandle is the one for stress tests, so others arent allowed
-                alert("you cant do that")
+                alert("Invalid connection")
                 return false
             }
 
         }
         else {   //cant connect workflow to any other nodes
-            alert("you cant do that")
+            alert("Invalid connection")
             return false
         }
 
@@ -370,20 +370,20 @@ function Flow() {
 
         if (requestNodeTypes.includes(targetNode.type)) {
             if (connection.sourceHandle !== "leftHandle") { // leftHandle is the one for request components, so others arent allowed
-                alert("you cant do that")
+                alert("Invalid connection")
                 return false
             }
         }
 
         else if (verificationNodeTypes.includes(targetNode.type)) {
-            if (connection.sourceHandle !== "rightHandle") {    // rightHandle is the one for request components, so others arent allowed
-                alert("you cant do that")
+            if (connection.sourceHandle !== "rightHandle") {    // rightHandle is the one for verifications, so others arent allowed
+                alert("Invalid connection")
                 return false
             }
         }
 
         else {  //cant connect test to any other nodes
-            alert("you cant do that")
+            alert("Invalid connection")
             return false
         }
 
@@ -395,7 +395,7 @@ function Flow() {
         // this method is called if sourceNode is a request component node
 
         if (!requestNodeTypes.includes(targetNode.type)) {  //can only connect to other request nodes
-            alert("you cant do that")
+            alert("Invalid connection")
             return false
         }
 
@@ -408,7 +408,7 @@ function Flow() {
         const hasOverlappingTypes = sourceNodeTypes.some(type => targetNodeTypes.includes(type));
 
         if (hasOverlappingTypes) {
-            alert('already have a node of that type connected')
+            alert('Invalid connection')
             return false
         }
 
@@ -420,7 +420,7 @@ function Flow() {
         // this method is called if sourceNode is a verification node
 
         if (!verificationNodeTypes.includes(targetNode.type)) { //can only connect to other verification nodes
-            alert("you cant do that")
+            alert("Invalid connection")
             return false
         }
 
@@ -433,7 +433,7 @@ function Flow() {
         const hasOverlappingTypes = sourceNodeTypes.some(type => targetNodeTypes.includes(type));
 
         if (hasOverlappingTypes) {
-            alert('already have a node of that type connected')
+            alert('Invalid connection')
             return false
         }
 
@@ -474,13 +474,9 @@ function Flow() {
 
     const processWorkflow = (wf) => {
 
-        rapiLog(level.DEBUG, "[Editor] Workflow found when recreating state. Assigned ID: ", wf._wfIndex)
-
-        //const wfNodeId = createWorkflowNode(maxWfIndex.current, wf.WorkflowID, currX, currY) //WorkflowID is wf name TODO: whats the diff between yammlwfindex and maxwfindex
-
         const nodeData = {
-            wfName: wf.WorkflowID,
-            _wfIndex: maxWfIndex.current        //TODO: not needed anymore?
+            wfName: wf.WorkflowID,  //WorklowID is the name of the workflow
+            _wfIndex: maxWfIndex.current    
         }
         const wfNodeId = createNode(NodeType.WORKFLOW, nodeData)
 
@@ -488,13 +484,6 @@ function Flow() {
     }
 
     const processStress = (wf) => {
-
-        //rapiLog(level.DEBUG, "[Editor] Stress found when recreating state for workflow with ID ", yamlWfIndex)
-
-        //const initialCount = wf.Stress.Count
-        //const initialThreads = wf.Stress.Threads
-        //const initialDelay = wf.Stress.Delay
-        //const stressTestId = createStressNode(initialCount, initialThreads, initialDelay, yamlWfIndex, currX, currY)
 
         const nodeData = {
             count: wf.Stress.Count,
@@ -508,14 +497,6 @@ function Flow() {
 
     const processTest = (test, currYamlTestIndex) => {
 
-        //rapiLog(level.DEBUG, "[Editor] Test found when recreating state for workflow with ID ", yamlWfIndex)
-
-        //const testNodeServer = test.Server
-        //const testNodePath = test.Path
-        //const testNodeMethod = test.Method
-
-        //const testNodeId = createTestNode(test.TestID, testNodeServer, testNodePath, testNodeMethod, yamlWfIndex, currYamlTestIndex, currX, currY) //TODO: the node has a test property however inside the values are the default ones not the ones in the state
-        //TODO: THIS THE ISSUE, names not same as the ones in getState method
         const nodeData = {
             testName: test.TestID,
             server: test.Server,
@@ -524,7 +505,7 @@ function Flow() {
             paths: apiFile.paths,
             servers: apiFile.servers,
             httpMethods: httpMethods, // TSL only supports the 4 main HTTP methods, in the future would be nice to support to more and derive them from the api as well
-            _testIndex: currYamlTestIndex   //TODO: is this needed ?
+            _testIndex: currYamlTestIndex 
         }
         const testNodeId = createNode(NodeType.TEST, nodeData)
 
@@ -533,15 +514,12 @@ function Flow() {
 
     const processBody = (body) => {
 
-        //const bodyNodeId = createBodyNode(bodyText, bodyRef, yamlWfIndex, currYamlTestIndex, currX, currY)
-
         let bodyText = null
         let bodyRef = null
         let useBodyRef = null
 
         if (body.startsWith("$")) {
             useBodyRef = true
-            console.log("USE BODY REF");
 
             let auxbodyRef = body
             let dictionaryIndex = auxbodyRef.indexOf("dictionary/");
@@ -560,9 +538,8 @@ function Flow() {
             bodyRef: bodyRef,
             useBodyRef: useBodyRef,
             dictObj: dictObj
-            // TODO: missing the dictObj
         }
-        console.log(nodeData);
+
         const bodyNodeId = createNode(NodeType.BODY, nodeData)
 
         return bodyNodeId
@@ -570,8 +547,7 @@ function Flow() {
 
     const processHeaders = (headers) => {
 
-
-        //headers is array with here, like this: ["Accept:application/xml"]
+        //headers is array here, like this: ["Accept:application/xml"]
         //must process it 
 
         let processedHeaders = headers.map(headerString => {
@@ -581,8 +557,6 @@ function Flow() {
                 value: parts[1]
             };
         });
-
-        //const headersNodeId = createHeadersNode(processedHeaders, yamlWfIndex, currYamlTestIndex, currX, currY)
 
         const nodeData = {
             headers: processedHeaders
@@ -594,9 +568,6 @@ function Flow() {
 
     const processQuery = (query) => {
 
-        //TODO: need to test this, dont have any example tsl file w query i think...
-
-
         let processedQuery = query.map(queryString => {
             let parts = queryString.split("=");
             return {
@@ -604,11 +575,6 @@ function Flow() {
                 value: parts[1]
             };
         });
-
-        console.log("QUERY: ", query);
-        console.log("PROCESSED QUERY: ", processedQuery);
-
-        //const queryNodeId = createQueryNode(processedQuery, yamlWfIndex, currYamlTestIndex, currX, currY)
 
         const nodeData = {
             query: processedQuery
@@ -628,8 +594,6 @@ function Flow() {
             };
         });
 
-        //const retainNodeId = createRetainNode(processedRetain, yamlWfIndex, currYamlTestIndex, currX, currY)
-
         const nodeData = {
             retains: processedRetain
         }
@@ -639,8 +603,6 @@ function Flow() {
     }
 
     const processStatusVerif = (status) => {
-
-        //const statusVerifNodeId = createStatusVerificationNode(status, yamlWfIndex, currYamlTestIndex, currX, currY)
 
         const nodeData = {
             initialStatusCode: status
@@ -652,12 +614,8 @@ function Flow() {
 
     const processSchemaVerif = (schema) => {
 
-        //const schemaVerifNodeId = createSchemaVerificationNode(schema, yamlWfIndex, currYamlTestIndex, currX, currY)
+        const processedSchema = schema.split(tslSchemaPrefix)[1]
 
-        const processedSchema = schema.split("$ref/definitions/")[1] //TODO: kinda hardcoded
-
-        //const schemas = apiFile.schemas.concat(Object.keys(dictObj))
-        
         const schemaMap = {};
         apiFile.schemas.forEach((schema, index) => {
             schemaMap[schema] = apiFile.schemasValues[index];
@@ -677,9 +635,6 @@ function Flow() {
 
     const processContainsVerif = (contains) => {
 
-        //TODO: transform contains here or before process is called?
-        //const containsVerifNodeId = createContainsVerificationNode(contains, yamlWfIndex, currYamlTestIndex, currX, currY)
-
         const nodeData = {
             contains: contains
         }
@@ -690,13 +645,9 @@ function Flow() {
 
     const processCountVerif = (matchString) => {
 
-        // TODO: process key and value here or before calling processmethod?
-
         const processedMatch = matchString.split("#");
         const key = processedMatch[0]
         const value = processedMatch[1]
-
-        //const countVerifNodeId = createCountVerificationNode(key, value, yamlWfIndex, currYamlTestIndex, currX, currY)
 
         const nodeData = {
             key: key,
@@ -709,17 +660,11 @@ function Flow() {
 
     const processMatchVerif = (matchString) => {
 
-        //TODO: preocess key and value here or before calling processmetdo?
-
-        //TODO: i am removing the dollar so that in the node it doesnt show, then in the end i manually add dollar to tsl file
-        // does this make sense though?
-
+        // removing the dollar so that in the node it doesn't show, then in the end when setup finalized we manually add dollar to tsl file
 
         const processedMatch = matchString.split("#");
         const key = processedMatch[0].replace(/^[$.]+/, '');
         const value = processedMatch[1]
-
-        //const matchVerifNodeId = createMatchVerificationNode(key, value, yamlWfIndex, currYamlTestIndex, currX, currY)
 
         const nodeData = {
             key: key,
@@ -732,11 +677,6 @@ function Flow() {
 
     const processCustomVerif = (dllName) => {
 
-        //TODO: process dll name here or begore
-        //const customVerifNodeId = createCustomVerificationNode(dllName, yamlWfIndex, currYamlTestIndex, currX, currY)
-        console.log('bualasfa');
-        console.log(dllNamesArr);
-        console.log(dllName[0]);
         const nodeData = {
             dllName: dllName[0],
             dllNames: dllNamesArr
@@ -753,7 +693,12 @@ function Flow() {
 
         let listOfEdgesLists = []
 
-        let isTryingToUseDictionary = false
+        /*
+        might need to be a global variable, since currentlywe will only know if tsl is trying to use dictionary or not in the aux methods (processBody, processSchema, etc)
+        currently not used, but it's same principle as isTryingToUseDll (and we now get the dic and dll files from DB for previous configurations, so it's not as needed)
+        */
+        //let isTryingToUseDictionary = false 
+
         let isTryingToUseDll = false
 
         newstate.forEach(wf => {
@@ -853,7 +798,8 @@ function Flow() {
 
                 // ----------- VERIFICATIONS ------------
 
-                //TODO: at the moment, the whole algorithm for example the status below kinda assumes a correct tsl strucuture, probably does not work and may crash with incorrect TSL
+                //TODO: at the moment, the whole algorithm assumes a correct tsl strucuture, probably does not work and may crash with incorrect TSL
+                //for "real world / production" , we should add tsl validation to make it more robust
 
                 const statusVerifNodeId = processStatusVerif(test.Verifications[0].Code)    //Verifications is an array for some reason but always 1 element
 
@@ -972,29 +918,24 @@ function Flow() {
             return newEdges
         })
 
-        //TODO: remove hardcoded warning
         if (isTryingToUseDll && dllFileArr.length === 0) {
             setTslUploadedWarnings(tslUploadedWarnings.concat("Warning: Some nodes attempt to make use of auxiliary files that are not yet uploaded."))
         }
 
         setCanCollapse(true)
-        //collapseNodesWhenReady
-
     }
 
-    // when state is recreated and nodes are created and ready to be collapsed
-    // the canCollapse flag is set to true
-    // when that happens, this function is executed which collapses the nodes after 100 ms
-    // the reason this needs to happen in useEffect after state update is because the nodes and edges etc are state updates
-    // as well, and React takes a bit to process those. so I cant call collapseNodes directly before the state updates are processed.
-    // this solution perhaps could be more elegant but it makes sense and works fine
-    // TODO: alternativas?/comment cleanup
+    /* when state is recreated and nodes are created and ready to be collapsed the canCollapse flag is set to true;
+    when that happens, this function is executed which collapses the nodes after X milliseconds
+    the reason this needs to happen in useEffect after state update is because the nodes and edges etc are state updates as well,
+    and React takes a bit to process those. so I cant call collapseNodes directly before the state updates are processed.
+    this solution perhaps could be more elegant but it makes sense and works fine */
     useEffect(() => {
         if (canCollapse) {
             setTimeout(() => {
                 collapseNodes();
                 setCanCollapse(false)
-            }, 200); //100
+            }, 200);
         }
     }, [canCollapse]);
 
@@ -1008,7 +949,6 @@ function Flow() {
         if (apiFile) {
             return true
         } else {
-            //alert('WIP - you cant add nodes before uploading api file')
             setShowNodesAlert(true)
             return false
         }
@@ -1018,12 +958,11 @@ function Flow() {
 
         if (!checkIfApiFile()) return
 
-        console.log("[Editor] Adding Workflow node");
         maxWfIndex.current += 1
 
         const nodeData = {
             wfName: "",
-            _wfIndex: maxWfIndex.current    //TODO: think this is worthless now
+            _wfIndex: maxWfIndex.current 
         }
         createNode(NodeType.WORKFLOW, nodeData)
     }
@@ -1032,51 +971,36 @@ function Flow() {
 
         if (!checkIfApiFile()) return
 
-        console.log("[Editor] Adding Test node");
         const nodeData = {
             paths: apiFile.paths,
             servers: apiFile.servers,
-            httpMethods: ["Get", "Delete", "Post", "Put"], //TODO: shouldnt be hardcoded here prob
+            httpMethods: httpMethods //TSL only supports the 4 main HTTP methods, in the future would be nice to support to more and derive them from the api as well
         }
         createNode(NodeType.TEST, nodeData)
     }
 
-    //TODO: all of these below are wrong???
     const onClickStatus = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Status Verification node");
         createNode(NodeType.STATUS)
-    }
-
-    const onClickWip = () => {
-        if (!checkIfApiFile()) return
-        console.log("Work in progress");
-        alert('wip')
     }
 
     const onClickCount = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Count Verification node");
         createNode(NodeType.COUNT)
     }
 
     const onClickContains = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Contains Verification node");
         createNode(NodeType.CONTAINS)
     }
 
     const onClickMatch = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Match Verification node");
         createNode(NodeType.MATCH)
     }
 
     const onClickCustom = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Custom Verification node");
-        console.log('asdasaddafsf');
-        console.log(dllNamesArr);
         const nodeData = {
             dllNames: dllNamesArr
         }
@@ -1086,7 +1010,6 @@ function Flow() {
 
     const onClickSchema = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Schema Verification node");
         
         const schemaMap = {};
         apiFile.schemas.forEach((schema, index) => {
@@ -1103,40 +1026,41 @@ function Flow() {
 
     const onClickBodyNode = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Body node");
         createNode(NodeType.BODY)
     }
 
     const onClickHeadersNode = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Headers node");
         createNode(NodeType.HEADERS)
     }
 
     const onClickQueryNode = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Query node");
         createNode(NodeType.QUERY)
     }
 
     const onClickRetainNode = () => {
         if (!checkIfApiFile()) return
-        console.log("[Editor] Adding Retain node");
         createNode(NodeType.RETAIN)
     }
 
     const onClickStressTestNode = () => {
         if (!checkIfApiFile()) return
-        console.log('[Editor] Adding Stress test node');
         createNode(NodeType.STRESS)
     }
+
+    // aux, can be deleted but is useful for testing
+    /* const onClickWip = () => {
+        if (!checkIfApiFile()) return
+        console.log("Work in progress");
+        alert('wip')
+    } */
 
     // #endregion
 
 
     //#region other callbacks to other components
 
-    //TODO: maybe I can analyse this to see how the schemasvalues are passed to do same in MonitorTests
     const handlerAPI = function (paths, servers, schemas, schemasValues) {
         let apiContents = { paths, servers, schemas, schemasValues }
         setApiUploaded(true)
@@ -1195,7 +1119,7 @@ function Flow() {
 
                 nodesArr.forEach(
                     node => {
-                        if (node.type === "body") {
+                        if (node.type === NodeType.BODY) {
                             node.data = {
                                 ...node.data,
                                 custom: {
@@ -1214,28 +1138,20 @@ function Flow() {
     }
 
     const onDllDrop = (dllArr) => {
-        //somehow relay info to customVerifNode
-        console.log("dll drop receivd, now need to relay");
-
-        console.log("fll");
-        console.log(dllArr);
 
         setDllFileArr(dllArr)
 
         let namesArr = []
 
-        dllArr.forEach((ddlFile) => { console.log(namesArr.push(ddlFile.name)); })
+        dllArr.forEach((ddlFile) => { namesArr.push(ddlFile.name) })
 
         setDllNamesArr(namesArr)
-
-        console.log(namesArr);
 
         let nodesArr = reactFlowInstance.getNodes();
 
         nodesArr.forEach(
             node => {
-                if (node.type === "custom") {
-                    console.log("found node with id:", node.id);
+                if (node.type === NodeType.CUSTOM) {
                     node.data = {
                         ...node.data,
                         custom: {
@@ -1244,9 +1160,6 @@ function Flow() {
                         }
 
                     }
-
-                    console.log("new node data:");
-                    console.log(node.data);
                 }
             }
         )
@@ -1255,7 +1168,6 @@ function Flow() {
     }
 
     const onTslDrop = (tslFile) => {
-        //somehow recreate state
 
         setNodes([])
         setEdges([])
@@ -1265,18 +1177,12 @@ function Flow() {
         reader.onload = (event) => {
             const fileContents = event.target.result;
 
-            console.log(fileContents);
-
-
             // file load will start
             const startTotal = performance.now();
-
 
             const newstate = jsYaml.load(fileContents)
 
             const endFile = performance.now();
-
-            //setWorkflows(newstate)
 
             const startEditor = performance.now();
 
@@ -1292,9 +1198,8 @@ function Flow() {
             console.log(`[FILE] Time taken: ${endFile - startTotal}ms`);
 
 
-
-
-            //TODO: hardcoded
+            // should perhaps do a more thorough check before this, to ensure it's not triggered when upload fails
+            // however at the moment if it reaches here then it was uploaded successfully, so it's fine for now
             setTslUploadedAlert(true)
 
 
@@ -1306,7 +1211,6 @@ function Flow() {
         };
 
         reader.readAsText(tslFile);
-
     }
 
     //#endregion
@@ -1339,7 +1243,7 @@ function Flow() {
 
     // collapse the accordions inside the sidebar, except those with the "dontCollapseClass"
     const collapseSidebarAccordions = () => {
-        const elements = document.querySelectorAll('.sidebar-simple-header .accordion-button'); //TODO: kinda hardcoded
+        const elements = document.querySelectorAll(sidebarAccordionClass); 
 
         elements.forEach((element) => {
             const isNotCollapsed = !element.classList.contains('collapsed')
@@ -1359,8 +1263,8 @@ function Flow() {
             }
             else {
                 element.scrollIntoView({
-                    behavior: 'smooth', // Optional: Defines the transition animation
-                    block: 'nearest' // Scrolls so that the targetItem is aligned to the top of the sidebar
+                    behavior: 'smooth',
+                    block: 'nearest' 
                 });
             }
 
@@ -1384,10 +1288,7 @@ function Flow() {
     useEffect(() => {
         if (location?.state?.tslState) {
             console.log('[Editor] External state has been found; creating nodes...');
-
-            //createNodes(workflows)
-            createNodes(location?.state?.tslState) // was above line before but like this can remove state var
-            //setTimeout(()=>onLayout('TB'),2000) // TODO: not working
+            createNodes(location?.state?.tslState)
             setNodesCreatedFromState(true)
         } else {
             console.log('[Editor] No state has been found; no nodes will be created');
@@ -1397,18 +1298,17 @@ function Flow() {
 
     useEffect(() => {
         if (nodesCreatedFromState) {
-            console.log("created from state use effect");
 
             setTimeout(() => {
                 document.getElementById('layout-button').click()
-                //onLayout('TB')
-                //onLayout('TB') // TODO: not working
+                //for some reason calling onLayout('TB') is not working, so we manually click the layout button instead, need further check to see why
             }, 1200);
             setNodesCreatedFromState(false)
         }
     }, [nodesCreatedFromState])
 
-    // TODO: improve to clean files/etc (full reset)?
+    // Maybe would be more useful to change this method in the future to also clean files/etc (full reset)? At the moment only clears nodes and edges
+    // probably good to add a confirmation button as well to prevent accidental resets
     function clearEditor() {
         setNodes([])
         setEdges([])
@@ -1472,8 +1372,6 @@ function Flow() {
         return result;
     }
 
-    //TODO:no save changes (agr ja nao ]e, ver num desses embaixo) remover headers vazios
-
     const scanEditorState = () => {
         const workflows = []
         let error = false
@@ -1493,7 +1391,7 @@ function Flow() {
 
             const connectedStressNodes = getConnectedNodes(wfNode, NodeType.STRESS)
             if (connectedStressNodes.length > 1) {
-                alert('can only have 1 stress test')
+                alert('Invalid settings - Only 1 Stress Test allowed per workflow')
                 error = true
                 return false
             }
@@ -1504,7 +1402,7 @@ function Flow() {
 
             const connectedTestNodes = getConnectedNodes(wfNode, NodeType.TEST)
             if (connectedTestNodes.length < 1) {
-                alert('workflows must have at least 1 test')
+                alert('Invalid settings - Workflows must have at least 1 Test')
                 error = true
                 return false
             }
@@ -1525,19 +1423,21 @@ function Flow() {
                 const connectedRequestNodes = getConnectedNodesByHandle(testNode, "leftHandle")
                 if (connectedRequestNodes.length >= 1) {
                     if (connectedRequestNodes.length > 1) {
-                        alert('only one request node can be connected directly to a test node')
+                        alert('Invalid settings - Only one Request node can be connected directly to a Test node')
                         return false
                     }
 
                     const connectedRequestNode = connectedRequestNodes[0]
                     if (!requestNodeTypes.includes(connectedRequestNode.type)) {
-                        alert('something wrong w connection')
+                        //should never happen
+                        alert('Something went wrong')
                         return false
                     }
                     const restOfTheRequestNodes = getNodesInLinearChain(connectedRequestNode)
                     const allRequestNodes = connectedRequestNodes.concat(restOfTheRequestNodes)
                     if (!allRequestNodes.every(node => requestNodeTypes.includes(node.type))) {
-                        alert('something wrong w connection')
+                        //should never happen
+                        alert('Something went wrong')
                         return false
                     }
 
@@ -1572,36 +1472,38 @@ function Flow() {
                 }
 
 
-                // get request nodes from test
+                // get verification nodes from test
                 const connectedVerificationNodes = getConnectedNodesByHandle(testNode, "rightHandle")
                 if (connectedVerificationNodes.length === 0) {
-                    alert('you need at least the status verification on every test')
+                    alert('Invalid settings - Status Verification is required for every test')
                     error = true
                     return false
                 }
 
                 if (connectedVerificationNodes.length > 1) {
-                    alert('only one verification node can be connected directly to a test node')
+                    alert('Invalid settings - Only one Verification node can be connected directly to a Test node')
                     error = true
                     return false
                 }
 
                 const connectedVerificationNode = connectedVerificationNodes[0]
                 if (!verificationNodeTypes.includes(connectedVerificationNode.type)) {
-                    alert('something wrong w connection')
+                    //should never happen
+                    alert('Something went wrong')
                     error = true
                     return false
                 }
                 const restOfTheVerificationNodes = getNodesInLinearChain(connectedVerificationNode)
                 const allVerificationNodes = connectedVerificationNodes.concat(restOfTheVerificationNodes)
                 if (!allVerificationNodes.every(node => verificationNodeTypes.includes(node.type))) {
-                    alert('something wrong w connection')
+                    //should never happen
+                    alert('Something went wrong')
                     error = true
                     return false
                 }
 
-                if (connectedVerificationNodes.length === 0) {
-                    alert('you need at least the status verification on every test')
+                if (!allVerificationNodes.some(node => node.type === NodeType.STATUS)) {
+                    alert('Invalid settings - Status Verification is required for every test')
                     error = true
                     return false
                 }
@@ -1747,7 +1649,7 @@ function Flow() {
 
                     // process Custom
                     if (verification.Custom) {
-                        const transformedCustom = [`${verification.Custom}`]; // TODO why is this array again? can it be more than1? if so this wrong.
+                        const transformedCustom = [`${verification.Custom}`]; 
                         verification.Custom = transformedCustom
                     }
                 }
@@ -1759,7 +1661,6 @@ function Flow() {
 
     const finalizeDataSetup = (workflows) => {
         let newFile = YAML.stringify(workflows);
-        console.log(newFile);
         var blob = new Blob([newFile], {
             type: 'text/plain'
         });
@@ -1777,7 +1678,6 @@ function Flow() {
 
 
         if (dictFile) {
-            console.log("appending dictionary...");
             data.append('dictionary.txt', dictFile);
         }
 
@@ -1793,7 +1693,6 @@ function Flow() {
 
         if (dllFileArr) {
             for (const file of dllFileArr) {
-                console.log("appending dll file...");
                 data.append(file.name, file)
             }
         }
@@ -1809,8 +1708,6 @@ function Flow() {
 
     const finalizeConfiguration = async (data) => {
 
-        //const data = finalizeDataSetup(workflows) //processedWorkflows
-
         const token = await authService.getAccessToken();
 
         fetch(`SetupTest/UploadFile`, {
@@ -1822,7 +1719,6 @@ function Flow() {
                 console.error("Test setup failed...");
             } else {
                 console.log("Test setup was successful!")
-                //TODO: remove hardcoded
                 setFinishSetupAlert(true)
             }
         })
@@ -1830,50 +1726,23 @@ function Flow() {
 
     const finishSetup = async () => {
 
-        /*
-        //check for invalid timer settings
-        console.log("whaaaat");
-        console.log(runImmediately);
-        console.log(runInterval);
-        console.log(runInterval.includes('Never'));
-        debugger
-
-
-        const cond1 = !runImmediately // this will be true when run immeditaly is false
-        console.log("cond1: ",cond1);
-        const cond2 = runInterval.includes('Never') // this will be true when run interval is never
-        console.log("cond2: ",cond2);
-
-        const invalidTimerSettings = cond1 && cond2 // this will be true when run immeditaly is false and run interval is never
-        console.log("flag: ",invalidTimerSettings);
-
-        debugger*/
-
         if (runInterval.includes('Never') && runImmediately.includes('false')) {
-            console.log("why??");
             alert('Invalid Timer settings - Please select either "Run Immediately" or one of the timed "Run Intervals"')
             return false
         }
-        else {
-            console.log("valid timer settings");
-        }
-
+        
         const workflows = scanEditorState()
-        console.log('finish setup, workflows:');
-        console.log(workflows);
 
         if (!workflows) {
             console.log('Something still wrong with workflows, cannot finish setup');
-            return
+            return false
         }
 
         const processedWorkflows = postProcessState(workflows)
-        console.log('finish setup, processed workflows:');
-        console.log(processedWorkflows);
 
         if (!processedWorkflows) {
             console.log('Something still wrong with workflows, cannot finish setup');
-            return
+            return false
         }
 
         const data = finalizeDataSetup(processedWorkflows)
@@ -1886,7 +1755,6 @@ function Flow() {
             editTestConfiguration(data)
         }
 
-        //finalizeConfiguration(processedWorkflows)
     }
 
     //#endregion
@@ -1897,7 +1765,6 @@ function Flow() {
     // control timer of showNodesAlert (for fade and auto close)
     useEffect(() => {
         let timer;
-        console.log("Checking nodes alert...");
         if (showNodesAlert) {
             setFadeClass('fade-in');
 
@@ -1905,9 +1772,7 @@ function Flow() {
                 setFadeClass('fade-out');
                 setTimeout(() => {
                     setShowNodesAlert(false);
-                    console.log("Hiding nodes alert...");
                 }, 800)
-
 
             }, 3000);
         }
@@ -1918,7 +1783,6 @@ function Flow() {
     // control timer of tslUploadedAlert (for fade and auto close)
     useEffect(() => {
         let timer;
-        console.log("Checking tsl alert...");
 
         if (tslUploadedAlert && tslUploadedWarnings.length === 0) {
             setFadeClass('fade-in');
@@ -1928,7 +1792,6 @@ function Flow() {
                 setFadeClass('fade-out');
                 setTimeout(() => {
                     setTslUploadedAlert(false);
-                    console.log("Hiding tsl alert...");
                 }, 800)
 
             }, 3000);
@@ -1944,7 +1807,6 @@ function Flow() {
     //control timer of finishSetupAlert (for fade and auto close)
     useEffect(() => {
         let timer;
-        console.log("Checking finish setup alert...");
 
         if (finishSetupAlert && finishSetupWarnings.length === 0) {
             setFadeClass('fade-in');
@@ -1954,7 +1816,6 @@ function Flow() {
                 setFadeClass('fade-out');
                 setTimeout(() => {
                     setTslUploadedAlert(false);
-                    console.log("Hiding finish setup alert...");
                 }, 800)
 
             }, 4000);
@@ -1971,13 +1832,12 @@ function Flow() {
     //#endregion
 
 
-    const logMetric = ({ name, value }) => {
+    /* const logMetric = ({ name, value }) => {
         console.log(`${name}: ${value}`);
-    };
+    }; */
 
 
-
-    const memoryCheck = () => {
+    /* const memoryCheck = () => {
         console.log("Memory check...");
         const memoryInfo = performance.memory;
         console.log(`JS Heap Size Limit: ${memoryInfo.jsHeapSizeLimit}`);
@@ -1992,15 +1852,10 @@ function Flow() {
         onINP(logMetric);    // Logs Interaction to Next Paint (INP)
         onTTFB(logMetric);   // Logs Time to First Byte (TTFB)
 
-    }
+    } */
 
     const editTestConfiguration = async (data) => {
         const token = await authService.getAccessToken();
-
-        //const workflows = scanEditorState()
-        //const processedWorkflows = postProcessState(workflows)
-
-        //const data = finalizeDataSetup(processedWorkflows)
 
         fetch(`MonitorTest/ChangeApi?` + new URLSearchParams({
             apiId: apiId,
@@ -2019,17 +1874,12 @@ function Flow() {
         })
     }
 
-    const logFunction = () => {
+    // aux, for debugging, tied to button, function contents are not important
+    /* const logFunction = () => {
         console.log("-------------------");
-        console.log("schemas:");
-        console.log(apiFile.schemas);
-
-        console.log("schemasValues:");
-        console.log(apiFile.schemasValues);
-
-
+        
         console.log("-------------------");
-    }
+    } */
 
     return (
         <div className='editor-container'>
@@ -2065,16 +1915,11 @@ function Flow() {
                     { section: "Verifications", title: "Count ", onClick: onClickCount, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.countTooltip },
                     { section: "Verifications", title: "Match ", onClick: onClickMatch, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.matchTooltip },
                     { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.customTooltip },
-                    /* { section: "Setup", title: "Save changes", onClick: onClickWip, class: "setup", iconClass: "gear-icon" }, */
                     { section: "Setup", title: "Clear editor", onClick: clearEditor, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.clearEditorTooltip },
                     { section: "Setup", title: location?.state == null ? "Finish Setup" : "Save changes", onClick: finishSetup, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.finishSetupTooltip },
-                    { section: "Dev", title: "Memory Check", onClick: memoryCheck, class: "setup", iconClass: "gear-icon" },
+                    /* { section: "Dev", title: "Memory Check", onClick: memoryCheck, class: "setup", iconClass: "gear-icon" },
                     { section: "Dev", title: "Test edit", onClick: editTestConfiguration, class: "setup", iconClass: "gear-icon" },
-                    { section: "Dev", title: "log", onClick: logFunction, class: "setup", iconClass: "gear-icon" }
-                    /* { section: "Dev", title: "Change entire Workflow", onClick: onClickChangeWf, class: "setup", iconClass: "gear-icon" },
-                    { section: "Dev", title: "Dump state", onClick: dumpState, class: "setup", iconClass: "gear-icon" },
-                    { section: "Dev", title: "Collapse nodes", onClick: collapseNodes, class: "setup", iconClass: "gear-icon" },
-                    { section: "Dev", title: "Open nodes", onClick: openNodes, class: "setup", iconClass: "gear-icon" }, */
+                    { section: "Dev", title: "log", onClick: logFunction, class: "setup", iconClass: "gear-icon" } */
                 ]}>
             </Sidebar>
 
@@ -2138,7 +1983,7 @@ function Flow() {
                 </div>
 
                 <div className='tslUploadWarnings'>
-                    {tslUploadedAlert && tslUploadedWarnings.length != 0 && (
+                    {tslUploadedAlert && tslUploadedWarnings.length !== 0 && (
                         <Alert className='nodeAlert' variant="warning" onClose={() => setTslUploadedAlert(false)} dismissible>
                             <b>TSL uploaded successfully, but some potential issues were found:</b>
                             <ul>
@@ -2161,7 +2006,7 @@ function Flow() {
                 </div>
 
                 <div className='setupFinishError'>
-                    {finishSetupAlert && finishSetupWarnings.length != 0 && (
+                    {finishSetupAlert && finishSetupWarnings.length !== 0 && (
                         <Alert className='nodeAlert' variant="warning" onClose={() => setFinishSetupAlert(false)} dismissible>
                             <b>Could not complete setup. Please address the issues below:</b>
                             <ul>

@@ -3,8 +3,6 @@ import React from 'react';
 import { Combobox } from 'react-widgets';
 
 
-import { Form } from 'react-bootstrap';
-
 import { LOG_LEVELS as level, rapiLog } from '../utils';
 
 import './css/statusVerificationNode.css'
@@ -23,11 +21,8 @@ function StatusVerificationNode({ data, isConnectable, xPos, yPos }) {
 
 
     const onStatusCodeChange = (evt) => {
-        /* rapiLog(level.INFO, "[Status node] Status code: ", evt.target.value)
-        setStatusCode(evt.target.value) */
         rapiLog(level.INFO, "[Status node] Status code: ", evt)
         setStatusCode(evt)
-        //data.custom.statusChangeCallback(evt.target.value, data.custom._wfIndex, data.custom._testIndex)
     };
 
     const getState = () => {
@@ -56,8 +51,7 @@ function StatusVerificationNode({ data, isConnectable, xPos, yPos }) {
             <GeneralNode {...generalNodeProps}>
 
                 <label htmlFor="status">Status Code</label>
-{/*                 <Form.Control id="status" value={statusCode} onChange={onStatusCodeChange} className="status-name" type="text" placeholder="Enter text" />
- */}
+
                 <Combobox id='paths' className='nowheel'
                     data={commonStatusCodes}
                     filter={false}
