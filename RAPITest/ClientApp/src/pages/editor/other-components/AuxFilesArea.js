@@ -24,7 +24,7 @@ function AuxFilesArea(props) {
 
     const [uploadedDic, setUploadedDic] = useState(props.uploadedDic)
 
-    const [dllArr, setDllArr] = useState([]) //this is now kind of a duplicate of dllFiles, think the code can be refactored to remove this
+    const [dllArr, setDllArr] = useState(props.dllFiles || []) //this is now kind of a duplicate of dllFiles, think the code can be refactored to remove this
 
     const { apiUploaded } = props
 

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom';
-import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider,  ControlButton } from 'reactflow';
+import ReactFlow, { addEdge, Background, Controls, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider, ControlButton } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 import authService from '../api-authorization/AuthorizeService';
@@ -139,9 +139,11 @@ function Flow() {
     const [apiFile, setApiFile] = useState(location?.state?.apiFile || null) // This will have servers, paths, schemas and schemavalues
 
     const [apiId, setApiId] = useState(location?.state?.ApiId || null) // Id of the test configuration (used when editing a configuration, instead of creating a new one)
- 
+
     const [apiUploaded, setApiUploaded] = useState(location?.state?.ApiId ? true : false) // Whether or not api spec has been uploaded 
-    
+
+    //const [unfinishedConfig, setUnfinishedConfig] = useState(true); // if current config has been finalized will be false, otherwise true
+
     //#endregion
 
 
@@ -213,6 +215,27 @@ function Flow() {
             document.body.classList.remove('editor-page');
         };
     }, []);
+
+    // when user leaves editor, cleanup unfinished test configurations
+    // this requires further testing to ensure we don't accidentally remove other configurations (since the backend implementation is not very safe), so will be disabled for now
+    /* useEffect(() => {
+        setUnfinishedConfig(true);
+        return () => {
+
+            const cleanup = async () => {
+                const unfinished = unfinishedConfig;
+
+                if (unfinished) {
+                    const token = await authService.getAccessToken();
+                    await fetch(`SetupTest/RemoveUnfinishedSetup`, {
+                        method: 'POST',
+                        headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
+                    });
+                }
+            };
+            cleanup();
+        };
+    }, []); */
 
 
     //for dagre (layout algorithm)
@@ -476,7 +499,7 @@ function Flow() {
 
         const nodeData = {
             wfName: wf.WorkflowID,  //WorklowID is the name of the workflow
-            _wfIndex: maxWfIndex.current    
+            _wfIndex: maxWfIndex.current
         }
         const wfNodeId = createNode(NodeType.WORKFLOW, nodeData)
 
@@ -505,7 +528,7 @@ function Flow() {
             paths: apiFile.paths,
             servers: apiFile.servers,
             httpMethods: httpMethods, // TSL only supports the 4 main HTTP methods, in the future would be nice to support to more and derive them from the api as well
-            _testIndex: currYamlTestIndex 
+            _testIndex: currYamlTestIndex
         }
         const testNodeId = createNode(NodeType.TEST, nodeData)
 
@@ -962,7 +985,7 @@ function Flow() {
 
         const nodeData = {
             wfName: "",
-            _wfIndex: maxWfIndex.current 
+            _wfIndex: maxWfIndex.current
         }
         createNode(NodeType.WORKFLOW, nodeData)
     }
@@ -1010,7 +1033,7 @@ function Flow() {
 
     const onClickSchema = () => {
         if (!checkIfApiFile()) return
-        
+
         const schemaMap = {};
         apiFile.schemas.forEach((schema, index) => {
             schemaMap[schema] = apiFile.schemasValues[index];
@@ -1243,7 +1266,7 @@ function Flow() {
 
     // collapse the accordions inside the sidebar, except those with the "dontCollapseClass"
     const collapseSidebarAccordions = () => {
-        const elements = document.querySelectorAll(sidebarAccordionClass); 
+        const elements = document.querySelectorAll(sidebarAccordionClass);
 
         elements.forEach((element) => {
             const isNotCollapsed = !element.classList.contains('collapsed')
@@ -1264,7 +1287,7 @@ function Flow() {
             else {
                 element.scrollIntoView({
                     behavior: 'smooth',
-                    block: 'nearest' 
+                    block: 'nearest'
                 });
             }
 
@@ -1378,6 +1401,12 @@ function Flow() {
 
         const nodes = reactFlowInstance.getNodes()
         const wfNodes = nodes.filter(node => node.type === NodeType.WORKFLOW);
+
+        if (wfNodes.length < 1) {
+            alert('Invalid settings - You must have at least 1 Workflow')
+            error = true
+            return false
+        }
 
         wfNodes.forEach(wfNode => {
 
@@ -1649,7 +1678,7 @@ function Flow() {
 
                     // process Custom
                     if (verification.Custom) {
-                        const transformedCustom = [`${verification.Custom}`]; 
+                        const transformedCustom = [`${verification.Custom}`];
                         verification.Custom = transformedCustom
                     }
                 }
@@ -1726,11 +1755,16 @@ function Flow() {
 
     const finishSetup = async () => {
 
+        if (!apiFile) {
+            alert('Invalid settings - No API specification uploaded')
+            return false
+        }
+
         if (runInterval.includes('Never') && runImmediately.includes('false')) {
             alert('Invalid Timer settings - Please select either "Run Immediately" or one of the timed "Run Intervals"')
             return false
         }
-        
+
         const workflows = scanEditorState()
 
         if (!workflows) {
@@ -1754,6 +1788,8 @@ function Flow() {
         else { //edit
             editTestConfiguration(data)
         }
+
+        //setUnfinishedConfig(false) //not used at the moment
 
     }
 
@@ -1875,11 +1911,25 @@ function Flow() {
     }
 
     // aux, for debugging, tied to button, function contents are not important
-    /* const logFunction = () => {
+    const logFunction = async () => {
         console.log("-------------------");
-        
+        /* const token = await authService.getAccessToken();
+        fetch(`SetupTest/RemoveUnfinishedSetup`, {
+            method: 'POST',
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
+        }) */
         console.log("-------------------");
-    } */
+    }
+
+    const cleanupUnfinishedConfigCallback = async () => {
+        const token = await authService.getAccessToken();
+        fetch(`SetupTest/RemoveUnfinishedSetup`, {
+            method: 'POST',
+            headers: !token ? {} : { 'Authorization': `Bearer ${token}` },
+        })
+
+        setApiFile(null); // this callback will be called when api file is removed by user
+    }
 
     return (
         <div className='editor-container'>
@@ -1901,6 +1951,8 @@ function Flow() {
                 onDictionaryDrop={onDictionaryDrop}
                 onDllDrop={onDllDrop}
                 onTslDrop={onTslDrop}
+                isNewConfiguration={location?.state == null ? true : false}
+                cleanupUnfinishedConfigCallback={cleanupUnfinishedConfigCallback}
                 buttonsArray={[
                     { section: "Flow", title: "Workflow", onClick: onClickWorkflowNode, class: "wf", tooltip: Tooltips.workflowTooltip, iconClass: "flow-icon" },
                     { section: "Flow", title: "Test", onClick: onClickTestNode, class: "test", iconClass: "flow-icon", tooltip: Tooltips.testTooltip },
@@ -1917,9 +1969,8 @@ function Flow() {
                     { section: "Verifications", title: "Custom ", onClick: onClickCustom, class: "verif", iconClass: "verifs-icon", tooltip: Tooltips.customTooltip },
                     { section: "Setup", title: "Clear editor", onClick: clearEditor, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.clearEditorTooltip },
                     { section: "Setup", title: location?.state == null ? "Finish Setup" : "Save changes", onClick: finishSetup, class: "setup", iconClass: "gear-icon", tooltip: Tooltips.finishSetupTooltip },
-                    /* { section: "Dev", title: "Memory Check", onClick: memoryCheck, class: "setup", iconClass: "gear-icon" },
-                    { section: "Dev", title: "Test edit", onClick: editTestConfiguration, class: "setup", iconClass: "gear-icon" },
-                    { section: "Dev", title: "log", onClick: logFunction, class: "setup", iconClass: "gear-icon" } */
+/*                     { section: "Dev", title: "Memory Check", onClick: memoryCheck, class: "setup", iconClass: "gear-icon" },
+                  { section: "Dev", title: "log", onClick: logFunction, class: "setup", iconClass: "gear-icon" }*/   
                 ]}>
             </Sidebar>
 

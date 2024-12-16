@@ -245,7 +245,13 @@ export class MonitorTest extends Component {
             const dictString = await dictResponse.text()
             dictObj = parseDictionary(dictString)
 
-            dictFile = new File([dictObj], "dictionary.txt", {
+            console.log("dictString: ");
+            console.log(dictString);
+
+            console.log("dictObj: ");
+            console.log(dictObj);
+
+            dictFile = new File([dictString], "dictionary.txt", {
                 type: "text/plain",
                 lastModified: new Date().getTime()
             });

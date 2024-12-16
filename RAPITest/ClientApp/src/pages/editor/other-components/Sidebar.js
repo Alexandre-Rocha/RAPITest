@@ -47,6 +47,10 @@ function Sidebar(props) {
 
     const { onDictionaryDrop, onDllDrop, onTslDrop } = props
 
+    const  { cleanupUnfinishedConfigCallback } = props
+
+    const { isNewConfiguration } = props
+
     const toggleSidebar = (dontCollapseClass) => {
         let dntClClass = ""
         if (typeof dontCollapseClass === "string") {
@@ -109,8 +113,10 @@ function Sidebar(props) {
                         uploaded={apiUploaded}
                         apiTitle={apiTitle}
                         apiFile={apiFile}
+                        isNewConfiguration={isNewConfiguration}
                         handlerAPI={handlerAPI}
                         setApiUploadedCallback={setApiUploadedCallback}
+                        cleanupUnfinishedConfigCallback={cleanupUnfinishedConfigCallback}
                         onTestConfNameChange={onTestConfNameChange}>
                     </ApiUploadArea>
 

@@ -29,6 +29,10 @@ const ApiUploadArea = (props) => {
 
     const { setApiUploadedCallback } = props
 
+    const { cleanupUnfinishedConfigCallback } = props
+
+    const { isNewConfiguration} = props
+
     const newHandler = (paths, servers, schemas, schemasValues, files) => {
         handlerAPI(paths, servers, schemas, schemasValues)
         setUploaded(true)
@@ -49,7 +53,7 @@ const ApiUploadArea = (props) => {
 
     const removeFileFunction = (fileToRemove) => {
         setApiFiles(currentFiles => currentFiles.filter(file => file !== fileToRemove));
-        // TODO: Check how does this affect the backend - I believe we need to call a cancel endpoint to ensure everything works smoohtly.
+        if (isNewConfiguration) cleanupUnfinishedConfigCallback() // remove unfinished config in db, since it is created once api spec is uploaded
         setUploaded(false)
 
         setApiUploadedCallback(false)
@@ -60,7 +64,7 @@ const ApiUploadArea = (props) => {
             <SimpleAccordion header={"Test configuration"} accHeaderClass={"sidebar-simple-header"} accItemClass={"sidebar-simple-item"} accIconClass={"name-icon"}>
 
                 <Form.Label style={{ fontWeight: 'bold' }}>Name:</Form.Label>
-                <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter name" />
+                <Form.Control value={apiTitle} onChange={onTestConfNameChange} className="nodrag" type="text" placeholder="Enter name" readOnly={uploaded && isNewConfiguration}/>
                 {settings.showTips ?
                     <Form.Text className="text-muted">
                         The name for your test configuration.
