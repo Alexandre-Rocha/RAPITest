@@ -1,0 +1,10 @@
+dictionaryID:petExample
+{
+"id": 10 ,
+"name": "doggie" ,
+"category": {
+"id": 1,
+"name": "Dogs"
+},
+"status": "available"
+}

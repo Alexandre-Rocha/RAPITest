@@ -70,6 +70,7 @@
         </li>
       </ul>
     </li>
+    <li><a href="#editor">Editor</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>
@@ -419,6 +420,16 @@ For instance the value present at the json path _$.id_ will be retained with the
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
+<!-- EDITOR -->
+## Editor
+
+After the initial project that developed and built most of the RapiTest app, a new development cycle was started with the goal of improving upon the application, specifically by implementing a new graphical editor. This new editor would have the goal of providing the RapiTest app with an improved interface for test creation, allowing users to leverage the capabilities of the TSL language.
+
+
+Most of the work done during this cycle can be found under `/RAPITest/ClientApp/src/pages/editor`, although changes were made in other places as well, including in the server.
+
+For an overview and quick guide on the editor, please check the document under `/others/editor_quick_guide.odt` (if it's not available yet, it will soon be).
+
 <!-- CONTRIBUTING -->
 ## Contributing
 
@@ -445,6 +456,13 @@ This project was developed as part of a partnership between the Lisbon City coun
 Duarte Felício  - A42197@alunos.isel.pt
 
 Project Link: [https://github.com/DuarteFelicio/RAPITest](https://github.com/DuarteFelicio/RAPITest)
+
+
+This project was later continued and improved with the addition of a graphical node-based editor (see <a href="#top">Editor</a> ).
+
+Alexandre Rocha - A44789@alunos.isel.pt
+
+Project Link: [https://github.com/Alexandre-Rocha/RAPITest](https://github.com/Alexandre-Rocha/RAPITest)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
