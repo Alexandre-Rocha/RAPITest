@@ -469,7 +469,7 @@ Duarte Felício  - A42197@alunos.isel.pt
 Project Link: [https://github.com/DuarteFelicio/RAPITest](https://github.com/DuarteFelicio/RAPITest)
 
 
-This project was later continued and improved with the addition of a graphical node-based editor (see <a href="#top">Editor</a> ).
+This project was later continued and improved with the addition of a graphical node-based editor (see <a href="#editor">Editor</a> ).
 
 Alexandre Rocha - A44789@alunos.isel.pt
 
