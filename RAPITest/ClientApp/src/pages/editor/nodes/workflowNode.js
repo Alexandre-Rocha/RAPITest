@@ -26,7 +26,8 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
     };
 
     const onChange = (change) => {
-        setWfIndex(change.target.value)
+        const value = Math.max(1, change.target.value)
+        setWfIndex(value)
     }
 
 
@@ -71,7 +72,7 @@ function WorkflowNode({ data, isConnectable, xPos, yPos }) {
                     <span style={{ fontWeight: 'bold' }}>Workflow order: </span>
                     <Form.Control
                     type="number"
-                    value={wfIndex}
+                    value={wfIndex || 1}
                     onChange={onChange}
                     style={{ width: '54px',display:'inline-block' }} 
                 />

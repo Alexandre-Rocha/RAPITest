@@ -1408,8 +1408,13 @@ function Flow() {
             return false
         }
 
+        const allWfNames = []
+        const allTestNames = []
+
         wfNodes.forEach(wfNode => {
 
+            if (error) return false
+    
             const wfState = wfNode.data.custom.getState() // {name: "", _wfIndex: ""}
 
             const workflow = {
@@ -1417,6 +1422,8 @@ function Flow() {
                 WorkflowID: wfState.name,
                 Tests: []
             }
+
+            allWfNames.push(wfState.name)
 
             const connectedStressNodes = getConnectedNodes(wfNode, NodeType.STRESS)
             if (connectedStressNodes.length > 1) {
@@ -1436,6 +1443,9 @@ function Flow() {
                 return false
             }
             connectedTestNodes.forEach(testNode => {
+
+                if(error) return false
+
                 const testState = testNode.data.custom.getState() // {name: "", server:"", path:"", method:"", _testIndex: ""}
 
                 const test = {
@@ -1447,12 +1457,14 @@ function Flow() {
                     Verifications: [{ Code: -1 }]
                 }
 
+                allTestNames.push(testState.name)
 
                 // get request nodes from test
                 const connectedRequestNodes = getConnectedNodesByHandle(testNode, "leftHandle")
                 if (connectedRequestNodes.length >= 1) {
                     if (connectedRequestNodes.length > 1) {
                         alert('Invalid settings - Only one Request node can be connected directly to a Test node')
+                        error = true
                         return false
                     }
 
@@ -1460,6 +1472,7 @@ function Flow() {
                     if (!requestNodeTypes.includes(connectedRequestNode.type)) {
                         //should never happen
                         alert('Something went wrong')
+                        error = true
                         return false
                     }
                     const restOfTheRequestNodes = getNodesInLinearChain(connectedRequestNode)
@@ -1467,6 +1480,7 @@ function Flow() {
                     if (!allRequestNodes.every(node => requestNodeTypes.includes(node.type))) {
                         //should never happen
                         alert('Something went wrong')
+                        error = true
                         return false
                     }
 
@@ -1581,6 +1595,21 @@ function Flow() {
 
             workflows.push(workflow)
         });
+
+        const hasDuplicates = (array) => array.length !== new Set(array).size;
+
+        if (hasDuplicates(allWfNames)) {
+            alert('Invalid settings - All Workflow names must be unique')
+            error = true
+            return false
+        }
+
+        if (hasDuplicates(allTestNames)) {
+            alert('Invalid settings - All Test names must be unique')
+            error = true
+            return false
+        }
+
         if (error) {
             return false
         }

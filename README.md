@@ -40,8 +40,9 @@
 <details>
   <summary>Table of Contents</summary>
   <ol>
+    <li><a href="#about-the-project">About The Project</a></li>
     <li>
-      <a href="#about-the-project">About The Project</a>
+      <a href="#rapitest">RapiTest</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
       </ul>
@@ -72,14 +73,24 @@
     </li>
     <li><a href="#editor">Editor</a></li>
     <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#contact-and-acknowledgements">Contact and Acknowledgements</a></li>
   </ol>
 </details>
 
 
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+
+This project was developed as the final project for the obtention of the Master's degree (MEIC - Mestrado em Engenharia Informática e de Computadores) at ISEL (Instituto Superior de Engenharia de Lisboa).
+
+ISEL: https://www.isel.pt/
+
+MEIC: https://www.isel.pt/curso/mestrado/mestrado-em-engenharia-informatica-e-de-computadores
+
+The project was developed in 2 separate cycles, see <a href="#contact-and-acknowledgements">Contact and Acknowledgements</a> for further details.
+
+<!-- RapiTest -->
+## RapiTest
 
 <img src="images/screenshot.png" alt="Logo">
 
@@ -448,10 +459,10 @@ Don't forget to give the project a star! Thanks again!
 
 
 
-<!-- CONTACT -->
+<!-- Contact and Acknowledgements-->
 ## Contact and Acknowledgements
 
-This project was developed as part of a partnership between the Lisbon City council (CML) and Lisbon School of Engineering (ISEL) 
+This project was developed as part of a partnership between the Lisbon City council (CML) and Lisbon School of Engineering (ISEL). 
 
 Duarte Felício  - A42197@alunos.isel.pt
 
