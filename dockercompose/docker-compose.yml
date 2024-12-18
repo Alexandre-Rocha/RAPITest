@@ -30,7 +30,7 @@ services:
     restart: always
 
   rapitest:
-    image: alexandrerocha99/rapitest:2.5
+    image: alexandrerocha99/rapitest:3.1
     depends_on:
         db:
             condition: service_healthy
@@ -41,7 +41,7 @@ services:
     restart: always
 
   runtestsworkerservice:
-    image: alexandrerocha99/runtestsworkerservice:2.1
+    image: alexandrerocha99/runtestsworkerservice:3.0
     depends_on:
         db:
             condition: service_healthy
@@ -51,7 +51,7 @@ services:
 
 
   setuptestsworkerservice:
-    image: alexandrerocha99/setuptestsworkerservice:2.1
+    image: alexandrerocha99/setuptestsworkerservice:3.0
     depends_on:
         db:
             condition: service_healthy
